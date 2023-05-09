@@ -1,0 +1,310 @@
+Session
+
+-		session	{irsdkSharp.Serialization.Models.Session.IRacingSessionModel}	irsdkSharp.Serialization.Models.Session.IRacingSessionModel
+-		CameraInfo	{irsdkSharp.Serialization.Models.Session.CameraInfo.CameraInfoModel}	irsdkSharp.Serialization.Models.Session.CameraInfo.CameraInfoModel
+-		Groups	Count = 20	System.Collections.Generic.List<irsdkSharp.Serialization.Models.Session.CameraInfo.GroupModel>
++		[0]	{irsdkSharp.Serialization.Models.Session.CameraInfo.GroupModel}	irsdkSharp.Serialization.Models.Session.CameraInfo.GroupModel
++		[1]	{irsdkSharp.Serialization.Models.Session.CameraInfo.GroupModel}	irsdkSharp.Serialization.Models.Session.CameraInfo.GroupModel
++		[2]	{irsdkSharp.Serialization.Models.Session.CameraInfo.GroupModel}	irsdkSharp.Serialization.Models.Session.CameraInfo.GroupModel
++		[3]	{irsdkSharp.Serialization.Models.Session.CameraInfo.GroupModel}	irsdkSharp.Serialization.Models.Session.CameraInfo.GroupModel
++		[4]	{irsdkSharp.Serialization.Models.Session.CameraInfo.GroupModel}	irsdkSharp.Serialization.Models.Session.CameraInfo.GroupModel
++		[5]	{irsdkSharp.Serialization.Models.Session.CameraInfo.GroupModel}	irsdkSharp.Serialization.Models.Session.CameraInfo.GroupModel
++		[6]	{irsdkSharp.Serialization.Models.Session.CameraInfo.GroupModel}	irsdkSharp.Serialization.Models.Session.CameraInfo.GroupModel
++		[7]	{irsdkSharp.Serialization.Models.Session.CameraInfo.GroupModel}	irsdkSharp.Serialization.Models.Session.CameraInfo.GroupModel
++		[8]	{irsdkSharp.Serialization.Models.Session.CameraInfo.GroupModel}	irsdkSharp.Serialization.Models.Session.CameraInfo.GroupModel
++		[9]	{irsdkSharp.Serialization.Models.Session.CameraInfo.GroupModel}	irsdkSharp.Serialization.Models.Session.CameraInfo.GroupModel
+-		[10]	{irsdkSharp.Serialization.Models.Session.CameraInfo.GroupModel}	irsdkSharp.Serialization.Models.Session.CameraInfo.GroupModel
+-		Cameras	Count = 6	System.Collections.Generic.List<irsdkSharp.Serialization.Models.Session.CameraInfo.CameraModel>
+-		[0]	{irsdkSharp.Serialization.Models.Session.CameraInfo.CameraModel}	irsdkSharp.Serialization.Models.Session.CameraInfo.CameraModel
+		CameraName	"CamTV1_00"	string
+		CameraNum	1	int
++		[1]	{irsdkSharp.Serialization.Models.Session.CameraInfo.CameraModel}	irsdkSharp.Serialization.Models.Session.CameraInfo.CameraModel
++		[2]	{irsdkSharp.Serialization.Models.Session.CameraInfo.CameraModel}	irsdkSharp.Serialization.Models.Session.CameraInfo.CameraModel
++		[3]	{irsdkSharp.Serialization.Models.Session.CameraInfo.CameraModel}	irsdkSharp.Serialization.Models.Session.CameraInfo.CameraModel
++		[4]	{irsdkSharp.Serialization.Models.Session.CameraInfo.CameraModel}	irsdkSharp.Serialization.Models.Session.CameraInfo.CameraModel
++		[5]	{irsdkSharp.Serialization.Models.Session.CameraInfo.CameraModel}	irsdkSharp.Serialization.Models.Session.CameraInfo.CameraModel
++		Raw View		
+		GroupName	"TV1"	string
+		GroupNum	11	int
+		IsScenic	false	bool
++		[11]	{irsdkSharp.Serialization.Models.Session.CameraInfo.GroupModel}	irsdkSharp.Serialization.Models.Session.CameraInfo.GroupModel
++		[12]	{irsdkSharp.Serialization.Models.Session.CameraInfo.GroupModel}	irsdkSharp.Serialization.Models.Session.CameraInfo.GroupModel
++		[13]	{irsdkSharp.Serialization.Models.Session.CameraInfo.GroupModel}	irsdkSharp.Serialization.Models.Session.CameraInfo.GroupModel
++		[14]	{irsdkSharp.Serialization.Models.Session.CameraInfo.GroupModel}	irsdkSharp.Serialization.Models.Session.CameraInfo.GroupModel
++		[15]	{irsdkSharp.Serialization.Models.Session.CameraInfo.GroupModel}	irsdkSharp.Serialization.Models.Session.CameraInfo.GroupModel
++		[16]	{irsdkSharp.Serialization.Models.Session.CameraInfo.GroupModel}	irsdkSharp.Serialization.Models.Session.CameraInfo.GroupModel
++		[17]	{irsdkSharp.Serialization.Models.Session.CameraInfo.GroupModel}	irsdkSharp.Serialization.Models.Session.CameraInfo.GroupModel
++		[18]	{irsdkSharp.Serialization.Models.Session.CameraInfo.GroupModel}	irsdkSharp.Serialization.Models.Session.CameraInfo.GroupModel
++		[19]	{irsdkSharp.Serialization.Models.Session.CameraInfo.GroupModel}	irsdkSharp.Serialization.Models.Session.CameraInfo.GroupModel
++		Raw View		
+-		DriverInfo	{irsdkSharp.Serialization.Models.Session.DriverInfo.DriverInfoModel}	irsdkSharp.Serialization.Models.Session.DriverInfo.DriverInfoModel
+		DriverCarEngCylinderCount	8	int
+		DriverCarEstLapTime	30.0832	float
+		DriverCarFuelKgPerLtr	0.75	float
+		DriverCarFuelMaxLtr	70.753	float
+		DriverCarGearNeutral	1	int
+		DriverCarGearNumForward	4	int
+		DriverCarGearReverse	1	int
+		DriverCarIdleRPM	2000	float
+		DriverCarIdx	1	int
+		DriverCarMaxFuelPct	0	float
+		DriverCarRedLine	9100	float
+		DriverCarSLBlinkRPM	9000	float
+		DriverCarSLFirstRPM	7500	float
+		DriverCarSLLastRPM	8300	float
+		DriverCarSLShiftRPM	8300	float
+		DriverCarVersion	null	string
+		DriverHeadPosX	-0.106	float
+		DriverHeadPosY	0.418	float
+		DriverHeadPosZ	0.578	float
+		DriverIncidentCount	0	int
+		DriverPitTrkPct	0.092536	float
+		DriverSetupIsModified	0	int
+		DriverSetupLoadTypeName	"invalid"	string
+		DriverSetupName	"INVALID_LOADTYPE"	string
+		DriverSetupPassedTech	0	int
+		DriverUserID	"854332"	string
+-		Drivers	Count = 25	System.Collections.Generic.List<irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel>
++		[0]	{irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel}	irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel
+-		[1]	{irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel}	irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel
+		AbbrevName	"Herbold, M"	string
+		CarClassColor	"0xffffff"	string
+		CarClassDryTireSetLimit	"0 %"	string
+		CarClassEstLapTime	30.0832	float
+		CarClassID	1455	int
+		CarClassLicenseLevel	0	int
+		CarClassMaxFuelPct	"0.000 %"	string
+		CarClassPowerAdjust	"0.000 %"	string
+		CarClassRelSpeed	0	int
+		CarClassShortName	null	string
+		CarClassWeightPenalty	"0.000 kg"	string
+		CarDesignStr	"1,17071c,3a1246,782490"	string
+		CarID	115	int
+		CarIdx	1	int
+		CarIsAI	"0"	string
+		CarIsPaceCar	"0"	string
+		CarNumber	"1"	string
+		CarNumberDesignStr	"27,0,ffffff,000000,000000"	string
+		CarNumberRaw	1	int
+		CarPath	"stockcars2 mustang2019"	string
+		CarScreenName	"Ford Mustang Class B"	string
+		CarScreenNameShort	"Ford Mustang Class B"	string
+		CarSponsor_1	0	int
+		CarSponsor_2	0	int
+		ClubID	0	int
+		ClubName	null	string
+		CurDriverIncidentCount	-1	int
+		DivisionID	0	int
+		DivisionName	null	string
+		HelmetDesignStr	"32,17071c,3a1246,782490"	string
+		IRating	920	int
+		Initials	"MH"	string
+		IsSpectator	0	int
+		LicColor	"0x00c702"	string
+		LicLevel	15	int
+		LicString	"B 3.60"	string
+		LicSubLevel	360	int
+		SuitDesignStr	"1,17071c,3a1246,782490"	string
+		TeamID	0	int
+		TeamIncidentCount	-1	int
+		TeamName	"Marvin Herbold"	string
+		UserID	854332	int
+		UserName	"Marvin Herbold"	string
++		[2]	{irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel}	irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel
++		[3]	{irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel}	irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel
++		[4]	{irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel}	irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel
++		[5]	{irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel}	irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel
++		[6]	{irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel}	irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel
++		[7]	{irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel}	irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel
++		[8]	{irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel}	irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel
++		[9]	{irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel}	irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel
++		[10]	{irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel}	irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel
++		[11]	{irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel}	irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel
++		[12]	{irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel}	irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel
++		[13]	{irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel}	irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel
++		[14]	{irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel}	irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel
++		[15]	{irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel}	irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel
++		[16]	{irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel}	irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel
++		[17]	{irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel}	irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel
++		[18]	{irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel}	irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel
++		[19]	{irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel}	irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel
++		[20]	{irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel}	irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel
++		[21]	{irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel}	irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel
++		[22]	{irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel}	irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel
++		[23]	{irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel}	irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel
++		[24]	{irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel}	irsdkSharp.Serialization.Models.Session.DriverInfo.DriverModel
++		Raw View		
+		PaceCarIdx	0	int
+		QualifyResultsInfo	null	irsdkSharp.Serialization.Models.Session.QualifyResultsInfo.QualifyResultsInfoModel
+-		RadioInfo	{irsdkSharp.Serialization.Models.Session.RadioInfo.RadioInfoModel}	irsdkSharp.Serialization.Models.Session.RadioInfo.RadioInfoModel
+-		Radios	Count = 1	System.Collections.Generic.List<irsdkSharp.Serialization.Models.Session.RadioInfo.RadioModel>
+-		[0]	{irsdkSharp.Serialization.Models.Session.RadioInfo.RadioModel}	irsdkSharp.Serialization.Models.Session.RadioInfo.RadioModel
++		Frequencies	null	System.Collections.Generic.List<irsdkSharp.Serialization.Models.Session.RadioInfo.FrequencyModel>
+		HopCount	0	int
+		NumFrequencies	0	int
+		RadioNum	0	int
+		ScanningIsOn	1	int
+		TunedToFrequencyNum	0	int
++		Raw View		
+		SelectedRadioNum	0	int
+-		SessionInfo	{irsdkSharp.Serialization.Models.Session.SessionInfo.SessionInfoModel}	irsdkSharp.Serialization.Models.Session.SessionInfo.SessionInfoModel
+		NumSessions	0	int
+-		Sessions	Count = 3	System.Collections.Generic.List<irsdkSharp.Serialization.Models.Session.SessionInfo.SessionModel>
++		[0]	{irsdkSharp.Serialization.Models.Session.SessionInfo.SessionModel}	irsdkSharp.Serialization.Models.Session.SessionInfo.SessionModel
++		[1]	{irsdkSharp.Serialization.Models.Session.SessionInfo.SessionModel}	irsdkSharp.Serialization.Models.Session.SessionInfo.SessionModel
+-		[2]	{irsdkSharp.Serialization.Models.Session.SessionInfo.SessionModel}	irsdkSharp.Serialization.Models.Session.SessionInfo.SessionModel
+		ResultsAverageLapTime	40.3466	float
+-		ResultsFastestLap	Count = 1	System.Collections.Generic.List<irsdkSharp.Serialization.Models.Session.SessionInfo.FastestLapModel>
+-		[0]	{irsdkSharp.Serialization.Models.Session.SessionInfo.FastestLapModel}	irsdkSharp.Serialization.Models.Session.SessionInfo.FastestLapModel
+		CarIdx	12	int
+		FastestLap	7	int
+		FastestTime	30.658	float
++		Raw View		
+		ResultsLapsComplete	49	int
+		ResultsNumCautionFlags	3	int
+		ResultsNumCautionLaps	8	int
+		ResultsNumLeadChanges	-2147483646	int
+		ResultsOfficial	1	int
+-		ResultsPositions	Count = 24	System.Collections.Generic.List<irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel>
++		[0]	{irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel}	irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel
+-		[1]	{irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel}	irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel
+		CarIdx	23	int
+		ClassPosition	1	int
+		FastestLap	18	int
+		FastestTime	31.527	float
+		Incidents	4	int
+		JokerLapsComplete	0	int
+		Lap	0	int
+		LapsComplete	49	int
+		LapsDriven	50.481	float
+		LapsLed	0	int
+		LastTime	47.2983	float
+		Position	2	int
+		ReasonOutId	0	int
+		ReasonOutStr	"Running"	string
+		Time	0.7154	float
++		[2]	{irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel}	irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel
++		[3]	{irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel}	irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel
++		[4]	{irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel}	irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel
++		[5]	{irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel}	irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel
++		[6]	{irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel}	irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel
++		[7]	{irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel}	irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel
++		[8]	{irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel}	irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel
++		[9]	{irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel}	irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel
++		[10]	{irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel}	irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel
++		[11]	{irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel}	irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel
++		[12]	{irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel}	irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel
++		[13]	{irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel}	irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel
++		[14]	{irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel}	irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel
++		[15]	{irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel}	irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel
++		[16]	{irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel}	irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel
++		[17]	{irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel}	irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel
++		[18]	{irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel}	irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel
++		[19]	{irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel}	irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel
++		[20]	{irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel}	irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel
++		[21]	{irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel}	irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel
++		[22]	{irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel}	irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel
++		[23]	{irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel}	irsdkSharp.Serialization.Models.Session.SessionInfo.PositionModel
++		Raw View		
+		SessionLaps	"49"	string
+		SessionName	"RACE"	string
+		SessionNum	2	int
+		SessionNumLapsToAvg	0	int
+		SessionRunGroupsUsed	"0"	string
+		SessionSkipped	"0"	string
+		SessionSubType	null	string
+		SessionTime	"unlimited"	string
+		SessionTrackRubberState	"carry over"	string
+		SessionType	"Race"	string
++		Raw View		
+-		SplitTimeInfo	{irsdkSharp.Serialization.Models.Session.SplitTimeInfo.SplitTimeInfoModel}	irsdkSharp.Serialization.Models.Session.SplitTimeInfo.SplitTimeInfoModel
+-		Sectors	Count = 2	System.Collections.Generic.List<irsdkSharp.Serialization.Models.Session.SplitTimeInfo.SectorModel>
+-		[0]	{irsdkSharp.Serialization.Models.Session.SplitTimeInfo.SectorModel}	irsdkSharp.Serialization.Models.Session.SplitTimeInfo.SectorModel
+		SectorNum	0	int
+		SectorStartPct	0	float
+-		[1]	{irsdkSharp.Serialization.Models.Session.SplitTimeInfo.SectorModel}	irsdkSharp.Serialization.Models.Session.SplitTimeInfo.SectorModel
+		SectorNum	1	int
+		SectorStartPct	0.5	float
++		Raw View		
+-		WeekendInfo	{irsdkSharp.Serialization.Models.Session.WeekendInfo.WeekendInfoModel}	irsdkSharp.Serialization.Models.Session.WeekendInfo.WeekendInfoModel
+		BuildTarget	"Members"	string
+		BuildType	"Release"	string
+		BuildVersion	null	string
+		Category	"Oval"	string
+		DCRuleSet	"None"	string
+		EventType	"Race"	string
+		HeatRacing	"0"	string
+		LeagueID	0	int
+		MaxDrivers	1	int
+		MinDrivers	0	int
+		NumCarClasses	1	int
+		NumCarTypes	4	int
+		Official	1	int
+		QualifierMustStartRace	0	int
+		RaceWeek	11	int
+		SeasonID	4027	int
+		SeriesID	103	int
+		SessionID	200285021	int
+		SimMode	"replay"	string
+		SubSessionID	60249262	int
+		TeamRacing	0	int
+-		TelemetryOptions	{irsdkSharp.Serialization.Models.Session.WeekendInfo.TelemetryOptionsModel}	irsdkSharp.Serialization.Models.Session.WeekendInfo.TelemetryOptionsModel
+		TelemetryDiskFile	""	string
+		TrackAirPressure	"29.92 Hg"	string
+		TrackAirTemp	"25.56 C"	string
+		TrackAltitude	"595.86 m"	string
+		TrackCity	"Las Vegas"	string
+		TrackCleanup	1	int
+		TrackConfigName	"Oval"	string
+		TrackCountry	"USA"	string
+		TrackDirection	"left"	string
+		TrackDisplayName	"Las Vegas Motor Speedway"	string
+		TrackDisplayShortName	"Las Vegas"	string
+		TrackDynamicTrack	1	int
+		TrackFogLevel	"0 %"	string
+		TrackID	103	int
+		TrackLatitude	"36.274494 m"	string
+		TrackLength	"2.45 km"	string
+		TrackLongitude	"-115.012602 m"	string
+		TrackName	"vegas oval"	string
+		TrackNorthOffset	"4.0199 rad"	string
+		TrackNumTurns	4	int
+		TrackPitSpeedLimit	"80.47 kph"	string
+		TrackRelativeHumidity	"55 %"	string
+		TrackSkies	"Partly Cloudy"	string
+		TrackSurfaceTemp	"40.56 C"	string
+		TrackType	"medium oval"	string
+		TrackVersion	null	string
+		TrackWeatherType	"Specified / Static Sky"	string
+		TrackWindDir	"0.00 rad"	string
+		TrackWindVel	"2.00 m/s"	string
+-		WeekendOptions	{irsdkSharp.Serialization.Models.Session.WeekendInfo.WeekendOptionsModel}	irsdkSharp.Serialization.Models.Session.WeekendInfo.WeekendOptionsModel
+		CommercialMode	"consumer"	string
+		CourseCautions	"full"	string
+		Date	"1970-01-01"	string
+		EarthRotationSpeedupFactor	"1"	string
+		FastRepairsLimit	"0"	string
+		FogLevel	"0 %"	string
+		GreenWhiteCheckeredLimit	1	int
+		HapSOpenRegistration	0	int
+		HardcoreLevel	0	int
+		HasOpenRegistration	"0"	string
+		IncidentLimit	"25"	string
+		IsFixedSetup	1	int
+		NightMode	"variable"	string
+		NumJokerLaps	0	int
+		NumStarters	26	int
+		QualifyScoring	"best lap"	string
+		RelativeHumidity	"55 %"	string
+		Restarts	"double file lapped cars behind"	string
+		ShortParadeLap	"0"	string
+		Skies	"Partly Cloudy"	string
+		StandingStart	0	int
+		StartingGrid	"2x2 inline pole on left"	string
+		StrictLapsChecking	"default"	string
+		TimeOfDay	"12:00 am"	string
+		Unofficial	0	int
+		WeatherTemp	"25.56 C"	string
+		WeatherType	"Specified / Dynamic Sky"	string
+		WindDirection	"N"	string
+		WindSpeed	"3.22 km/h"	string

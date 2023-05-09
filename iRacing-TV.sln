@@ -1,0 +1,41 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33530.505
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "iRacing-TV", "iRacing-TV.csproj", "{0C39CBB0-701B-429B-BEEC-2DD3959EB941}"
+	ProjectSection(ProjectDependencies) = postProject
+		{053D70BB-2916-42F9-B234-53B678A620BE} = {053D70BB-2916-42F9-B234-53B678A620BE}
+		{E6BB6588-64A3-404D-B1F0-7444D034273E} = {E6BB6588-64A3-404D-B1F0-7444D034273E}
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "irsdkSharp", "..\irsdkSharp\src\irsdkSharp\irsdkSharp.csproj", "{E6BB6588-64A3-404D-B1F0-7444D034273E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "irsdkSharp.Serialization", "..\irsdkSharp\src\irsdkSharp.Serialization\irsdkSharp.Serialization.csproj", "{053D70BB-2916-42F9-B234-53B678A620BE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0C39CBB0-701B-429B-BEEC-2DD3959EB941}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C39CBB0-701B-429B-BEEC-2DD3959EB941}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C39CBB0-701B-429B-BEEC-2DD3959EB941}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C39CBB0-701B-429B-BEEC-2DD3959EB941}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E6BB6588-64A3-404D-B1F0-7444D034273E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6BB6588-64A3-404D-B1F0-7444D034273E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6BB6588-64A3-404D-B1F0-7444D034273E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6BB6588-64A3-404D-B1F0-7444D034273E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{053D70BB-2916-42F9-B234-53B678A620BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{053D70BB-2916-42F9-B234-53B678A620BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{053D70BB-2916-42F9-B234-53B678A620BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{053D70BB-2916-42F9-B234-53B678A620BE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E8DC7EE1-EB6D-4EFD-A021-C4FEABC73445}
+	EndGlobalSection
+EndGlobal
