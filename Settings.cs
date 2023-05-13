@@ -33,7 +33,8 @@ namespace iRacingTV
 		public int _fontDSize { get; set; } = 25;
 
 		public string _lapString { get; set; } = "LAP";
-		public string _lapsRemainingString { get; set; } = " TO GO";
+		public string _lapsRemainingString { get; set; } = "TO GO";
+		public string _lapPositionString { get; set; } = "L";
 		public string _pitString { get; set; } = "PIT";
 		public string _outString { get; set; } = "OUT";
 		public string _mphString { get; set; } = "MPH";

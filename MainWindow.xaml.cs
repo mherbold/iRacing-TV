@@ -28,6 +28,7 @@ using Veldrid.StartupUtilities;
 using Veldrid;
 
 using ImGuiNET;
+using irsdkSharp.Serialization.Models.Session.SessionInfo;
 
 #endregion
 
@@ -93,6 +94,18 @@ namespace iRacingTV
 			NumCameraGroups
 		};
 
+		private enum IncidentScanStateEnum
+		{
+			Startup,
+			FindStartOfRace,
+			LookAtPaceCarWithScenicCamera,
+			SearchForNextIncident,
+			AddIncidentToList,
+			NoMoreIncidents,
+			Complete,
+			WaitForFrameNumberToSettle
+		}
+
 		#endregion
 
 		#region Consts
@@ -106,8 +119,12 @@ namespace iRacingTV
 		private const string StatusDisconnectedImageFileName = "status-disconnected.png";
 		private const string StatusConnectedImageFileName = "status-connected.png";
 
-		private const int MinimumSendMessageWaitTicks = 50;
+		private const int MinimumSendMessageWaitTicks = 40;
 		private const int MinimumCameraSwitchWaitTicks = 150;
+		private const int PostChatCameraSwitchWaitTicks = 50;
+
+		private const int IncidentFrameCount = 240;
+		private const int IncidentPrerollFrameCount = 90;
 
 		#endregion
 
@@ -117,9 +134,9 @@ namespace iRacingTV
 		{
 			public int sessionTick;
 			public float sessionTime;
-			public int sessionFlags;
+			public uint sessionFlags;
 
-			public SessionFlagsRecord( int _sessionTick, float _sessionTime, int _sessionFlags )
+			public SessionFlagsRecord( int _sessionTick, float _sessionTime, uint _sessionFlags )
 			{
 				sessionTick = _sessionTick;
 				sessionTime = _sessionTime;
@@ -134,6 +151,12 @@ namespace iRacingTV
 			public DriverModel? _driver;
 			public CarModel? _car;
 
+			public bool _sortByOfficialPosition;
+
+			public int _qualifyingPosition;
+
+			public float _lapPosition;
+			public float _lapPositionRelativeToLeader;
 			public float _speed;
 			public float _heat;
 			public float _distanceToCarInFrontInMeters;
@@ -146,6 +169,9 @@ namespace iRacingTV
 				_driver = null;
 				_car = null;
 
+				_sortByOfficialPosition = false;
+				_lapPosition = 0;
+				_lapPositionRelativeToLeader = 0;
 				_speed = 0;
 				_heat = 0;
 				_distanceToCarInFrontInMeters = 0;
@@ -174,40 +200,68 @@ namespace iRacingTV
 					return -1;
 				}
 
-				if ( _car.CarIdxPosition <= 0 )
+				if ( _sortByOfficialPosition )
 				{
-					if ( other._car.CarIdxPosition <= 0 )
+					var officialPosition = _car.CarIdxPosition == 0 ? _qualifyingPosition : _car.CarIdxPosition;
+					var otherOfficialPosition = other._car.CarIdxPosition == 0 ? other._qualifyingPosition : other._car.CarIdxPosition;
+
+					if ( officialPosition <= 0 )
 					{
-						return 0;
+						if ( otherOfficialPosition <= 0 )
+						{
+							return 0;
+						}
+
+						return 1;
 					}
 
-					return 1;
-				}
+					if ( otherOfficialPosition <= 0 )
+					{
+						return -1;
+					}
 
-				if ( other._car.CarIdxPosition <= 0 )
+					return officialPosition.CompareTo( otherOfficialPosition );
+				}
+				else
 				{
-					return -1;
+					return other._lapPosition.CompareTo( _lapPosition );
 				}
-
-				return _car.CarIdxPosition.CompareTo( other._car.CarIdxPosition );
 			}
 		}
 
 		private class Message
 		{
-			public BroadcastMessageTypes msg;
+			public BroadcastMessageTypes _msg;
 
-			public int var1;
-			public int var2;
-			public int var3;
+			public int _var1;
+			public int _var2;
+			public int _var3;
 
-			public Message( BroadcastMessageTypes _msg, int _var1, int _var2, int _var3 )
+			public Message( BroadcastMessageTypes msg, int var1, int var2, int var3 )
 			{
-				msg = _msg;
+				_msg = msg;
 
-				var1 = _var1;
-				var2 = _var2;
-				var3 = _var3;
+				_var1 = var1;
+				_var2 = var2;
+				_var3 = var3;
+			}
+		}
+
+		private class Incident
+		{
+			public int _driverIdx;
+
+			public DriverModel _driver;
+			public CarModel _car;
+
+			public int _frameNumber;
+
+			public Incident( int driverIdx, DriverModel driver, CarModel car, int frameNumber )
+			{
+				_driverIdx = driverIdx;
+				_driver = driver;
+				_car = car;
+				_frameNumber = frameNumber;
 			}
 		}
 
@@ -233,22 +287,25 @@ namespace iRacingTV
 
 		private IRacingSessionModel? _session = null;
 		private IRacingDataModel? _data = null;
+		private SessionModel? _qualifyingSession = null;
 
 		private int _sessionInfoUpdate = -1;
 		private int _sessionID = -1;
 		private int _subSessionID = -1;
 
-		private int _sessionFlags = 0;
+		private uint _sessionFlags = 0;
 		private bool _isUnderCaution = false;
 		private float _trackLengthInMeters = 0;
 		private double _lastSessionTime = 0;
 		private double _sessionTimeDelta = 0;
 		private int _currentLap = 0;
 		private int _radioTransmitCarIdx = -1;
-		private bool _positionsValid = false;
+		private bool _carIdxPositionsAreValid = false;
+		private bool _driverWasTalking = false;
 
-		private readonly float[] _lastLapDistPct = new float[ MaxNumDrivers ];
-		private readonly float[] _lastSpeed = new float[ MaxNumDrivers ];
+		private readonly float[] _lapPosition = new float[ MaxNumDrivers ];
+		private readonly float[] _lapDistPct = new float[ MaxNumDrivers ];
+		private readonly float[] _speed = new float[ MaxNumDrivers ];
 
 		private List<SessionFlagsRecord>? _sessionFlagsRecordList = null;
 
@@ -283,13 +340,25 @@ namespace iRacingTV
 		private int _currentCameraNumber = 0;
 		private int _currentCameraCarIdx = 0;
 		private int _cameraSwitchWaitTicksRemaining = 0;
+		private string _cameraSwitchReason = string.Empty;
 
 		private int _targetCameraCarIdx = 0;
 		private int _targetCameraDriverIdx = 0;
 		private int _targetCameraGroupNumber = 0;
-		private int _targetCameraNumber = 0;
-		
-		private int[] _cameraGroupNumbers = new int[ (int) CameraGroupEnum.NumCameraGroups ];
+
+		private readonly int[] _cameraGroupNumbers = new int[ (int) CameraGroupEnum.NumCameraGroups ];
+
+		private readonly List<Incident> _incidentList = new();
+
+		private IncidentScanStateEnum _currentIncidentScanState = IncidentScanStateEnum.Complete;
+		private IncidentScanStateEnum _nextIncidentScanState = IncidentScanStateEnum.Complete;
+		private int _currentSession = 0;
+		private int _startOfRaceFrameNumber = 0;
+
+		private int _settleStartingFrameNumber = 0;
+		private int _settleTargetFrameNumber = 0;
+		private int _settleLastFrameNumber = 0;
+		private int _settleLoopCount = 0;
 
 		#endregion
 
@@ -556,6 +625,8 @@ namespace iRacingTV
 				UpdateDirector();
 			}
 
+			UpdateIncidentScan();
+			UpdateMessageDispatcher();
 			UpdateOverlay();
 		}
 
@@ -575,6 +646,43 @@ namespace iRacingTV
 		private uint ColorVectorToUint( Vector4 vector )
 		{
 			return 0xFF000000 | ( ( (uint) Math.Round( vector.Z * 255.0 ) ) << 16 ) | ( ( (uint) Math.Round( vector.Y * 255.0 ) ) << 8 ) | ( (uint) Math.Round( vector.X * 255.0 ) );
+		}
+
+		private void BufferMessage( BroadcastMessageTypes msg, int var1, int var2, int var3 )
+		{
+			_messageBuffer.Add( new Message( msg, var1, var2, var3 ) );
+		}
+
+		private int FindDriverIdxFromCarIdx( int carIdx )
+		{
+			if ( ( _session != null ) && ( _data != null ) )
+			{
+				for ( var driverIdx = 0; driverIdx < _session.DriverInfo.Drivers.Count; driverIdx++ )
+				{
+					var driver = _session.DriverInfo.Drivers[ driverIdx ];
+
+					if ( driver.CarIdx == carIdx )
+					{
+						return driverIdx;
+					}
+				}
+			}
+
+			return 0;
+		}
+
+		private void WaitForFrameNumberToSettleState( IncidentScanStateEnum nextIncidentScanState, int targetFrameNumber )
+		{
+			if ( _data != null )
+			{
+				_settleStartingFrameNumber = _data.Data.ReplayFrameNum;
+				_settleTargetFrameNumber = targetFrameNumber;
+				_settleLastFrameNumber = 0;
+				_settleLoopCount = 0;
+
+				_currentIncidentScanState = IncidentScanStateEnum.WaitForFrameNumberToSettle;
+				_nextIncidentScanState = nextIncidentScanState;
+			}
 		}
 
 		private void UpdateCameraGroupNumbers()
@@ -608,7 +716,7 @@ namespace iRacingTV
 					{
 						_cameraGroupNumbers[ (int) CameraGroupEnum.Blimp ] = cameraGroup.GroupNum;
 					}
-					else if ( cameraGroup.GroupName == _settings._scenicCameraGroupName)
+					else if ( cameraGroup.GroupName == _settings._scenicCameraGroupName )
 					{
 						_cameraGroupNumbers[ (int) CameraGroupEnum.Scenic ] = cameraGroup.GroupNum;
 					}
@@ -628,8 +736,8 @@ namespace iRacingTV
 
 				StatusImage.Source = _isConnected ? _statusConnectedImage : _statusDisconnectedImage;
 
-				ScanForIncidentsButton.IsEnabled = _isConnected;
 				ShowOverlayButton.IsEnabled = _isConnected;
+				ScanForIncidentsButton.IsEnabled = _isConnected;
 				EnableAIDirectorButton.IsEnabled = _isConnected;
 			}
 
@@ -646,6 +754,18 @@ namespace iRacingTV
 					_sessionInfoUpdate = _iRacingSdk.Header.SessionInfoUpdate;
 
 					_session = _iRacingSdk.GetSerializedSessionInfo();
+
+					#endregion
+
+					#region Find qualifying session
+
+					foreach ( var session in _session.SessionInfo.Sessions )
+					{
+						if ( session.SessionName == "QUALIFY" )
+						{
+							_qualifyingSession = session;
+						}
+					}
 
 					#endregion
 
@@ -704,7 +824,7 @@ namespace iRacingTV
 
 									if ( match.Success )
 									{
-										_sessionFlagsRecordList.Add( new SessionFlagsRecord( int.Parse( match.Groups[ 1 ].Value ), float.Parse( match.Groups[ 2 ].Value ), int.Parse( match.Groups[ 3 ].Value, System.Globalization.NumberStyles.HexNumber ) ) );
+										_sessionFlagsRecordList.Add( new SessionFlagsRecord( int.Parse( match.Groups[ 1 ].Value ), float.Parse( match.Groups[ 2 ].Value ), uint.Parse( match.Groups[ 3 ].Value, System.Globalization.NumberStyles.HexNumber ) ) );
 									}
 								}
 
@@ -784,7 +904,7 @@ namespace iRacingTV
 					{
 						if ( _sessionFlags != _data.Data.SessionFlags )
 						{
-							_sessionFlags = _data.Data.SessionFlags;
+							_sessionFlags = (uint) _data.Data.SessionFlags;
 
 							if ( _sessionFlagsStreamWriter != null )
 							{
@@ -937,7 +1057,7 @@ namespace iRacingTV
 
 				#region Update misc properties
 
-				_isUnderCaution = ( ( (uint) _sessionFlags & ( (uint) SessionFlags.CautionWaving | (uint) SessionFlags.Caution | (uint) SessionFlags.YellowWaving | (uint) SessionFlags.Yellow ) ) != 0 );
+				_isUnderCaution = ( ( _sessionFlags & ( (uint) SessionFlags.CautionWaving | (uint) SessionFlags.Caution | (uint) SessionFlags.YellowWaving | (uint) SessionFlags.Yellow ) ) != 0 );
 				_currentLap = _data.Data.SessionLapsTotal - _data.Data.SessionLapsRemain;
 
 				#endregion
@@ -946,6 +1066,7 @@ namespace iRacingTV
 			{
 				_session = null;
 				_data = null;
+				_qualifyingSession = null;
 
 				_sessionInfoUpdate = -1;
 				_sessionID = -1;
@@ -958,12 +1079,14 @@ namespace iRacingTV
 				_sessionTimeDelta = 0;
 				_currentLap = 0;
 				_radioTransmitCarIdx = -1;
-				_positionsValid = false;
+				_carIdxPositionsAreValid = false;
+				_driverWasTalking = false;
 
 				for ( var i = 0; i < MaxNumDrivers; i++ )
 				{
-					_lastLapDistPct[ i ] = 0;
-					_lastSpeed[ i ] = 0;
+					_lapPosition[ i ] = -1;
+					_lapDistPct[ i ] = 0;
+					_speed[ i ] = 0;
 				}
 
 				_messageBuffer.Clear();
@@ -976,9 +1099,20 @@ namespace iRacingTV
 				_cameraSwitchWaitTicksRemaining = 0;
 
 				_targetCameraGroupNumber = 0;
-				_targetCameraNumber = 0;
 				_targetCameraCarIdx = 0;
 				_targetCameraDriverIdx = 0;
+
+				_incidentList.Clear();
+
+				_currentIncidentScanState = IncidentScanStateEnum.Complete;
+				_nextIncidentScanState = IncidentScanStateEnum.Complete;
+				_currentSession = 0;
+				_startOfRaceFrameNumber = 0;
+
+				_settleStartingFrameNumber = 0;
+				_settleTargetFrameNumber = 0;
+				_settleLastFrameNumber = 0;
+				_settleLoopCount = 0;
 			}
 		}
 
@@ -991,6 +1125,8 @@ namespace iRacingTV
 
 			#region Reset tracked cars
 
+			var sortByOfficialPosition = ( _currentLap <= 1 ) || ( _sessionFlags & ( (uint) SessionFlags.CautionWaving | (uint) SessionFlags.Caution | (uint) SessionFlags.YellowWaving | (uint) SessionFlags.Yellow | (uint) SessionFlags.Checkered ) ) != 0;
+
 			for ( var i = 0; i < MaxNumDrivers; i++ )
 			{
 				var trackedCar = _trackedCarList[ i ];
@@ -1000,6 +1136,12 @@ namespace iRacingTV
 				trackedCar._driver = null;
 				trackedCar._car = null;
 
+				trackedCar._sortByOfficialPosition = sortByOfficialPosition;
+
+				trackedCar._qualifyingPosition = 0;
+
+				trackedCar._lapPosition = -1;
+				trackedCar._lapPositionRelativeToLeader = 0;
 				trackedCar._speed = 0;
 				trackedCar._heat = 0;
 				trackedCar._distanceToCarInFrontInMeters = float.MaxValue;
@@ -1010,26 +1152,45 @@ namespace iRacingTV
 
 			#region Update tracked cars (except for heat and distances)
 
-			_positionsValid = false;
+			_carIdxPositionsAreValid = false;
 
-			for ( var i = 0; i < _session.DriverInfo.Drivers.Count; i++ )
+			var leaderLapPosition = 0.0f;
+
+			for ( var driverIdx = 0; driverIdx < _session.DriverInfo.Drivers.Count; driverIdx++ )
 			{
-				var driver = _session.DriverInfo.Drivers[ i ];
+				var driver = _session.DriverInfo.Drivers[ driverIdx ];
 
 				if ( ( driver.CarIsPaceCar != "1" ) && ( driver.IsSpectator == 0 ) )
 				{
-					var trackedCar = _trackedCarList[ i ];
+					var trackedCar = _trackedCarList[ driverIdx ];
 
 					var car = _data.Data.Cars[ driver.CarIdx ];
 
-					trackedCar._driverIdx = i;
+					if ( car.CarIdxPosition >= 1 )
+					{
+						_carIdxPositionsAreValid = true;
+					}
+
+					trackedCar._driverIdx = driverIdx;
+
 					trackedCar._driver = driver;
 					trackedCar._car = car;
-					trackedCar._speed = 0;
 
-					if ( _lastLapDistPct[ i ] >= 0 )
+					if ( _qualifyingSession != null )
 					{
-						var deltaLapDistPct = car.CarIdxLapDistPct - _lastLapDistPct[ i ];
+						foreach ( var position in _qualifyingSession.ResultsPositions )
+						{
+							if ( driver.CarIdx == position.CarIdx )
+							{
+								trackedCar._qualifyingPosition = position.Position;
+								break;
+							}
+						}
+					}
+
+					if ( ( _lapDistPct[ driverIdx ] >= 0 ) && ( car.CarIdxLapDistPct >= 0 ) )
+					{
+						var deltaLapDistPct = car.CarIdxLapDistPct - _lapDistPct[ driverIdx ];
 
 						if ( deltaLapDistPct > 0.5f )
 						{
@@ -1044,23 +1205,45 @@ namespace iRacingTV
 
 						if ( deltaLapDistPct < 0.05f )
 						{
-							trackedCar._speed = _lastSpeed[ i ] * 0.92f + (float) ( deltaLapDistPct / _sessionTimeDelta * _trackLengthInMeters ) * 0.08f;
+							var speed = (float) ( deltaLapDistPct / _sessionTimeDelta * _trackLengthInMeters );
+
+							trackedCar._speed = _speed[ driverIdx ] + ( speed - _speed[ driverIdx ] ) * 0.1f;
+						}
+
+						trackedCar._lapPosition = car.CarIdxLapCompleted + car.CarIdxLapDistPct;
+
+						if ( ( car.CarIdxLapDistPct < 0.05f ) || ( car.CarIdxLapDistPct > 0.95f ) )
+						{
+							if ( Math.Abs( trackedCar._lapPosition - _lapPosition[ driverIdx ] ) > 0.5f )
+							{
+								trackedCar._lapPosition = _lapPosition[ driverIdx ] + deltaLapDistPct;
+							}
+						}
+
+						if ( trackedCar._lapPosition > leaderLapPosition )
+						{
+							leaderLapPosition = trackedCar._lapPosition;
 						}
 					}
 
-					_lastLapDistPct[ i ] = car.CarIdxLapDistPct;
-					_lastSpeed[ i ] = trackedCar._speed;
+					_lapPosition[ driverIdx ] = trackedCar._lapPosition;
+					_lapDistPct[ driverIdx ] = car.CarIdxLapDistPct;
+					_speed[ driverIdx ] = trackedCar._speed;
 
-					if ( car.CarIdxPosition > 1 )
+					/*
+					if ( driver.CarNumber == _settings._preferredCarNumber )
 					{
-						_positionsValid = true;
+						var lapDistPct = Math.Floor( car.CarIdxLapDistPct * 10000 ) / 10000;
+
+						Log( $"ET={car.CarIdxEstTime:0.000}, F2T={car.CarIdxF2Time:0.000}, L={car.CarIdxLap}, LC={car.CarIdxLapCompleted}/{_lapCompleted[ driverIdx ]}, LDP={lapDistPct:0.0000}, P={car.CarIdxPosition}\r\n" );
 					}
+					*/
 				}
 			}
 
 			#endregion
 
-			#region Update heat and distances
+			#region Update lap position relative to leader, heat, and car in front / car in back distances
 
 			for ( var i = 0; i < _session.DriverInfo.Drivers.Count; i++ )
 			{
@@ -1070,6 +1253,8 @@ namespace iRacingTV
 				{
 					if ( ( trackedCar._driver.CarIsPaceCar != "1" ) && ( trackedCar._driver.IsSpectator == 0 ) && !trackedCar._car.CarIdxOnPitRoad && ( trackedCar._car.CarIdxLapDistPct >= 0 ) )
 					{
+						trackedCar._lapPositionRelativeToLeader = leaderLapPosition - trackedCar._lapPosition;
+
 						for ( var j = 0; j < _session.DriverInfo.Drivers.Count; j++ )
 						{
 							var otherTrackedCar = _trackedCarList[ j ];
@@ -1125,50 +1310,98 @@ namespace iRacingTV
 				return;
 			}
 
+			#region Find current incident
+
+			Incident? currentIncident = null;
+
+			foreach ( var incident in _incidentList )
+			{
+				if ( ( ( incident._frameNumber + IncidentFrameCount ) >= _data.Data.ReplayFrameNum ) && ( ( incident._frameNumber - IncidentPrerollFrameCount ) <= _data.Data.ReplayFrameNum ) )
+				{
+					if ( ( currentIncident == null ) || ( currentIncident._frameNumber < incident._frameNumber ) )
+					{
+						currentIncident = incident;
+						break;
+					}
+				}
+			}
+
+			#endregion
+
 			#region Camera selection
 
-			var cameraSwitchReason = string.Empty;
-			var cameraGroup = CameraGroupEnum.Far;
+			_cameraSwitchReason = string.Empty;
 
-			_targetCameraNumber = 0;
+			var cameraGroup = CameraGroupEnum.Far;
 
 			if ( ( _sessionFlags & ( (uint) SessionFlags.Checkered ) ) != 0 )
 			{
 				cameraGroup = CameraGroupEnum.Scenic;
 
-				_targetCameraNumber = 1;
+				_cameraSwitchReason = $"Session flags = Checkered.";
 
-				cameraSwitchReason = $"Session flags = Checkered.";
+				_driverWasTalking = false;
 			}
-			else if ( !_positionsValid || ( ( _sessionFlags & ( (uint) SessionFlags.GreenHeld | (uint) SessionFlags.StartReady | (uint) SessionFlags.StartSet | (uint) SessionFlags.StartGo ) ) != 0 ) )
+			else if ( currentIncident != null )
 			{
-				var highestLapDistPct = 0.0f;
+				cameraGroup = CameraGroupEnum.Medium;
 
-				for ( var i = 0; i < _session.DriverInfo.Drivers.Count; i++ )
+				_targetCameraCarIdx = currentIncident._driver.CarIdx;
+				_targetCameraDriverIdx = currentIncident._driverIdx;
+
+				_cameraSwitchReason = $"Incident at frame {currentIncident._frameNumber} involving {currentIncident._driver.UserName} in car #{currentIncident._driver.CarNumber}.";
+
+				_driverWasTalking = false;
+			}
+			else if ( ( _sessionFlags & ( (uint) SessionFlags.GreenHeld | (uint) SessionFlags.StartReady | (uint) SessionFlags.StartSet | (uint) SessionFlags.StartGo ) ) != 0 )
+			{
+				var trackedCar = _trackedCarList[ 0 ];
+
+				if ( ( trackedCar._driver != null ) && ( trackedCar._car != null ) )
 				{
-					var trackedCar = _trackedCarList[ i ];
-
-					if ( ( trackedCar._driver != null ) && ( trackedCar._car != null ) )
-					{
-						if ( trackedCar._car.CarIdxLapDistPct > highestLapDistPct )
-						{
-							highestLapDistPct = trackedCar._car.CarIdxLapDistPct;
-
-							_targetCameraCarIdx = trackedCar._driver.CarIdx;
-							_targetCameraDriverIdx = trackedCar._driverIdx;
-
-							cameraSwitchReason = $"Positions not valid or session flags = GreenHeld|StartReady|StartSet|StartGo, Car #{trackedCar._driver.CarNumber}.";
-						}
-					}
+					_targetCameraCarIdx = trackedCar._driver.CarIdx;
+					_targetCameraDriverIdx = trackedCar._driverIdx;
 				}
+
+				_cameraSwitchReason = $"Session flags = GreenHeld|StartReady|StartSet|StartGo.";
+
+				_driverWasTalking = false;
+			}
+			else if ( _data.Data.RadioTransmitCarIdx != -1 )
+			{
+				cameraGroup = CameraGroupEnum.Close;
+
+				_targetCameraCarIdx = _data.Data.RadioTransmitCarIdx;
+				_targetCameraDriverIdx = FindDriverIdxFromCarIdx( _data.Data.RadioTransmitCarIdx );
+
+				_cameraSwitchWaitTicksRemaining = _sendMessageWaitTicksRemaining;
+
+				_cameraSwitchReason = "Driver is talking.";
+
+				_driverWasTalking = true;
+			}
+			else if ( _driverWasTalking )
+			{
+				_driverWasTalking = false;
+
+				_cameraSwitchWaitTicksRemaining = PostChatCameraSwitchWaitTicks;
+			}
+			else if ( !_carIdxPositionsAreValid )
+			{
+				cameraGroup = CameraGroupEnum.Scenic;
+
+				_targetCameraCarIdx = 0;
+				_targetCameraDriverIdx = 0;
+
+				_cameraSwitchReason = "Race has not started yet.";
 			}
 			else
 			{
 				var highestHeat = 0.0f;
 
-				for ( var i = 0; i < _session.DriverInfo.Drivers.Count; i++ )
+				for ( var driverIdx = 0; driverIdx < _session.DriverInfo.Drivers.Count; driverIdx++ )
 				{
-					var trackedCar = _trackedCarList[ i ];
+					var trackedCar = _trackedCarList[ driverIdx ];
 
 					if ( trackedCar._driver != null )
 					{
@@ -1179,7 +1412,7 @@ namespace iRacingTV
 							_targetCameraCarIdx = trackedCar._driver.CarIdx;
 							_targetCameraDriverIdx = trackedCar._driverIdx;
 
-							cameraSwitchReason = $"Hottest car #{trackedCar._driver.CarNumber}.";
+							_cameraSwitchReason = $"Hottest car is #{trackedCar._driver.CarNumber}.";
 						}
 					}
 				}
@@ -1190,7 +1423,7 @@ namespace iRacingTV
 				{
 					cameraGroup = CameraGroupEnum.Far;
 
-					cameraSwitchReason += " (Caution waving)";
+					_cameraSwitchReason += " (Caution waving)";
 				}
 				else
 				{
@@ -1209,43 +1442,43 @@ namespace iRacingTV
 									_targetCameraCarIdx = trackedCar._driver.CarIdx;
 									_targetCameraDriverIdx = trackedCar._driverIdx;
 
-									cameraSwitchReason = $"Preferred car #{trackedCar._driver.CarNumber}.";
+									_cameraSwitchReason = $"Preferred car is #{trackedCar._driver.CarNumber}.";
 
 									if ( _isUnderCaution )
 									{
 										cameraGroup = CameraGroupEnum.Far;
 
-										cameraSwitchReason += " (Under caution)";
+										_cameraSwitchReason += " (Under caution)";
 									}
 									else if ( trackedCar._distanceToCarInFrontInMeters < 10 )
 									{
 										cameraGroup = CameraGroupEnum.Inside;
 
-										cameraSwitchReason += " (Car in front < 10m)";
+										_cameraSwitchReason += " (Car in front < 10m)";
 									}
 									else if ( nearestCarDistance < 10 )
 									{
 										cameraGroup = CameraGroupEnum.Close;
 
-										cameraSwitchReason += " (Car within 10m)";
+										_cameraSwitchReason += " (Car within 10m)";
 									}
 									else if ( nearestCarDistance < 20 )
 									{
 										cameraGroup = CameraGroupEnum.Medium;
 
-										cameraSwitchReason += " (Car within 20m)";
+										_cameraSwitchReason += " (Car within 20m)";
 									}
 									else if ( nearestCarDistance < 30 )
 									{
 										cameraGroup = CameraGroupEnum.Far;
 
-										cameraSwitchReason += " (Car within 30m)";
+										_cameraSwitchReason += " (Car within 30m)";
 									}
 									else
 									{
 										cameraGroup = CameraGroupEnum.Blimp;
 
-										cameraSwitchReason += " (Car within 50m)";
+										_cameraSwitchReason += " (Car within 50m)";
 									}
 								}
 
@@ -1258,13 +1491,147 @@ namespace iRacingTV
 
 			_targetCameraGroupNumber = _cameraGroupNumbers[ (int) cameraGroup ];
 
-			cameraSwitchReason += $" ({cameraGroup})";
+			_cameraSwitchReason += $" ({cameraGroup})";
 
 			#endregion
+		}
 
-			#region Message dispatching
+		private void UpdateIncidentScan()
+		{
+			if ( ( _session != null ) && ( _data != null ) )
+			{
+				switch ( _currentIncidentScanState )
+				{
+					case IncidentScanStateEnum.Startup:
 
-			if ( _session != null )
+						_incidentList.Clear();
+
+						Log( "Rewinding to the start of the replay...\r\n" );
+
+						BufferMessage( BroadcastMessageTypes.ReplaySetPlaySpeed, 0, 0, 0 );
+						BufferMessage( BroadcastMessageTypes.ReplaySetPlayPosition, 0, 1, 0 );
+
+						_currentSession = 1;
+
+						Log( "Finding the start of the race event...\r\n" );
+
+						WaitForFrameNumberToSettleState( IncidentScanStateEnum.FindStartOfRace, 1 );
+
+						break;
+
+					case IncidentScanStateEnum.FindStartOfRace:
+
+						if ( _currentSession < _session.SessionInfo.Sessions.Count )
+						{
+							Log( "Jumping to the next event...\r\n" );
+
+							_currentSession++;
+
+							BufferMessage( BroadcastMessageTypes.ReplaySearch, (int) ReplaySearchModeTypes.NextSession, 0, 0 );
+
+							WaitForFrameNumberToSettleState( IncidentScanStateEnum.FindStartOfRace, 0 );
+						}
+						else
+						{
+							Log( $"Start of race found at frame {_data.Data.ReplayFrameNum}.\r\n" );
+
+							_startOfRaceFrameNumber = _data.Data.ReplayFrameNum;
+
+							_currentIncidentScanState = IncidentScanStateEnum.LookAtPaceCarWithScenicCamera;
+						}
+
+						break;
+
+					case IncidentScanStateEnum.LookAtPaceCarWithScenicCamera:
+
+						_targetCameraGroupNumber = _cameraGroupNumbers[ (int) CameraGroupEnum.Scenic ];
+						_targetCameraCarIdx = 0;
+						_targetCameraDriverIdx = 0;
+
+						if ( _currentCameraCarIdx == _targetCameraCarIdx && _currentCameraGroupNumber == _targetCameraGroupNumber )
+						{
+							_currentIncidentScanState = IncidentScanStateEnum.SearchForNextIncident;
+						}
+
+						break;
+
+					case IncidentScanStateEnum.SearchForNextIncident:
+
+						BufferMessage( BroadcastMessageTypes.ReplaySearch, (int) ReplaySearchModeTypes.NextIncident, 0, 0 );
+
+						WaitForFrameNumberToSettleState( IncidentScanStateEnum.AddIncidentToList, 0 );
+
+						break;
+
+					case IncidentScanStateEnum.AddIncidentToList:
+
+						Log( $"New incident found at frame {_data.Data.ReplayFrameNum} involving car #{_session.DriverInfo.Drivers[ _data.Data.CamCarIdx ].CarNumber}.\r\n" );
+
+						var driverIdx = FindDriverIdxFromCarIdx( _data.Data.CamCarIdx );
+
+						var driver = _session.DriverInfo.Drivers[ driverIdx ];
+
+						_incidentList.Add( new Incident( driverIdx, driver, _data.Data.Cars[ driver.CarIdx ], _data.Data.ReplayFrameNum ) );
+
+						_currentIncidentScanState = IncidentScanStateEnum.SearchForNextIncident;
+
+						break;
+
+					case IncidentScanStateEnum.NoMoreIncidents:
+
+						Log( "Done with finding incidents, rewinding to the start of the replay.\r\n" );
+
+						BufferMessage( BroadcastMessageTypes.ReplaySetPlayPosition, 0, _startOfRaceFrameNumber, 0 );
+
+						_incidentList.Reverse();
+
+						WaitForFrameNumberToSettleState( IncidentScanStateEnum.Complete, _startOfRaceFrameNumber );
+
+						EnableAIDirectorButton.IsEnabled = true;
+
+						break;
+
+					case IncidentScanStateEnum.WaitForFrameNumberToSettle:
+
+						if ( _settleTargetFrameNumber != 0 )
+						{
+							if ( _data.Data.ReplayFrameNum == _settleTargetFrameNumber )
+							{
+								_currentIncidentScanState = _nextIncidentScanState;
+							}
+						}
+						else
+						{
+							if ( ( _data.Data.ReplayFrameNum != 0 ) && ( _data.Data.ReplayFrameNum != _settleStartingFrameNumber ) )
+							{
+								if ( ( _settleLastFrameNumber == 0 ) || ( _settleLastFrameNumber != _data.Data.ReplayFrameNum ) )
+								{
+									_settleLastFrameNumber = _data.Data.ReplayFrameNum;
+								}
+								else
+								{
+									_currentIncidentScanState = _nextIncidentScanState;
+								}
+							}
+							else
+							{
+								_settleLoopCount++;
+
+								if ( _settleLoopCount == 100 )
+								{
+									_currentIncidentScanState = IncidentScanStateEnum.NoMoreIncidents;
+								}
+							}
+						}
+
+						break;
+				}
+			}
+		}
+
+		private void UpdateMessageDispatcher()
+		{
+			if ( ( _session != null ) && ( _data != null ) )
 			{
 				_cameraSwitchWaitTicksRemaining--;
 
@@ -1287,25 +1654,29 @@ namespace iRacingTV
 
 						_messageBuffer.RemoveAt( 0 );
 
-						_iRacingSdk.BroadcastMessage( message.msg, message.var1, message.var2, message.var3 );
+						_iRacingSdk.BroadcastMessage( message._msg, message._var1, message._var2, message._var3 );
 
 						_sendMessageWaitTicksRemaining = MinimumSendMessageWaitTicks;
 					}
-					else if ( ( _cameraSwitchWaitTicksRemaining <= 0 ) && ( ( _currentCameraCarIdx != _targetCameraCarIdx ) || ( _currentCameraGroupNumber != _targetCameraGroupNumber ) || ( _currentCameraNumber != _targetCameraNumber ) ) )
+					else
 					{
-						var carNumberRaw = _session.DriverInfo.Drivers[ _targetCameraDriverIdx ].CarNumberRaw;
+						if ( _directorIsEnabled || ( _currentIncidentScanState != IncidentScanStateEnum.Complete ) )
+						{
+							if ( ( _cameraSwitchWaitTicksRemaining <= 0 ) && ( ( _currentCameraCarIdx != _targetCameraCarIdx ) || ( _currentCameraGroupNumber != _targetCameraGroupNumber ) ) )
+							{
+								var carNumberRaw = _session.DriverInfo.Drivers[ _targetCameraDriverIdx ].CarNumberRaw;
 
-						_iRacingSdk.BroadcastMessage( BroadcastMessageTypes.CamSwitchNum, carNumberRaw, _targetCameraGroupNumber, _targetCameraNumber );
+								_iRacingSdk.BroadcastMessage( BroadcastMessageTypes.CamSwitchNum, carNumberRaw, _targetCameraGroupNumber, 0 );
 
-						_sendMessageWaitTicksRemaining = MinimumSendMessageWaitTicks;
-						_cameraSwitchWaitTicksRemaining = MinimumCameraSwitchWaitTicks;
+								_sendMessageWaitTicksRemaining = MinimumSendMessageWaitTicks;
+								_cameraSwitchWaitTicksRemaining = MinimumCameraSwitchWaitTicks;
 
-						Log( $"{cameraSwitchReason} ({_targetCameraNumber})\r\n" );
+								Log( $"Camera switching: {_cameraSwitchReason}\r\n" );
+							}
+						}
 					}
 				}
 			}
-
-			#endregion
 		}
 
 		private void UpdateOverlay()
@@ -1347,11 +1718,8 @@ namespace iRacingTV
 
 					#region Leaderboard image
 
-					if ( _positionsValid )
-					{
-						ImGui.SetCursorPos( _settings._leaderboardPosition );
-						ImGui.Image( _textureIdList[ (int) TextureEnum.Leaderboard ], new Vector2( _textureList[ (int) TextureEnum.Leaderboard ].Width, _textureList[ (int) TextureEnum.Leaderboard ].Height ), Vector2.Zero, Vector2.One, _settings._leaderboardTint );
-					}
+					ImGui.SetCursorPos( _settings._leaderboardPosition );
+					ImGui.Image( _textureIdList[ (int) TextureEnum.Leaderboard ], new Vector2( _textureList[ (int) TextureEnum.Leaderboard ].Width, _textureList[ (int) TextureEnum.Leaderboard ].Height ), Vector2.Zero, Vector2.One, _settings._leaderboardTint );
 
 					#endregion
 
@@ -1385,7 +1753,7 @@ namespace iRacingTV
 					else if ( ( _data.Data.SessionLapsRemain > 0 ) && ( _data.Data.SessionLapsRemain != 32767 ) )
 					{
 						ImGui.PushFont( _fontB );
-						textString = Math.Min( _data.Data.SessionLapsTotal, _data.Data.SessionLapsRemain + 1 ).ToString() + _settings._lapsRemainingString;
+						textString = Math.Min( _data.Data.SessionLapsTotal, _data.Data.SessionLapsRemain + 1 ).ToString() + " " + _settings._lapsRemainingString;
 						textSize = ImGui.CalcTextSize( textString );
 						ImGui.SetCursorPos( _settings._lapsRemainingPosition - new Vector2( textSize.X, 0.0f ) );
 						ImGui.TextColored( _settings._lapsRemainingColor, textString );
@@ -1402,7 +1770,11 @@ namespace iRacingTV
 					{
 						lightTextureEnum = TextureEnum.LightYellow;
 					}
-					else if ( ( _currentLap == 0 ) || ( _data.Data.SessionLapsRemain == 0 ) || ( ( (uint) _sessionFlags & ( (uint) SessionFlags.White ) ) != 0 ) )
+					else if ( _currentLap == 0 )
+					{
+						lightTextureEnum = TextureEnum.LightBlack;
+					}
+					else if ( ( _data.Data.SessionLapsRemain == 0 ) || ( ( _sessionFlags & ( (uint) SessionFlags.White ) ) != 0 ) )
 					{
 						lightTextureEnum = TextureEnum.LightWhite;
 					}
@@ -1447,142 +1819,147 @@ namespace iRacingTV
 
 					#region Leaderboard
 
-					if ( _positionsValid )
+					for ( var i = 0; i < ( _session.DriverInfo.Drivers.Count ) && ( i < _settings._placeCount ); i++ )
 					{
-						for ( var i = 0; i < ( _session.DriverInfo.Drivers.Count ) && ( i < _settings._placeCount ); i++ )
+						var trackedCar = _trackedCarList[ i ];
+
+						if ( ( trackedCar._driver == null ) || ( trackedCar._car == null ) )
 						{
-							var trackedCar = _trackedCarList[ i ];
+							break;
+						}
 
-							if ( ( trackedCar._driver == null ) || ( trackedCar._car == null ) )
+						#region Place
+
+						ImGui.PushFont( _fontC );
+
+						textString = ( i + 1 ).ToString();
+						textSize = ImGui.CalcTextSize( textString );
+
+						var placePosition = _settings._placePosition + new Vector2( 0.0f, _settings._placeSpacing * i ) - new Vector2( textSize.X, 0.0f );
+
+						ImGui.SetCursorPos( placePosition );
+						ImGui.TextColored( _settings._placeColor, textString );
+						ImGui.PopFont();
+
+						#endregion
+
+						#region Car number
+
+						var carNumberPosition = _settings._carNumberPosition + new Vector2( 0, _settings._placeSpacing * i );
+
+						DrawCarNumber( drawList, trackedCar, carNumberPosition, _settings._carNumberSize );
+
+						#endregion
+
+						#region Driver name
+
+						if ( trackedCar._driver.AbbrevName != null )
+						{
+							textString = Regex.Replace( trackedCar._driver.AbbrevName, @"[\d-]", string.Empty );
+						}
+						else
+						{
+							textString = "---";
+						}
+
+						var driverNamePosition = _settings._driverNamePosition + new Vector2( 0.0f, _settings._placeSpacing * i );
+
+						ImGui.PushFont( _fontD );
+						ImGui.SetCursorPos( driverNamePosition );
+						ImGui.TextColored( _settings._driverNameColor, textString );
+						ImGui.PopFont();
+
+						#endregion
+
+						#region Laps down / Pit / Out
+
+						textString = string.Empty;
+						textColor = Vector4.Zero;
+
+						if ( trackedCar._car.CarIdxOnPitRoad )
+						{
+							textString = _settings._pitString;
+							textColor = _settings._pitColor;
+						}
+						else if ( trackedCar._car.CarIdxLapDistPct == -1 )
+						{
+							textString = _settings._outString;
+							textColor = _settings._outColor;
+						}
+						else if ( _carIdxPositionsAreValid )
+						{
+							if ( ( _currentLap > 1 ) && ( trackedCar._lapPositionRelativeToLeader != 0 ) )
 							{
-								break;
-							}
+								if ( trackedCar._lapPositionRelativeToLeader >= 1.0f )
+								{
+									var wholeLapsDown = Math.Floor( trackedCar._lapPositionRelativeToLeader );
 
-							#region Place
+									textString = $"-{wholeLapsDown:0} {_settings._lapPositionString}";
+								}
+								else if ( !_isUnderCaution )
+								{
+									textString = $"-{trackedCar._lapPositionRelativeToLeader:0.000} {_settings._lapPositionString}";
+								}
+
+								textColor = _settings._lapsDownColor;
+							}
+						}
+
+						if ( textString != string.Empty )
+						{
+							ImGui.PushFont( _fontC );
+
+							textSize = ImGui.CalcTextSize( textString );
+
+							var lapsDownPosition = _settings._lapsDownPosition + new Vector2( 0.0f, _settings._placeSpacing * i ) - new Vector2( textSize.X, 0.0f );
+
+							ImGui.SetCursorPos( lapsDownPosition );
+							ImGui.TextColored( textColor, textString );
+							ImGui.PopFont();
+						}
+
+						#endregion
+
+						#region Current target
+
+						if ( _data.Data.CamCarIdx == trackedCar._car.CarIdx )
+						{
+							var currentTargetPosition = _settings._currentTargetPosition + new Vector2( 0.0f, _settings._placeSpacing * i );
+
+							ImGui.SetCursorPos( currentTargetPosition );
+							ImGui.Image( _textureIdList[ (int) TextureEnum.CurrentTarget ], new Vector2( _textureList[ (int) TextureEnum.CurrentTarget ].Width, _textureList[ (int) TextureEnum.CurrentTarget ].Height ) );
 
 							ImGui.PushFont( _fontC );
 
-							textString = ( i + 1 ).ToString();
+							textString = $"{trackedCar._speed * ( ( _data.Data.DisplayUnits == 0 ) ? 2.23694f : 3.6f ):0} {( ( _data.Data.DisplayUnits == 0 ) ? _settings._mphString : _settings._kphString )}";
+
 							textSize = ImGui.CalcTextSize( textString );
 
-							var placePosition = _settings._placePosition + new Vector2( 0.0f, _settings._placeSpacing * i ) - new Vector2( textSize.X, 0.0f );
+							var speedPosition = currentTargetPosition + _settings._currentTargetSpeedOffset - new Vector2( textSize.X, 0 );
 
-							ImGui.SetCursorPos( placePosition );
-							ImGui.TextColored( _settings._placeColor, textString );
+							ImGui.SetCursorPos( speedPosition );
+							ImGui.TextColored( _settings._currentTargetSpeedColor, textString );
 							ImGui.PopFont();
-
-							#endregion
-
-							#region Car number
-
-							var carNumberPosition = _settings._carNumberPosition + new Vector2( 0, _settings._placeSpacing * i );
-
-							DrawCarNumber( drawList, trackedCar, carNumberPosition, _settings._carNumberSize );
-
-							#endregion
-
-							#region Driver name
-
-							if ( trackedCar._driver.AbbrevName != null )
-							{
-								textString = Regex.Replace( trackedCar._driver.AbbrevName, @"[\d-]", string.Empty );
-							}
-							else
-							{
-								textString = "---";
-							}
-
-							var driverNamePosition = _settings._driverNamePosition + new Vector2( 0.0f, _settings._placeSpacing * i );
-
-							ImGui.PushFont( _fontD );
-							ImGui.SetCursorPos( driverNamePosition );
-							ImGui.TextColored( _settings._driverNameColor, textString );
-							ImGui.PopFont();
-
-							#endregion
-
-							#region Laps down / Pit / Out
-
-							textString = string.Empty;
-							textColor = Vector4.Zero;
-
-							if ( trackedCar._car.CarIdxOnPitRoad )
-							{
-								textString = _settings._pitString;
-								textColor = _settings._pitColor;
-							}
-							else if ( trackedCar._car.CarIdxLapDistPct == -1 )
-							{
-								textString = _settings._outString;
-								textColor = _settings._outColor;
-							}
-							else
-							{
-								textString = $"{trackedCar._car.CarIdxF2Time:0.0}";
-								textColor = _settings._lapsDownColor;
-
-								if ( textString == "0.0" )
-								{
-									textString = string.Empty;
-								}
-							}
-
-							if ( textString != string.Empty )
-							{
-								ImGui.PushFont( _fontC );
-
-								textSize = ImGui.CalcTextSize( textString );
-
-								var lapsDownPosition = _settings._lapsDownPosition + new Vector2( 0.0f, _settings._placeSpacing * i ) - new Vector2( textSize.X, 0.0f );
-
-								ImGui.SetCursorPos( lapsDownPosition );
-								ImGui.TextColored( textColor, textString );
-								ImGui.PopFont();
-							}
-
-							#endregion
-
-							#region Current target
-
-							if ( _data.Data.CamCarIdx == trackedCar._car.CarIdx )
-							{
-								var currentTargetPosition = _settings._currentTargetPosition + new Vector2( 0.0f, _settings._placeSpacing * i );
-
-								ImGui.SetCursorPos( currentTargetPosition );
-								ImGui.Image( _textureIdList[ (int) TextureEnum.CurrentTarget ], new Vector2( _textureList[ (int) TextureEnum.CurrentTarget ].Width, _textureList[ (int) TextureEnum.CurrentTarget ].Height ) );
-
-								ImGui.PushFont( _fontC );
-
-								textString = $"{trackedCar._speed * ( ( _data.Data.DisplayUnits == 0 ) ? 2.23694f : 3.6f ):0} {( ( _data.Data.DisplayUnits == 0 ) ? _settings._mphString : _settings._kphString )}";
-
-								textSize = ImGui.CalcTextSize( textString );
-
-								var speedPosition = currentTargetPosition + _settings._currentTargetSpeedOffset - new Vector2( textSize.X, 0 );
-
-								ImGui.SetCursorPos( speedPosition );
-								ImGui.TextColored( _settings._currentTargetSpeedColor, textString );
-								ImGui.PopFont();
-							}
-
-							#endregion
 						}
+
+						#endregion
 					}
 
 					#endregion
 
 					#region Flags
 
-					if ( ( (uint) _sessionFlags & ( (uint) SessionFlags.Checkered ) ) != 0 )
+					if ( ( _sessionFlags & ( (uint) SessionFlags.Checkered ) ) != 0 )
 					{
 						ImGui.SetCursorPos( _settings._flagPosition );
 						ImGui.Image( _textureIdList[ (int) TextureEnum.FlagCheckered ], new Vector2( _textureList[ (int) TextureEnum.FlagCheckered ].Width, _textureList[ (int) TextureEnum.FlagCheckered ].Height ) );
 					}
-					else if ( ( (uint) _sessionFlags & ( (uint) SessionFlags.CautionWaving | (uint) SessionFlags.YellowWaving ) ) != 0 )
+					else if ( ( _sessionFlags & ( (uint) SessionFlags.CautionWaving | (uint) SessionFlags.YellowWaving ) ) != 0 )
 					{
 						ImGui.SetCursorPos( _settings._flagPosition );
 						ImGui.Image( _textureIdList[ (int) TextureEnum.FlagCaution ], new Vector2( _textureList[ (int) TextureEnum.FlagCaution ].Width, _textureList[ (int) TextureEnum.FlagCaution ].Height ) );
 					}
-					else if ( ( (uint) _sessionFlags & ( (uint) SessionFlags.StartGo ) ) != 0 )
+					else if ( ( _sessionFlags & ( (uint) SessionFlags.StartGo ) ) != 0 )
 					{
 						ImGui.SetCursorPos( _settings._flagPosition );
 						ImGui.Image( _textureIdList[ (int) TextureEnum.FlagGreen ], new Vector2( _textureList[ (int) TextureEnum.FlagGreen ].Width, _textureList[ (int) TextureEnum.FlagGreen ].Height ) );
@@ -1763,6 +2140,8 @@ namespace iRacingTV
 			ImGui.PopFont();
 		}
 
+		#region UI
+
 		private void OverlayX_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
 		{
 			_settings._overlayX = int.Parse( OverlayX.Text );
@@ -1805,6 +2184,16 @@ namespace iRacingTV
 			{
 				_sdl2Window.Visible = _overlayIsVisible;
 			}
+		}
+
+		private void ScanForIncidentsButton_Click( object sender, RoutedEventArgs e )
+		{
+			_currentIncidentScanState = IncidentScanStateEnum.Startup;
+
+			_directorIsEnabled = false;
+
+			EnableAIDirectorButton.Content = "Enable AI Director";
+			EnableAIDirectorButton.IsEnabled = false;
 		}
 
 		private void EnableAIDirectorButton_Click( object sender, RoutedEventArgs e )
@@ -1861,5 +2250,7 @@ namespace iRacingTV
 		{
 			_settings._scenicCameraGroupName = ScenicCameraTextBox.Text;
 		}
+
+		#endregion
 	}
 }
