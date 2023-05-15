@@ -13,6 +13,7 @@ using System.Drawing;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System.Linq;
+using System.Globalization;
 
 using irsdkSharp;
 using irsdkSharp.Enums;
@@ -21,6 +22,7 @@ using irsdkSharp.Serialization.Enums.Fastest;
 using irsdkSharp.Serialization.Models.Session;
 using irsdkSharp.Serialization.Models.Data;
 using irsdkSharp.Serialization.Models.Session.DriverInfo;
+using irsdkSharp.Serialization.Models.Session.SessionInfo;
 
 using Veldrid.ImageSharp;
 using Veldrid.Sdl2;
@@ -28,7 +30,6 @@ using Veldrid.StartupUtilities;
 using Veldrid;
 
 using ImGuiNET;
-using irsdkSharp.Serialization.Models.Session.SessionInfo;
 
 #endregion
 
@@ -364,23 +365,32 @@ namespace iRacingTV
 
 		public MainWindow()
 		{
-			InitializeComponent();
-
-			InitializeLog();
-
-			LoadSettings();
-
-			ReinitializeOverlay();
-
-			for ( var i = 0; i < MaxNumDrivers; i++ )
+			try
 			{
-				_trackedCarList.Add( new TrackedCar() );
+				InitializeComponent();
+
+				InitializeLog();
+
+				Log( $"{this.Title} starting up!\r\n\r\n" );
+
+				LoadSettings();
+
+				ReinitializeOverlay();
+
+				for ( var i = 0; i < MaxNumDrivers; i++ )
+				{
+					_trackedCarList.Add( new TrackedCar() );
+				}
+
+				_dispatchTimer.Tick += new EventHandler( DispatchTimer_Tick );
+				_dispatchTimer.Interval = TimeSpan.FromMilliseconds( 20 );
+
+				_dispatchTimer.Start();
 			}
-
-			_dispatchTimer.Tick += new EventHandler( DispatchTimer_Tick );
-			_dispatchTimer.Interval = TimeSpan.FromMilliseconds( 20 );
-
-			_dispatchTimer.Start();
+			catch ( Exception exception )
+			{
+				Log( $"Exception caught!\r\n\r\n{exception.Message}\r\n\r\n{exception.StackTrace}\r\n\r\n" );
+			}
 		}
 
 		#region Log functions
@@ -439,6 +449,10 @@ namespace iRacingTV
 			ScenicCameraTextBox.Text = _settings._scenicCameraGroupName.ToString();
 
 			PreferredCarNumber.Text = _settings._preferredCarNumber;
+
+			SwitchToTalkingDriverCheckBox.IsChecked = _settings._switchToTalkingDriver;
+			ShowDistancesCheckBox.IsChecked = _settings._showDistances;
+			BetweenCarsCheckBox.IsChecked = _settings._betweenCars;
 
 			Log( " OK\r\n" );
 		}
@@ -617,17 +631,24 @@ namespace iRacingTV
 
 		private void DispatchTimer_Tick( object? sender, EventArgs e )
 		{
-			UpdateIRacingSDK();
-
-			if ( _sessionTimeDelta > 0 )
+			try
 			{
-				UpdateTrackedCarList();
-				UpdateDirector();
-			}
+				UpdateIRacingSDK();
 
-			UpdateIncidentScan();
-			UpdateMessageDispatcher();
-			UpdateOverlay();
+				if ( _sessionTimeDelta > 0 )
+				{
+					UpdateTrackedCarList();
+					UpdateDirector();
+				}
+
+				UpdateIncidentScan();
+				UpdateMessageDispatcher();
+				UpdateOverlay();
+			}
+			catch ( Exception exception )
+			{
+				Log( $"Exception caught!\r\n\r\n{exception.Message}\r\n\r\n{exception.StackTrace}\r\n\r\n" );
+			}
 		}
 
 		private Vector4 ColorHexToVector( string hex )
@@ -775,7 +796,7 @@ namespace iRacingTV
 
 					if ( match.Success )
 					{
-						var trackLengthInKilometers = Convert.ToSingle( match.Groups[ 1 ].Value );
+						var trackLengthInKilometers = float.Parse( match.Groups[ 1 ].Value, CultureInfo.InvariantCulture.NumberFormat );
 
 						_trackLengthInMeters = trackLengthInKilometers * 1000;
 					}
@@ -824,7 +845,7 @@ namespace iRacingTV
 
 									if ( match.Success )
 									{
-										_sessionFlagsRecordList.Add( new SessionFlagsRecord( int.Parse( match.Groups[ 1 ].Value ), float.Parse( match.Groups[ 2 ].Value ), uint.Parse( match.Groups[ 3 ].Value, System.Globalization.NumberStyles.HexNumber ) ) );
+										_sessionFlagsRecordList.Add( new SessionFlagsRecord( int.Parse( match.Groups[ 1 ].Value ), float.Parse( match.Groups[ 2 ].Value, CultureInfo.InvariantCulture.NumberFormat ), uint.Parse( match.Groups[ 3 ].Value, NumberStyles.HexNumber ) ) );
 									}
 								}
 
@@ -1176,7 +1197,7 @@ namespace iRacingTV
 					trackedCar._driver = driver;
 					trackedCar._car = car;
 
-					if ( _qualifyingSession != null )
+					if ( ( _qualifyingSession != null ) && ( _qualifyingSession.ResultsPositions != null ) )
 					{
 						foreach ( var position in _qualifyingSession.ResultsPositions )
 						{
@@ -1274,21 +1295,21 @@ namespace iRacingTV
 										distanceToOtherCar += 1.0f;
 									}
 
-									var heat = Math.Max( 0.0f, 1.0f - Math.Abs( distanceToOtherCar ) * 10.0f );
+									var distanceToOtherCarInMeters = distanceToOtherCar * _trackLengthInMeters;
+
+									var heat = Math.Max( 0.0f, 20.0f - Math.Abs( distanceToOtherCarInMeters ) ) / 20.0f;
 
 									trackedCar._heat += heat * heat;
 
 									if ( i != j )
 									{
-										var distanceToCarInMeters = distanceToOtherCar * _trackLengthInMeters;
-
-										if ( distanceToCarInMeters >= 0.0f )
+										if ( distanceToOtherCarInMeters >= 0.0f )
 										{
-											trackedCar._distanceToCarInFrontInMeters = Math.Min( trackedCar._distanceToCarInFrontInMeters, distanceToCarInMeters );
+											trackedCar._distanceToCarInFrontInMeters = Math.Min( trackedCar._distanceToCarInFrontInMeters, distanceToOtherCarInMeters );
 										}
 										else
 										{
-											trackedCar._distanceToCarBehindInMeters = Math.Min( trackedCar._distanceToCarBehindInMeters, -distanceToCarInMeters );
+											trackedCar._distanceToCarBehindInMeters = Math.Min( trackedCar._distanceToCarBehindInMeters, -distanceToOtherCarInMeters );
 										}
 									}
 								}
@@ -1367,7 +1388,7 @@ namespace iRacingTV
 
 				_driverWasTalking = false;
 			}
-			else if ( _data.Data.RadioTransmitCarIdx != -1 )
+			else if ( _settings._switchToTalkingDriver && ( _data.Data.RadioTransmitCarIdx != -1 ) )
 			{
 				cameraGroup = CameraGroupEnum.Close;
 
@@ -1376,7 +1397,7 @@ namespace iRacingTV
 
 				_cameraSwitchWaitTicksRemaining = _sendMessageWaitTicksRemaining;
 
-				_cameraSwitchReason = "Driver is talking.";
+				_cameraSwitchReason = $"{_session.DriverInfo.Drivers[ _targetCameraDriverIdx ].UserName} is talking.";
 
 				_driverWasTalking = true;
 			}
@@ -1819,6 +1840,8 @@ namespace iRacingTV
 
 					#region Leaderboard
 
+					var carInFrontLapPosition = 0.0f;
+
 					for ( var i = 0; i < ( _session.DriverInfo.Drivers.Count ) && ( i < _settings._placeCount ); i++ )
 					{
 						var trackedCar = _trackedCarList[ i ];
@@ -1894,16 +1917,38 @@ namespace iRacingTV
 								{
 									var wholeLapsDown = Math.Floor( trackedCar._lapPositionRelativeToLeader );
 
-									textString = $"-{wholeLapsDown:0} {_settings._lapPositionString}";
+									textString = $"-{wholeLapsDown:0} {_settings._distanceLapPositionString}";
 								}
 								else if ( !_isUnderCaution )
 								{
-									textString = $"-{trackedCar._lapPositionRelativeToLeader:0.000} {_settings._lapPositionString}";
+									var lapPosition = _settings._betweenCars ? ( carInFrontLapPosition - trackedCar._lapPosition ) : trackedCar._lapPositionRelativeToLeader;
+
+									if ( _settings._showDistances )
+									{
+										var distance = lapPosition * _trackLengthInMeters;
+
+										if ( _data.Data.DisplayUnits == 0 )
+										{
+											distance *= 3.28084f;
+
+											textString = $"-{distance:0} {_settings._distanceFeetString}";
+										}
+										else
+										{
+											textString = $"-{distance:0} {_settings._distanceMetersString}";
+										}
+									}
+									else
+									{
+										textString = $"-{lapPosition:0.000} {_settings._distanceLapPositionString}";
+									}
 								}
 
 								textColor = _settings._lapsDownColor;
 							}
 						}
+
+						carInFrontLapPosition = trackedCar._lapPosition;
 
 						if ( textString != string.Empty )
 						{
@@ -2142,31 +2187,6 @@ namespace iRacingTV
 
 		#region UI
 
-		private void OverlayX_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
-		{
-			_settings._overlayX = int.Parse( OverlayX.Text );
-		}
-
-		private void OverlayY_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
-		{
-			_settings._overlayY = int.Parse( OverlayY.Text );
-		}
-
-		private void OverlayWidth_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
-		{
-			_settings._overlayWidth = int.Parse( OverlayWidth.Text );
-		}
-
-		private void OverlayHeight_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
-		{
-			_settings._overlayHeight = int.Parse( OverlayHeight.Text );
-		}
-
-		private void PreferredCarNumber_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
-		{
-			_settings._preferredCarNumber = PreferredCarNumber.Text;
-		}
-
 		private void ShowOverlayButton_Click( object sender, RoutedEventArgs e )
 		{
 			_overlayIsVisible = !_overlayIsVisible;
@@ -2210,15 +2230,24 @@ namespace iRacingTV
 			}
 		}
 
-		private void ApplyChangesButton_Click( object sender, RoutedEventArgs e )
+		private void OverlayX_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
 		{
-			MainWindowTabControl.SelectedIndex = 0;
+			_settings._overlayX = int.Parse( OverlayX.Text );
+		}
 
-			SaveSettings();
+		private void OverlayY_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
+		{
+			_settings._overlayY = int.Parse( OverlayY.Text );
+		}
 
-			ReinitializeOverlay();
+		private void OverlayWidth_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
+		{
+			_settings._overlayWidth = int.Parse( OverlayWidth.Text );
+		}
 
-			UpdateCameraGroupNumbers();
+		private void OverlayHeight_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
+		{
+			_settings._overlayHeight = int.Parse( OverlayHeight.Text );
 		}
 
 		private void InsideCameraTextBox_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
@@ -2249,6 +2278,37 @@ namespace iRacingTV
 		private void ScenicCameraTextBox_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
 		{
 			_settings._scenicCameraGroupName = ScenicCameraTextBox.Text;
+		}
+
+		private void PreferredCarNumber_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
+		{
+			_settings._preferredCarNumber = PreferredCarNumber.Text;
+		}
+
+		private void SwitchToTalkingDriverCheckBox_Click( object sender, RoutedEventArgs e )
+		{
+			_settings._switchToTalkingDriver = SwitchToTalkingDriverCheckBox.IsChecked ?? false;
+		}
+
+		private void ShowDistancesCheckBox_Click( object sender, RoutedEventArgs e )
+		{
+			_settings._showDistances = ShowDistancesCheckBox.IsChecked ?? false;
+		}
+
+		private void BetweenCarsCheckBox_Click( object sender, RoutedEventArgs e )
+		{
+			_settings._betweenCars = BetweenCarsCheckBox.IsChecked ?? false;
+		}
+
+		private void ApplyChangesButton_Click( object sender, RoutedEventArgs e )
+		{
+			MainWindowTabControl.SelectedIndex = 0;
+
+			SaveSettings();
+
+			ReinitializeOverlay();
+
+			UpdateCameraGroupNumbers();
 		}
 
 		#endregion

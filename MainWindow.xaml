@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:iRacingTV"
         mc:Ignorable="d"
-        Title="iRacing-TV 1.0" Width="800" ResizeMode="CanMinimize" SizeToContent="Height" WindowStartupLocation="CenterScreen">
+        Title="iRacing-TV 1.3" Width="800" ResizeMode="CanMinimize" SizeToContent="Height" WindowStartupLocation="CenterScreen">
     <Grid>
         <TabControl x:Name="MainWindowTabControl">
             <TabItem Header="Status">
@@ -84,8 +84,11 @@
                         </StackPanel>
                     </Grid>
                     <Label Content="Preferred Car Number" />
-                    <TextBox x:Name="PreferredCarNumber" TextChanged="PreferredCarNumber_TextChanged" />
-                    <Button x:Name="ApplyChangesButton" Content="Apply Changes" Grid.Column="0" Margin="0,12,0,0" Click="ApplyChangesButton_Click" />
+                    <TextBox x:Name="PreferredCarNumber" TextChanged="PreferredCarNumber_TextChanged" Margin="0,0,0,12" />
+                    <CheckBox x:Name="SwitchToTalkingDriverCheckBox" Content="Switch to Talking Drivers" Click="SwitchToTalkingDriverCheckBox_Click" />
+                    <CheckBox x:Name="ShowDistancesCheckBox" Content="Show Distance Instead of Laps" Click="ShowDistancesCheckBox_Click" />
+                    <CheckBox x:Name="BetweenCarsCheckBox" Content="Between Cars Instead of Relative to Leader" Click="BetweenCarsCheckBox_Click" />
+                    <Button x:Name="ApplyChangesButton" Content="Save and Apply Changes" Grid.Column="0" Margin="0,12,0,0" Click="ApplyChangesButton_Click" />
                 </StackPanel>
             </TabItem>
         </TabControl>

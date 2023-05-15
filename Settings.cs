@@ -20,6 +20,10 @@ namespace iRacingTV
 
 		public string _preferredCarNumber { get; set; } = string.Empty;
 
+		public bool _switchToTalkingDriver { get; set; } = true;
+		public bool _showDistances { get; set; } = true;
+		public bool _betweenCars { get; set; } = false;
+
 		public string _fontAFileName { get; set; } = "RevolutionGothic_ExtraBold.otf";
 		public int _fontASize { get; set; } = 31;
 
@@ -34,7 +38,9 @@ namespace iRacingTV
 
 		public string _lapString { get; set; } = "LAP";
 		public string _lapsRemainingString { get; set; } = "TO GO";
-		public string _lapPositionString { get; set; } = "L";
+		public string _distanceLapPositionString { get; set; } = "L";
+		public string _distanceFeetString { get; set; } = "FT";
+		public string _distanceMetersString { get; set; } = "M";
 		public string _pitString { get; set; } = "PIT";
 		public string _outString { get; set; } = "OUT";
 		public string _mphString { get; set; } = "MPH";
