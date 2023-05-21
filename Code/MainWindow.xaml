@@ -5,9 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:iRacingTV"
         mc:Ignorable="d"
-        Title="iRacing-TV 1.3" Width="800" ResizeMode="CanMinimize" SizeToContent="Height" WindowStartupLocation="CenterScreen">
+        Title="iRacing-TV 1.3" Width="800" ResizeMode="CanMinimize" SizeToContent="Height" WindowStartupLocation="CenterScreen" Closed="Window_Closed">
     <Grid>
-        <TabControl x:Name="MainWindowTabControl">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="77*"/>
+            <ColumnDefinition Width="323*"/>
+        </Grid.ColumnDefinitions>
+        <TabControl x:Name="MainWindowTabControl" Grid.ColumnSpan="2">
             <TabItem Header="Status">
                 <StackPanel Margin="6,6,6,6">
                     <TextBox x:Name="StatusTextBox" TextWrapping="Wrap" IsReadOnly="True" Padding="3" Margin="0,6,0,12" ScrollViewer.VerticalScrollBarVisibility="Visible" Height="150"/>
@@ -16,10 +20,12 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <Button x:Name="ShowOverlayButton" Content="Show Overlay" Grid.Column="0" Margin="0,0,3,0" IsEnabled="False" Click="ShowOverlayButton_Click" />
+                        <Button x:Name="ResetDataButton" Content="Reset Data" Grid.Column="0" Margin="0,0,3,0" IsEnabled="False" Click="ResetDataButton_Click" />
                         <Button x:Name="ScanForIncidentsButton" Content="Scan For Incidents" Grid.Column="1" Margin="3,0,3,0" IsEnabled="False" Click="ScanForIncidentsButton_Click" />
-                        <Button x:Name="EnableAIDirectorButton" Content="Enable AI Director" Grid.Column="2" Margin="3,0,0,0" IsEnabled="False" Click="EnableAIDirectorButton_Click" />
+                        <Button x:Name="ShowOverlayButton" Content="Show Overlay" Grid.Column="2" Margin="3,0,3,0" IsEnabled="False" Click="ShowOverlayButton_Click" />
+                        <Button x:Name="EnableAIDirectorButton" Content="Enable AI Director" Grid.Column="4" Margin="3,0,0,0" IsEnabled="False" Click="EnableAIDirectorButton_Click" />
                     </Grid>
                 </StackPanel>
             </TabItem>
@@ -85,13 +91,19 @@
                     </Grid>
                     <Label Content="Preferred Car Number" />
                     <TextBox x:Name="PreferredCarNumber" TextChanged="PreferredCarNumber_TextChanged" Margin="0,0,0,12" />
-                    <CheckBox x:Name="SwitchToTalkingDriverCheckBox" Content="Switch to Talking Drivers" Click="SwitchToTalkingDriverCheckBox_Click" />
-                    <CheckBox x:Name="ShowDistancesCheckBox" Content="Show Distance Instead of Laps" Click="ShowDistancesCheckBox_Click" />
-                    <CheckBox x:Name="BetweenCarsCheckBox" Content="Between Cars Instead of Relative to Leader" Click="BetweenCarsCheckBox_Click" />
+                    <CheckBox x:Name="SwitchCameraToTalkingDriverCheckBox" Content="Switch Camera to Talking Drivers" Margin="0,0,0,12" Click="SwitchCameraToTalkingDriverCheckBox_Click" />
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                        <RadioButton x:Name="ShowLapsRadioButton" GroupName="LeaderboardMode" Content="Show Laps" Margin="0,0,12,0" Click="ShowLapsRadioButton_Click" />
+                        <RadioButton x:Name="ShowDistanceRadioButton" GroupName="LeaderboardMode" Content="Show Distance" Margin="0,0,12,0" Click="ShowDistanceRadioButton_Click" />
+                        <RadioButton x:Name="ShowTimeRadioButton" GroupName="LeaderboardMode" Content="Show Time" Margin="0,0,12,0" Click="ShowTimeRadioButton_Click" />
+                        <CheckBox x:Name="BetweenCarsCheckBox" Content="Between Cars Instead of Relative to Leader" Click="BetweenCarsCheckBox_Click" />
+                    </StackPanel>
+                    <Label Content="Number of Checkpoints (for Show Time Only)" />
+                    <Slider x:Name="NumberOfCheckpointsSlider" Maximum="100" Minimum="2" LargeChange="10" SmallChange="1" TickPlacement="TopLeft" ValueChanged="NumberOfCheckpointsSlider_ValueChanged" Value="100" />
                     <Button x:Name="ApplyChangesButton" Content="Save and Apply Changes" Grid.Column="0" Margin="0,12,0,0" Click="ApplyChangesButton_Click" />
                 </StackPanel>
             </TabItem>
         </TabControl>
-        <Image x:Name="StatusImage" Source="/status-disconnected.png" Width="16" Height="16" Margin="758,2,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Stretch="None"/>
+        <Image x:Name="StatusImage" Source="/Assets/status-disconnected.png" Width="16" Height="16" Margin="604,2,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Stretch="None" Grid.Column="1"/>
     </Grid>
 </Window>

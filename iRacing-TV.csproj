@@ -7,7 +7,8 @@
     <UseWPF>true</UseWPF>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <RootNamespace>$(MSBuildProjectName.Replace("-", ""))</RootNamespace>
-    <ApplicationIcon>iRacing-TV-Icon.ico</ApplicationIcon>
+    <ApplicationIcon>Assets\iRacing-TV-Icon.ico</ApplicationIcon>
+    <StartupObject></StartupObject>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="iRacing-TV-Icon.ico" />
+    <Content Include="Assets\iRacing-TV-Icon.ico" />
   </ItemGroup>
 
   <ItemGroup>
@@ -30,10 +31,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="status-connected.png">
+    <Resource Include="Assets\status-connected.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="status-disconnected.png">
+    <Resource Include="Assets\status-disconnected.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>
@@ -44,46 +45,49 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="current-target.png">
+    <None Update="Assets\current-target.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="flag-caution-new.png">
+    <None Update="Assets\flag-caution-new.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="flag-checkered-new.png">
+    <None Update="Assets\flag-caution.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="Assets\flag-checkered-new.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="flag-green-new.png">
+    <None Update="Assets\flag-green-new.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="leaderboard.png">
+    <None Update="Assets\leaderboard.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="light-black.png">
+    <None Update="Assets\light-black.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="light-green.png">
+    <None Update="Assets\light-green.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="light-white.png">
+    <None Update="Assets\light-white.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="light-yellow.png">
+    <None Update="Assets\light-yellow.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="nascar-logo.png">
+    <None Update="Assets\nascar-logo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="race-status.png">
+    <None Update="Assets\race-status.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="RevolutionGothic_ExtraBold.otf">
+    <None Update="Assets\RevolutionGothic_ExtraBold.otf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="RevolutionGothic_ExtraBold_It.otf">
+    <None Update="Assets\RevolutionGothic_ExtraBold_It.otf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="voice-of.png">
+    <None Update="Assets\voice-of.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
