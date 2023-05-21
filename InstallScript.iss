@@ -5,7 +5,7 @@
 
 [Setup]
 AppName=iRacing-TV
-AppVersion=1.3
+AppVersion=1.4
 AppCopyright=Created by Marvin Herbold
 AppPublisher=Marvin Herbold
 AppPublisherURL=http://herboldracing.com/blog/iracing/iracing-tv/
@@ -30,21 +30,21 @@ Source: "C:\Users\marvi\OneDrive\Desktop\iRacing-TV\SDL2.dll"; DestDir: "{app}"
 Source: "C:\Users\marvi\OneDrive\Desktop\iRacing-TV\vcruntime140_cor3.dll"; DestDir: "{app}"
 Source: "C:\Users\marvi\OneDrive\Desktop\iRacing-TV\wpfgfx_cor3.dll"; DestDir: "{app}"
 
-Source: "C:\Users\marvi\OneDrive\Desktop\iRacing-TV\RevolutionGothic_ExtraBold.otf"; DestDir: "{app}"
-Source: "C:\Users\marvi\OneDrive\Desktop\iRacing-TV\RevolutionGothic_ExtraBold_It.otf"; DestDir: "{app}"
+Source: "C:\Users\marvi\OneDrive\Desktop\iRacing-TV\Assets\RevolutionGothic_ExtraBold.otf"; DestDir: "{app}\Assets"
+Source: "C:\Users\marvi\OneDrive\Desktop\iRacing-TV\Assets\RevolutionGothic_ExtraBold_It.otf"; DestDir: "{app}\Assets"
 
-Source: "C:\Users\marvi\OneDrive\Desktop\iRacing-TV\current-target.png"; DestDir: "{app}"
-Source: "C:\Users\marvi\OneDrive\Desktop\iRacing-TV\flag-caution-new.png"; DestDir: "{app}"
-Source: "C:\Users\marvi\OneDrive\Desktop\iRacing-TV\flag-checkered-new.png"; DestDir: "{app}"
-Source: "C:\Users\marvi\OneDrive\Desktop\iRacing-TV\flag-green-new.png"; DestDir: "{app}"
-Source: "C:\Users\marvi\OneDrive\Desktop\iRacing-TV\leaderboard.png"; DestDir: "{app}"
-Source: "C:\Users\marvi\OneDrive\Desktop\iRacing-TV\light-black.png"; DestDir: "{app}"
-Source: "C:\Users\marvi\OneDrive\Desktop\iRacing-TV\light-green.png"; DestDir: "{app}"
-Source: "C:\Users\marvi\OneDrive\Desktop\iRacing-TV\light-white.png"; DestDir: "{app}"
-Source: "C:\Users\marvi\OneDrive\Desktop\iRacing-TV\light-yellow.png"; DestDir: "{app}"
-Source: "C:\Users\marvi\OneDrive\Desktop\iRacing-TV\nascar-logo.png"; DestDir: "{app}"
-Source: "C:\Users\marvi\OneDrive\Desktop\iRacing-TV\race-status.png"; DestDir: "{app}"
-Source: "C:\Users\marvi\OneDrive\Desktop\iRacing-TV\voice-of.png"; DestDir: "{app}"
+Source: "C:\Users\marvi\OneDrive\Desktop\iRacing-TV\Assets\current-target.png"; DestDir: "{app}\Assets"
+Source: "C:\Users\marvi\OneDrive\Desktop\iRacing-TV\Assets\flag-caution-new.png"; DestDir: "{app}\Assets"
+Source: "C:\Users\marvi\OneDrive\Desktop\iRacing-TV\Assets\flag-checkered-new.png"; DestDir: "{app}\Assets"
+Source: "C:\Users\marvi\OneDrive\Desktop\iRacing-TV\Assets\flag-green-new.png"; DestDir: "{app}\Assets"
+Source: "C:\Users\marvi\OneDrive\Desktop\iRacing-TV\Assets\leaderboard.png"; DestDir: "{app}\Assets"
+Source: "C:\Users\marvi\OneDrive\Desktop\iRacing-TV\Assets\light-black.png"; DestDir: "{app}\Assets"
+Source: "C:\Users\marvi\OneDrive\Desktop\iRacing-TV\Assets\light-green.png"; DestDir: "{app}\Assets"
+Source: "C:\Users\marvi\OneDrive\Desktop\iRacing-TV\Assets\light-white.png"; DestDir: "{app}\Assets"
+Source: "C:\Users\marvi\OneDrive\Desktop\iRacing-TV\Assets\light-yellow.png"; DestDir: "{app}\Assets"
+Source: "C:\Users\marvi\OneDrive\Desktop\iRacing-TV\Assets\nascar-logo.png"; DestDir: "{app}\Assets"
+Source: "C:\Users\marvi\OneDrive\Desktop\iRacing-TV\Assets\race-status.png"; DestDir: "{app}\Assets"
+Source: "C:\Users\marvi\OneDrive\Desktop\iRacing-TV\Assets\voice-of.png"; DestDir: "{app}\Assets"
 
 [Dirs]
 Name: "{userappdata}\iRacing-TV"
