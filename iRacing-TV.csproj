@@ -9,7 +9,7 @@
     <RootNamespace>$(MSBuildProjectName.Replace("-", ""))</RootNamespace>
     <ApplicationIcon>Assets\iRacing-TV-Icon.ico</ApplicationIcon>
     <StartupObject></StartupObject>
-    <VersionPrefix>1.4</VersionPrefix>
+    <VersionPrefix>1.6</VersionPrefix>
   </PropertyGroup>
 
   <ItemGroup>

@@ -18,7 +18,8 @@ namespace iRacingTV
 		public static bool wasConnected = false;
 
 		public static int sessionInfoUpdate = -1;
-		public static bool forceSessionUpdate = false;
+		public static int sessionNum = -1;
+		public static bool forceResetRace = false;
 
 		public static IRacingSessionModel? session = null;
 		public static DataModel? data = null;
@@ -72,24 +73,32 @@ namespace iRacingTV
 				UpdateData();
 
 				SessionFlagsPlayback.Update();
+				ChatLogPlayback.Update();
 
 				SendMessages();
 			}
 			else
 			{
 				sessionInfoUpdate = -1;
+				sessionNum = -1;
+				forceResetRace = false;
 
-				messageBuffer.Clear();
+				session = null;
+				data = null;
 
 				sendMessageWaitTicksRemaining = 0;
+				cameraSwitchWaitTicksRemaining = 0;
 
 				currentCameraGroupNumber = 0;
 				currentCameraNumber = 0;
 				currentCameraCarIdx = 0;
-				cameraSwitchWaitTicksRemaining = 0;
 
-				targetCameraGroupNumber = 0;
+				cameraSwitchingEnabled = false;
 				targetCameraCarIdx = 0;
+				targetCameraGroupNumber = 0;
+				targetCameraReason = string.Empty;
+
+				messageBuffer.Clear();
 			}
 		}
 
@@ -97,14 +106,19 @@ namespace iRacingTV
 		{
 			data = iRacingSdk.GetSerializedData().Data;
 
-			if ( ( sessionInfoUpdate != iRacingSdk.Header.SessionInfoUpdate ) || forceSessionUpdate )
+			if ( sessionNum != data.SessionNum )
+			{
+				forceResetRace = true;
+			}
+
+			if ( ( sessionInfoUpdate != iRacingSdk.Header.SessionInfoUpdate ) || forceResetRace )
 			{
 				sessionInfoUpdate = iRacingSdk.Header.SessionInfoUpdate;
-				forceSessionUpdate = false;
+				sessionNum = data.SessionNum;
 
 				session = iRacingSdk.GetSerializedSessionInfo();
 
-				normalizedSession.Initialize();
+				normalizedSession.Initialize( forceResetRace );
 
 				UpdateCameraGroupNumbers();
 
@@ -113,6 +127,8 @@ namespace iRacingTV
 				ChatLogPlayback.Initialize();
 
 				MainWindow.instance?.Update();
+
+				forceResetRace = false;
 			}
 
 			normalizedSession.Update();

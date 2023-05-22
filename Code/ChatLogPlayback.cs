@@ -8,6 +8,7 @@ namespace iRacingTV
 {
 	internal static partial class ChatLogPlayback
 	{
+		public static string chatLogFileName = string.Empty;
 		public static List<ChatLogData>? chatLogList = null;
 
 		public static void Initialize()
@@ -17,62 +18,67 @@ namespace iRacingTV
 				return;
 			}
 
-			var chatLogFileName = $"{Program.sttDocumentsFolderPath}\\ChatLogs\\{IRSDK.normalizedSession.sessionID}-{IRSDK.normalizedSession.subSessionID}.csv";
+			var newChatLogFileName = $"{Program.sttDocumentsFolderPath}\\ChatLogs\\{IRSDK.normalizedSession.sessionID}-{IRSDK.normalizedSession.subSessionID}.csv";
 
-			chatLogList = new List<ChatLogData>();
-
-			if ( File.Exists( chatLogFileName ) )
+			if ( newChatLogFileName != chatLogFileName )
 			{
-				LogFile.Write( "Loading chat log file..." );
+				chatLogFileName = newChatLogFileName;
 
-				var streamReader = File.OpenText( chatLogFileName );
+				chatLogList = new List<ChatLogData>();
 
-				var startSessionTime = 0.0;
-
-				while ( true )
+				if ( File.Exists( chatLogFileName ) )
 				{
-					var line = streamReader.ReadLine();
+					LogFile.Write( "Loading chat log file..." );
 
-					if ( line == null )
+					var streamReader = File.OpenText( chatLogFileName );
+
+					var startSessionTime = 0.0;
+
+					while ( true )
 					{
-						break;
-					}
+						var line = streamReader.ReadLine();
 
-					var match = ChatLogCSVRegex().Match( line );
-
-					if ( match.Success )
-					{
-						var sessionTime = float.Parse( match.Groups[ 2 ].Value, CultureInfo.InvariantCulture.NumberFormat );
-						var eventId = int.Parse( match.Groups[ 3 ].Value );
-
-						if ( eventId == 5 )
+						if ( line == null )
 						{
-							if ( startSessionTime == 0.0 )
+							break;
+						}
+
+						var match = ChatLogCSVRegex().Match( line );
+
+						if ( match.Success )
+						{
+							var sessionTime = float.Parse( match.Groups[ 2 ].Value, CultureInfo.InvariantCulture.NumberFormat );
+							var eventId = int.Parse( match.Groups[ 3 ].Value );
+
+							if ( eventId == 5 )
 							{
-								startSessionTime = sessionTime;
+								if ( startSessionTime == 0.0 )
+								{
+									startSessionTime = sessionTime;
+								}
+							}
+							else if ( eventId == 6 )
+							{
+								if ( startSessionTime > 0 )
+								{
+									chatLogList.Add( new ChatLogData( startSessionTime - 1.6, sessionTime + 2, match.Groups[ 8 ].Value ) );
+
+									startSessionTime = 0;
+								}
 							}
 						}
-						else if ( eventId == 6 )
-						{
-							if ( startSessionTime > 0 )
-							{
-								chatLogList.Add( new ChatLogData( startSessionTime - 1.6, sessionTime + 2, match.Groups[ 8 ].Value ) );
-
-								startSessionTime = 0;
-							}
-						}
 					}
+
+					LogFile.Write( " OK\r\n" );
 				}
 
-				LogFile.Write( " OK\r\n" );
+				chatLogList.Reverse();
 			}
-
-			chatLogList.Reverse();
 		}
 
-		public static ChatLogData? GetCurrentChatLogData()
+		public static void Update()
 		{
-			ChatLogData? currentChatLogData = null;
+			IRSDK.normalizedSession.chatLogData = null;
 
 			if ( chatLogList != null )
 			{
@@ -89,13 +95,12 @@ namespace iRacingTV
 
 					if ( ( chatLogData.startSessionTime <= IRSDK.normalizedSession.sessionTime ) && ( chatLogData.endSessionTime > IRSDK.normalizedSession.sessionTime ) )
 					{
-						currentChatLogData = chatLogData;
+						IRSDK.normalizedSession.chatLogData = chatLogData;
 						break;
 					}
 				}
 			}
 
-			return currentChatLogData;
 		}
 
 		[GeneratedRegex( "([^,]*),([^,]*),([^,]*),([^,]*)(,([^,]*))?(,\"([^\"]*)\")?" )]

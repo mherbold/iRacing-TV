@@ -57,6 +57,12 @@ namespace iRacingTV
 				ShowTimeRadioButton.IsChecked = Settings.data.ShowTime;
 				BetweenCarsCheckBox.IsChecked = Settings.data.BetweenCars;
 				NumberOfCheckpointsSlider.Value = Settings.data.NumberOfCheckpoints;
+
+				CarNumberImageColorOverrideATextBox.Text = Settings.data.CarNumberColorOverrideA;
+				CarNumberImageColorOverrideBTextBox.Text = Settings.data.CarNumberColorOverrideB;
+				CarNumberImageColorOverrideCTextBox.Text = Settings.data.CarNumberColorOverrideC;
+				CarNumberImagePatternOverrideTextBox.Text = Settings.data.CarNumberPatternOverride;
+				CarNumberImageSlantOverrideTextBox.Text = Settings.data.CarNumberSlantOverride;
 			} );
 		}
 
@@ -103,7 +109,7 @@ namespace iRacingTV
 
 		private void ResetDataButton_Click( object sender, RoutedEventArgs e )
 		{
-			IRSDK.forceSessionUpdate = true;
+			IRSDK.forceResetRace = true;
 		}
 
 		private void ScanForIncidentsButton_Click( object sender, RoutedEventArgs e )
@@ -216,6 +222,31 @@ namespace iRacingTV
 		private void NumberOfCheckpointsSlider_ValueChanged( object sender, RoutedPropertyChangedEventArgs<double> e )
 		{
 			Settings.data.NumberOfCheckpoints = (int) NumberOfCheckpointsSlider.Value;
+		}
+
+		private void CarNumberImageColorOverrideA_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
+		{
+			Settings.data.CarNumberColorOverrideA = CarNumberImageColorOverrideATextBox.Text;
+		}
+
+		private void CarNumberImageColorOverrideB_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
+		{
+			Settings.data.CarNumberColorOverrideB = CarNumberImageColorOverrideBTextBox.Text;
+		}
+
+		private void CarNumberImageColorOverrideC_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
+		{
+			Settings.data.CarNumberColorOverrideC = CarNumberImageColorOverrideCTextBox.Text;
+		}
+
+		private void CarNumberImagePatternOverride_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
+		{
+			Settings.data.CarNumberPatternOverride = CarNumberImagePatternOverrideTextBox.Text;
+		}
+
+		private void CarNumberImageSlantOverride_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
+		{
+			Settings.data.CarNumberSlantOverride = CarNumberImageSlantOverrideTextBox.Text;
 		}
 
 		private void ApplyChangesButton_Click( object sender, RoutedEventArgs e )

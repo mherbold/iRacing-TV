@@ -42,7 +42,11 @@ namespace iRacingTV
 		public string SubtitlesFontFileName = "Assets\\RevolutionGothic_ExtraBold.otf";
 		public int SubtitlesFontSize = 65;
 
+		public string PracticeString = "PRACTICE";
+		public string QualifyingString = "QUALIFYING";
+		public string RaceString = "";
 		public string LapString = "LAP";
+		public string TimeString = "TIME";
 		public string LapsRemainingString = "TO GO";
 		public string DistanceLapPositionString = "L";
 		public string DistanceFeetString = "FT";
@@ -77,17 +81,26 @@ namespace iRacingTV
 		public string FlagImageGreenFileName = "Assets\\flag-green-new.png";
 		public Vector2 FlagImagePosition = new( 44, 0 );
 
-		public Vector4 LapTextColor = new( 188 / 255.0f, 189 / 255.0f, 185 / 255.0f, 1.0f );
-		public Vector2 LapTextPosition = new( 60, 155 );
-
-		public Vector4 CurrentLapTextColor = new( 188 / 255.0f, 189 / 255.0f, 185 / 255.0f, 1.0f );
-		public Vector2 CurrentLapTextPosition = new( 267, 155 );
-
-		public Vector4 TotalLapsTextColor = new( 188 / 255.0f, 189 / 255.0f, 185 / 255.0f, 1.0f );
-		public Vector2 TotalLapsTextPosition = new( 295, 155 );
+		public Vector4 ModeTextColor = new( 245 / 255.0f, 245 / 255.0f, 243 / 255.0f, 1.0f );
+		public Vector2 ModeTextPosition = new( 60, 107 );
 
 		public Vector4 LapsRemainingTextColor = new( 245 / 255.0f, 245 / 255.0f, 243 / 255.0f, 1.0f );
 		public Vector2 LapsRemainingTextPosition = new( 315, 107 );
+
+		public Vector4 TimeRemainingTextColor = new( 245 / 255.0f, 245 / 255.0f, 243 / 255.0f, 1.0f );
+		public Vector2 TimeRemainingTextPosition = new( 315, 107 );
+
+		public Vector4 LapTextColor = new( 188 / 255.0f, 189 / 255.0f, 185 / 255.0f, 1.0f );
+		public Vector2 LapTextPosition = new( 60, 155 );
+
+		public Vector4 TimeTextColor = new( 188 / 255.0f, 189 / 255.0f, 185 / 255.0f, 1.0f );
+		public Vector2 TimeTextPosition = new( 60, 155 );
+
+		public Vector4 CurrentLapTextColor = new( 188 / 255.0f, 189 / 255.0f, 185 / 255.0f, 1.0f );
+		public Vector2 CurrentLapTextPosition = new( 344, 155 );
+
+		public Vector4 CurrentTimeTextColor = new( 188 / 255.0f, 189 / 255.0f, 185 / 255.0f, 1.0f );
+		public Vector2 CurrentTimeTextPosition = new( 344, 155 );
 
 		public int LeaderboardPlaceSpacing = 41;
 		public int LeaderboardPlaceCount = 20;
@@ -95,6 +108,11 @@ namespace iRacingTV
 		public Vector2 PlaceTextPosition = new( 72, 223 );
 		public Vector4 PlaceTextColor = new( 176 / 255.0f, 181 / 255.0f, 177 / 255.0f, 1.0f );
 
+		public string CarNumberColorOverrideA = "";
+		public string CarNumberColorOverrideB = "";
+		public string CarNumberColorOverrideC = "";
+		public string CarNumberPatternOverride = "";
+		public string CarNumberSlantOverride = "";
 		public Vector2 CarNumberImagePosition = new( 112, 218 );
 		public int CarNumberImageHeight = 34;
 

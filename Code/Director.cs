@@ -120,6 +120,15 @@ namespace iRacingTV
 					}
 				}
 
+				if ( highestHeat == 0 )
+				{
+					var normalizedCar = IRSDK.normalizedSession.normalizedCars[ 0 ];
+
+					IRSDK.targetCameraCarIdx = normalizedCar.carIdx;
+
+					IRSDK.targetCameraReason = $"No hot cars - focusing on leader car #{normalizedCar.carNumber}.";
+				}
+
 				cameraGroup = IRSDK.CameraGroupEnum.Medium;
 
 				if ( ( IRSDK.normalizedSession.sessionFlags & ( (uint) SessionFlags.CautionWaving | (uint) SessionFlags.YellowWaving ) ) != 0 )

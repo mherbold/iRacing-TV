@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Xml.Serialization;
 
 namespace iRacingTV
@@ -15,18 +16,27 @@ namespace iRacingTV
 
 			if ( File.Exists( Program.appDataFolderPath + SettingsFileName ) )
 			{
-				var xmlSerializer = new XmlSerializer( typeof( SettingsData ) );
-
-				var fileStream = new FileStream( Program.appDataFolderPath + SettingsFileName, FileMode.Open );
-
-				var deserializedObject = xmlSerializer.Deserialize( fileStream );
-
-				if ( deserializedObject != null )
+				try
 				{
-					data = (SettingsData) deserializedObject;
-				}
+					var xmlSerializer = new XmlSerializer( typeof( SettingsData ) );
 
-				fileStream.Close();
+					var fileStream = new FileStream( Program.appDataFolderPath + SettingsFileName, FileMode.Open );
+
+					var deserializedObject = xmlSerializer.Deserialize( fileStream );
+
+					if ( deserializedObject != null )
+					{
+						data = (SettingsData) deserializedObject;
+					}
+
+					fileStream.Close();
+				}
+				catch ( Exception )
+				{
+					LogFile.Write( " error loading existing settings file; using default settings..." );
+
+					data = new SettingsData();
+				}
 			}
 
 			MainWindow.instance?.Initialize();

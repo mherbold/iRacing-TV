@@ -173,7 +173,7 @@ namespace iRacingTV
 
 					MainWindow.instance?.Update();
 
-					IRSDK.forceSessionUpdate = true;
+					IRSDK.forceResetRace = true;
 
 					break;
 

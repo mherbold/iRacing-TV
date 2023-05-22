@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
 using irsdkSharp.Serialization.Enums.Fastest;
@@ -12,61 +13,67 @@ namespace iRacingTV
 	{
 		public static List<SessionFlagsData>? sessionFlagsDataList = null;
 
+		public static string sessionFlagsFileName = string.Empty;
 		public static StreamWriter? streamWriter = null;
-		public static uint lastSessionFlags = 0;
+		public static uint sessionFlags = 0;
 
 		public static void Initialize()
 		{
-			var sessionFlagsFileName = $"{Program.documentsFolderPath}\\SessionFlags\\{IRSDK.normalizedSession.sessionID}-{IRSDK.normalizedSession.subSessionID}.csv";
+			var newSessionFlagsFileName = $"{Program.documentsFolderPath}\\SessionFlags\\{IRSDK.normalizedSession.sessionID}-{IRSDK.normalizedSession.subSessionID}.csv";
 
-			if ( IRSDK.normalizedSession.isReplay )
+			if ( newSessionFlagsFileName != sessionFlagsFileName )
 			{
+				sessionFlagsFileName = newSessionFlagsFileName;
+
 				sessionFlagsDataList = new List<SessionFlagsData>();
 
-				if ( File.Exists( sessionFlagsFileName ) )
+				if ( IRSDK.normalizedSession.isReplay )
 				{
-					LogFile.Write( "Loading session flags file..." );
-
-					var streamReader = File.OpenText( sessionFlagsFileName );
-
-					while ( true )
+					if ( File.Exists( sessionFlagsFileName ) )
 					{
-						var line = streamReader.ReadLine();
+						LogFile.Write( "Loading session flags file..." );
 
-						if ( line == null )
+						var streamReader = File.OpenText( sessionFlagsFileName );
+
+						while ( true )
 						{
-							break;
+							var line = streamReader.ReadLine();
+
+							if ( line == null )
+							{
+								break;
+							}
+
+							var match = SessionFlagsCSVRegex().Match( line );
+
+							if ( match.Success )
+							{
+								sessionFlagsDataList.Add( new SessionFlagsData( int.Parse( match.Groups[ 1 ].Value ), float.Parse( match.Groups[ 2 ].Value, CultureInfo.InvariantCulture.NumberFormat ), uint.Parse( match.Groups[ 3 ].Value, NumberStyles.HexNumber ) ) );
+							}
 						}
 
-						var match = SessionFlagsCSVRegex().Match( line );
-
-						if ( match.Success )
-						{
-							sessionFlagsDataList.Add( new SessionFlagsData( int.Parse( match.Groups[ 1 ].Value ), float.Parse( match.Groups[ 2 ].Value, CultureInfo.InvariantCulture.NumberFormat ), uint.Parse( match.Groups[ 3 ].Value, NumberStyles.HexNumber ) ) );
-						}
+						LogFile.Write( " OK\r\n" );
 					}
+
+					sessionFlagsDataList.Reverse();
+				}
+				else
+				{
+					if ( streamWriter != null )
+					{
+						streamWriter.Close();
+
+						streamWriter = null;
+					}
+
+					LogFile.Write( "Opening session flags file for writing..." );
+
+					Directory.CreateDirectory( $"{Program.documentsFolderPath}\\SessionFlags" );
+
+					streamWriter = File.AppendText( sessionFlagsFileName );
 
 					LogFile.Write( " OK\r\n" );
 				}
-
-				sessionFlagsDataList.Reverse();
-			}
-			else
-			{
-				if ( streamWriter != null )
-				{
-					streamWriter.Close();
-
-					streamWriter = null;
-				}
-
-				LogFile.Write( "Opening session flags file for writing..." );
-
-				Directory.CreateDirectory( $"{Program.documentsFolderPath}\\SessionFlags" );
-
-				streamWriter = File.AppendText( sessionFlagsFileName );
-
-				LogFile.Write( " OK\r\n" );
 			}
 		}
 
@@ -91,7 +98,7 @@ namespace iRacingTV
 			}
 			else
 			{
-				if ( lastSessionFlags != IRSDK.normalizedSession.sessionFlags )
+				if ( sessionFlags != IRSDK.normalizedSession.sessionFlags )
 				{
 					if ( streamWriter != null )
 					{
@@ -104,7 +111,7 @@ namespace iRacingTV
 				}
 			}
 
-			if ( lastSessionFlags != IRSDK.normalizedSession.sessionFlags )
+			if ( sessionFlags != IRSDK.normalizedSession.sessionFlags )
 			{
 				var sessionFlagsString = string.Empty;
 
@@ -236,7 +243,7 @@ namespace iRacingTV
 				LogFile.Write( $"Session flags ={sessionFlagsString}\r\n" );
 			}
 
-			lastSessionFlags = IRSDK.normalizedSession.sessionFlags;
+			sessionFlags = IRSDK.normalizedSession.sessionFlags;
 		}
 
 		[GeneratedRegex( "(.*),(.*),0x(.*)" )]

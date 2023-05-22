@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:iRacingTV"
         mc:Ignorable="d"
-        Title="iRacing-TV 1.4" Width="800" ResizeMode="CanMinimize" SizeToContent="Height" WindowStartupLocation="CenterScreen" Closed="Window_Closed">
+        Title="iRacing-TV 1.6" Width="800" ResizeMode="CanMinimize" SizeToContent="Height" WindowStartupLocation="CenterScreen" Closed="Window_Closed">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="77*"/>
@@ -100,6 +100,34 @@
                     </StackPanel>
                     <Label Content="Number of Checkpoints (for Show Time Only)" />
                     <Slider x:Name="NumberOfCheckpointsSlider" Maximum="100" Minimum="2" LargeChange="10" SmallChange="1" TickPlacement="TopLeft" ValueChanged="NumberOfCheckpointsSlider_ValueChanged" Value="100" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,3,0">
+                            <Label Content="Car Number Image Color Overrides" />
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="CarNumberImageColorOverrideATextBox" Grid.Column="0" TextChanged="CarNumberImageColorOverrideA_TextChanged" Margin="0,0,3,0" />
+                                <TextBox x:Name="CarNumberImageColorOverrideBTextBox" Grid.Column="1" TextChanged="CarNumberImageColorOverrideB_TextChanged" Margin="3,0,3,0" />
+                                <TextBox x:Name="CarNumberImageColorOverrideCTextBox" Grid.Column="2" TextChanged="CarNumberImageColorOverrideC_TextChanged" Margin="3,0,0,0" />
+                            </Grid>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Margin="3,0,3,0">
+                            <Label Content="Car Number Image Pattern Override" />
+                            <TextBox x:Name="CarNumberImagePatternOverrideTextBox" TextChanged="CarNumberImagePatternOverride_TextChanged" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" Margin="3,0,0,0">
+                            <Label Content="Car Number Image Slant Override" />
+                            <TextBox x:Name="CarNumberImageSlantOverrideTextBox" TextChanged="CarNumberImageSlantOverride_TextChanged" />
+                        </StackPanel>
+                    </Grid>
                     <Button x:Name="ApplyChangesButton" Content="Save and Apply Changes" Grid.Column="0" Margin="0,12,0,0" Click="ApplyChangesButton_Click" />
                 </StackPanel>
             </TabItem>

@@ -73,7 +73,7 @@ namespace iRacingTV
 
 					Overlay.Initialize();
 
-					IRSDK.forceSessionUpdate = true;
+					IRSDK.forceResetRace = true;
 				}
 
 				IRSDK.Update();
