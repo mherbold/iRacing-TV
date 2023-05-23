@@ -38,7 +38,6 @@ namespace iRacingTV
 		{
 			RaceStatus,
 			Leaderboard,
-			Sponsor,
 			LightBlack,
 			LightGreen,
 			LightWhite,
@@ -181,7 +180,6 @@ namespace iRacingTV
 
 			overlayTextures[ (int) TextureEnum.RaceStatus ] = new OverlayTexture( Settings.data.RaceStatusImageFileName );
 			overlayTextures[ (int) TextureEnum.Leaderboard ] = new OverlayTexture( Settings.data.LeaderboardImageFileName );
-			overlayTextures[ (int) TextureEnum.Sponsor ] = new OverlayTexture( Settings.data.SponsorImageFileName );
 			overlayTextures[ (int) TextureEnum.LightBlack ] = new OverlayTexture( Settings.data.LightImageBlackFileName );
 			overlayTextures[ (int) TextureEnum.LightGreen ] = new OverlayTexture( Settings.data.LightImageGreenFileName );
 			overlayTextures[ (int) TextureEnum.LightWhite ] = new OverlayTexture( Settings.data.LightImageWhiteFileName );
@@ -240,7 +238,17 @@ namespace iRacingTV
 
 			overlayTextures[ (int) TextureEnum.RaceStatus ]?.Draw( Settings.data.RaceStatusImagePosition, null, Settings.data.RaceStatusImageTint );
 			overlayTextures[ (int) TextureEnum.Leaderboard ]?.Draw( Settings.data.LeaderboardImagePosition, null, Settings.data.LeaderboardImageTint );
-			overlayTextures[ (int) TextureEnum.Sponsor ]?.Draw( Settings.data.SponsorImagePosition, null, Settings.data.SponsorImageTint );
+
+			// draw series image
+
+			if ( IRSDK.normalizedSession.seriesOverlayTexture != null )
+			{
+				var heightRatio = Settings.data.SeriesImageSize.Y / IRSDK.normalizedSession.seriesOverlayTexture.texture.Height;
+				var adjustedWidth = IRSDK.normalizedSession.seriesOverlayTexture.texture.Width * heightRatio;
+				var xOffset = ( Settings.data.SeriesImageSize.X - adjustedWidth ) * 0.5f;
+
+				IRSDK.normalizedSession.seriesOverlayTexture?.Draw( Settings.data.SeriesImagePosition + new Vector2( xOffset, 0 ), new Vector2( adjustedWidth, Settings.data.SeriesImageSize.Y ), Vector4.One );
+			}
 
 			// mode
 

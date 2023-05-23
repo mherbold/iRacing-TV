@@ -19,7 +19,7 @@ namespace iRacingTV
 
 		public static void Initialize()
 		{
-			var newSessionFlagsFileName = $"{Program.documentsFolderPath}\\SessionFlags\\{IRSDK.normalizedSession.sessionID}-{IRSDK.normalizedSession.subSessionID}.csv";
+			var newSessionFlagsFileName = $"{Program.documentsFolderPath}SessionFlags\\{IRSDK.normalizedSession.sessionID}-{IRSDK.normalizedSession.subSessionID}.csv";
 
 			if ( newSessionFlagsFileName != sessionFlagsFileName )
 			{
@@ -68,7 +68,7 @@ namespace iRacingTV
 
 					LogFile.Write( "Opening session flags file for writing..." );
 
-					Directory.CreateDirectory( $"{Program.documentsFolderPath}\\SessionFlags" );
+					Directory.CreateDirectory( $"{Program.documentsFolderPath}SessionFlags" );
 
 					streamWriter = File.AppendText( sessionFlagsFileName );
 
@@ -104,7 +104,7 @@ namespace iRacingTV
 					{
 						var sessionFlagsAsHex = IRSDK.normalizedSession.sessionFlags.ToString( "X8" );
 
-						streamWriter.WriteLine( $"{IRSDK.normalizedSession.sessionTick},{IRSDK.normalizedSession.sessionTime:0.000},0x{sessionFlagsAsHex}" );
+						streamWriter.WriteLine( $"{IRSDK.sessionNum},{IRSDK.normalizedSession.sessionTime:0.000},0x{sessionFlagsAsHex}" );
 
 						streamWriter.Flush();
 					}

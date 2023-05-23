@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:iRacingTV"
         mc:Ignorable="d"
-        Title="iRacing-TV 1.6" Width="800" ResizeMode="CanMinimize" SizeToContent="Height" WindowStartupLocation="CenterScreen" Closed="Window_Closed">
+        Title="iRacing-TV 1.7" Width="800" ResizeMode="CanMinimize" SizeToContent="Height" WindowStartupLocation="CenterScreen" Closed="Window_Closed">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="77*"/>

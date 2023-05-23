@@ -44,6 +44,7 @@ namespace iRacingTV
 
 		public OverlayTexture? carOverlayTexture = null;
 		public OverlayTexture? carNumberOverlayTexture = null;
+		public OverlayTexture? helmetOverlayTexture = null;
 
 		public async void Initialize( int carIdx, bool reset )
 		{
@@ -54,7 +55,7 @@ namespace iRacingTV
 				DriverModel? driver = null;
 
 				this.carIdx = carIdx;
-				driverIdx = -1;
+				this.driverIdx = -1;
 
 				for ( var driverIdx = 0; driverIdx < IRSDK.session.DriverInfo.Drivers.Count; driverIdx++ )
 				{
@@ -105,8 +106,9 @@ namespace iRacingTV
 
 				carOverlayTexture = null;
 				carNumberOverlayTexture = null;
+				helmetOverlayTexture = null;
 
-				if ( driver != null )
+				if ( driverIdx != -1 )
 				{
 					userName = driver.UserName;
 					abbrevName = driver.AbbrevName;
@@ -182,6 +184,28 @@ namespace iRacingTV
 
 							}
 						}
+
+						var helmetDesignMatch = HelmetDesignStringRegex().Match( driver.HelmetDesignStr );
+
+						if ( helmetDesignMatch.Success )
+						{
+							try
+							{
+								var licColor = driver.LicColor[ 2.. ];
+
+								var helmetUrl = $"http://localhost:32034/pk_helmet.png?size=7&hlmtPat={helmetDesignMatch.Groups[ 1 ].Value}&licCol={licColor}&hlmtCol={numberDesignMatch.Groups[ 2 ].Value},{numberDesignMatch.Groups[ 3 ].Value},{numberDesignMatch.Groups[ 4 ].Value}&view=1&hlmtType=0";
+
+								var httpClient = new HttpClient();
+
+								var stream = await httpClient.GetStreamAsync( helmetUrl );
+
+								helmetOverlayTexture = new OverlayTexture( stream );
+							}
+							catch ( Exception )
+							{
+
+							}
+						}
 					}
 				}
 			}
@@ -206,7 +230,7 @@ namespace iRacingTV
 				}
 			}
 
-			raceHasStarted = car.CarIdxLap >= 1;
+			raceHasStarted = car.CarIdxPosition > 0;
 			isOnPitRoad = car.CarIdxOnPitRoad;
 			isOutOfCar = car.CarIdxLapDistPct == -1;
 
@@ -314,5 +338,8 @@ namespace iRacingTV
 
 		[GeneratedRegex( "(\\d+),(\\d+),(.{6}),(.{6}),(.{6})" )]
 		public static partial Regex CarNumberDesignStringRegex();
+
+		[GeneratedRegex( "(\\d+),(.{6}),(.{6}),(.{6})" )]
+		public static partial Regex HelmetDesignStringRegex();
 	}
 }

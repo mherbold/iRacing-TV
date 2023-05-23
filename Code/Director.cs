@@ -65,7 +65,7 @@ namespace iRacingTV
 			}
 			else if ( ( IRSDK.normalizedSession.sessionFlags & ( (uint) SessionFlags.GreenHeld | (uint) SessionFlags.StartReady | (uint) SessionFlags.StartSet | (uint) SessionFlags.StartGo ) ) != 0 )
 			{
-				var normalizedCar = IRSDK.normalizedSession.normalizedCars[ 0 ];
+				var normalizedCar = IRSDK.normalizedSession.sortedNormalizedCars[ 0 ];
 
 				IRSDK.targetCameraCarIdx = normalizedCar.carIdx;
 
@@ -122,7 +122,7 @@ namespace iRacingTV
 
 				if ( highestHeat == 0 )
 				{
-					var normalizedCar = IRSDK.normalizedSession.normalizedCars[ 0 ];
+					var normalizedCar = IRSDK.normalizedSession.sortedNormalizedCars[ 0 ];
 
 					IRSDK.targetCameraCarIdx = normalizedCar.carIdx;
 
