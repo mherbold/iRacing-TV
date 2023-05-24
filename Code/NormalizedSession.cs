@@ -102,13 +102,20 @@ namespace iRacingTV
 					normalizedCars[ carIdx ].Initialize( carIdx, true );
 				}
 
-				var seriesImageUrl = $"https://ir-core-sites.iracing.com/members/member_images/series/seriesid_{IRSDK.session.WeekendInfo.SeriesID}/logo.jpg";
+				try
+				{
+					var seriesImageUrl = $"https://ir-core-sites.iracing.com/members/member_images/series/seriesid_{IRSDK.session.WeekendInfo.SeriesID}/logo.jpg";
 
-				var httpClient = new HttpClient();
+					var httpClient = new HttpClient();
 
-				var stream = await httpClient.GetStreamAsync( seriesImageUrl );
+					var stream = await httpClient.GetStreamAsync( seriesImageUrl );
 
-				seriesOverlayTexture = new OverlayTexture( stream );
+					seriesOverlayTexture = new OverlayTexture( stream );
+				}
+				catch ( Exception )
+				{
+
+				}
 			}
 			else
 			{

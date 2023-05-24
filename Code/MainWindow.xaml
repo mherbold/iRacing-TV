@@ -5,15 +5,31 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:iRacingTV"
         mc:Ignorable="d"
-        Title="iRacing-TV 1.7" Width="800" ResizeMode="CanMinimize" SizeToContent="Height" WindowStartupLocation="CenterScreen" Closed="Window_Closed">
+        Title="iRacing-TV 1.8" ResizeMode="CanMinimize" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen" Closed="Window_Closed">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="77*"/>
-            <ColumnDefinition Width="323*"/>
+            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <TabControl x:Name="MainWindowTabControl" Grid.ColumnSpan="2">
+        <Image x:Name="StatusImage" Source="/Assets/status-disconnected.png" Width="16" Height="16" Margin="774,2,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Stretch="None" Grid.Column="0"/>
+        <TabControl x:Name="MainWindowTabControl" Grid.Column="0" Width="800">
             <TabItem Header="Status">
                 <StackPanel Margin="6,6,6,6">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Frame" FontSize="10" Margin="0,0,3,0" />
+                        <TextBox x:Name="Debug_Frame" Width="52" FontSize="11" TextAlignment="Right" FontFamily="Courier New" Margin="0,0,3,0" IsEnabled="False" />
+                        <TextBlock Text="Time" FontSize="10" Margin="3,0,3,0" />
+                        <TextBox x:Name="Debug_Time" Width="52" FontSize="11" TextAlignment="Right" FontFamily="Courier New" Margin="0,0,3,0" IsEnabled="False" />
+                        <TextBlock Text="IS-S" FontSize="10" Margin="3,0,3,0" />
+                        <TextBox x:Name="Debug_IS_S" Width="208" FontSize="11" FontFamily="Courier New" Margin="0,0,3,0" IsEnabled="False" />
+                        <TextBlock Text="IS-SSFN" FontSize="10" Margin="3,0,3,0" />
+                        <TextBox x:Name="Debug_IS_SSFN" Width="52" FontSize="11" TextAlignment="Right" FontFamily="Courier New" Margin="0,0,3,0" IsEnabled="False" />
+                        <TextBlock Text="IS-STFN" FontSize="10" Margin="3,0,3,0" />
+                        <TextBox x:Name="Debug_IS_STFN" Width="52" FontSize="11" TextAlignment="Right" FontFamily="Courier New" Margin="0,0,3,0" IsEnabled="False" />
+                        <TextBlock Text="IS-SLFN" FontSize="10" Margin="3,0,3,0" />
+                        <TextBox x:Name="Debug_IS_SLFN" Width="52" FontSize="11" TextAlignment="Right" FontFamily="Courier New" Margin="0,0,3,0" IsEnabled="False" />
+                        <TextBlock Text="IS-SLC" FontSize="10" Margin="3,0,3,0" />
+                        <TextBox x:Name="Debug_IS_SLC" Width="52" FontSize="11" TextAlignment="Right" FontFamily="Courier New" Margin="0,0,0,0" IsEnabled="False" />
+                    </StackPanel>
                     <TextBox x:Name="StatusTextBox" TextWrapping="Wrap" IsReadOnly="True" Padding="3" Margin="0,6,0,12" ScrollViewer.VerticalScrollBarVisibility="Visible" Height="150"/>
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -132,6 +148,5 @@
                 </StackPanel>
             </TabItem>
         </TabControl>
-        <Image x:Name="StatusImage" Source="/Assets/status-disconnected.png" Width="16" Height="16" Margin="604,2,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Stretch="None" Grid.Column="1"/>
     </Grid>
 </Window>

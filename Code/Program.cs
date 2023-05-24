@@ -80,6 +80,7 @@ namespace iRacingTV
 				Director.Update();
 				IncidentScan.Update();
 				Overlay.Update();
+				MainWindow.instance?.UpdateDebug();
 			}
 
 			Interlocked.Decrement( ref Program.tickMutex );

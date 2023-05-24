@@ -97,6 +97,20 @@ namespace iRacingTV
 			} );
 		}
 
+		public void UpdateDebug()
+		{
+			Dispatcher.Invoke( () =>
+			{
+				Debug_Frame.Text = IRSDK.normalizedSession.replayFrameNum.ToString();
+				Debug_Time.Text = $"{IRSDK.normalizedSession.sessionTime:0.0}";
+				Debug_IS_S.Text = IncidentScan.currentIncidentScanState.ToString();
+				Debug_IS_SSFN.Text = IncidentScan.settleStartingFrameNumber.ToString();
+				Debug_IS_STFN.Text = IncidentScan.settleTargetFrameNumber.ToString();
+				Debug_IS_SLFN.Text = IncidentScan.settleLastFrameNumber.ToString();
+				Debug_IS_SLC.Text = IncidentScan.settleLoopCount.ToString();
+			} );
+		}
+
 		public void AddToStatusTextBox( string message )
 		{
 			Dispatcher.Invoke( () =>

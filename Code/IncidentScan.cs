@@ -157,7 +157,7 @@ namespace iRacingTV
 
 				case IncidentScanStateEnum.NoMoreIncidents:
 
-					LogFile.Write( "Done with finding incidents, rewinding to the start of the replay.\r\n" );
+					LogFile.Write( $"Done with finding incidents, rewinding to the start of the race (frame {startOfRaceFrameNumber}).\r\n" );
 
 					IRSDK.AddMessage( BroadcastMessageTypes.ReplaySetPlayPosition, 0, startOfRaceFrameNumber, 0 );
 

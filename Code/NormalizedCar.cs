@@ -108,10 +108,17 @@ namespace iRacingTV
 				carNumberOverlayTexture = null;
 				helmetOverlayTexture = null;
 
-				if ( driverIdx != -1 )
+				if ( ( driverIdx != -1 ) && ( driver != null ) )
 				{
 					userName = driver.UserName;
 					abbrevName = driver.AbbrevName;
+
+					if ( abbrevName == null )
+					{
+						var userNameParts = userName.Split( " ", 2 );
+
+						abbrevName = $"{userNameParts[ 0 ]?[ ..1 ] ?? ""}. {userNameParts[ 1 ] ?? ""}";
+					}
 
 					carNumber = driver.CarNumber;
 					carNumberRaw = driver.CarNumberRaw;
