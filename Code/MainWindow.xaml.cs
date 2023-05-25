@@ -1,6 +1,8 @@
 ﻿
+using irsdkSharp.Serialization.Enums.Fastest;
 using System;
 using System.Windows;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 
@@ -48,7 +50,7 @@ namespace iRacingTV
 				BlimpCameraTextBox.Text = Settings.data.BlimpCameraGroupName.ToString();
 				ScenicCameraTextBox.Text = Settings.data.ScenicCameraGroupName.ToString();
 
-				PreferredCarNumber.Text = Settings.data.PreferredCarNumber;
+				PreferredCarNumberTextBox.Text = Settings.data.PreferredCarNumber;
 
 				SwitchCameraToTalkingDriverCheckBox.IsChecked = Settings.data.SwitchCameraToTalkingDriver;
 
@@ -63,6 +65,13 @@ namespace iRacingTV
 				CarNumberImageColorOverrideCTextBox.Text = Settings.data.CarNumberColorOverrideC;
 				CarNumberImagePatternOverrideTextBox.Text = Settings.data.CarNumberPatternOverride;
 				CarNumberImageSlantOverrideTextBox.Text = Settings.data.CarNumberSlantOverride;
+
+				EnableIntroCheckBox.IsChecked = Settings.data.EnableIntro;
+				IntroStartTimeTextBox.Text = Settings.data.IntroStartTime.ToString();
+				IntroDurationTextBox.Text = Settings.data.IntroDuration.ToString();
+
+				UsernameTextBox.Text = Settings.data.Username;
+				PasswordTextBox.Password = Settings.data.Password;
 			} );
 		}
 
@@ -111,6 +120,275 @@ namespace iRacingTV
 			} );
 		}
 
+		public void UpdateSessionFlags()
+		{
+			Dispatcher.Invoke( () =>
+			{
+				if ( ( IRSDK.normalizedSession.sessionFlags & (uint) SessionFlags.Checkered ) != 0 )
+				{
+					SF_Checkered.Background = Brushes.White;
+				}
+				else
+				{
+					SF_Checkered.Background = null;
+				}
+
+				if ( ( IRSDK.normalizedSession.sessionFlags & (uint) SessionFlags.White ) != 0 )
+				{
+					SF_White.Background = Brushes.White;
+				}
+				else
+				{
+					SF_White.Background = null;
+				}
+
+				if ( ( IRSDK.normalizedSession.sessionFlags & (uint) SessionFlags.Green ) != 0 )
+				{
+					SF_Green.Background = Brushes.Green;
+					SF_Green.Foreground = Brushes.White;
+				}
+				else
+				{
+					SF_Green.Background = null;
+					SF_Green.Foreground = Brushes.Black;
+				}
+
+				if ( ( IRSDK.normalizedSession.sessionFlags & (uint) SessionFlags.Yellow ) != 0 )
+				{
+					SF_Yellow.Background = Brushes.Yellow;
+				}
+				else
+				{
+					SF_Yellow.Background = null;
+				}
+
+				if ( ( IRSDK.normalizedSession.sessionFlags & (uint) SessionFlags.Red ) != 0 )
+				{
+					SF_Red.Background = Brushes.Red;
+					SF_Red.Foreground = Brushes.White;
+				}
+				else
+				{
+					SF_Red.Background = null;
+					SF_Red.Foreground = Brushes.Black;
+				}
+
+				if ( ( IRSDK.normalizedSession.sessionFlags & (uint) SessionFlags.Blue ) != 0 )
+				{
+					SF_Blue.Background = Brushes.Blue;
+					SF_Blue.Foreground = Brushes.White;
+				}
+				else
+				{
+					SF_Blue.Background = null;
+					SF_Blue.Foreground = Brushes.Black;
+				}
+
+				if ( ( IRSDK.normalizedSession.sessionFlags & (uint) SessionFlags.Debris ) != 0 )
+				{
+					SF_Debris.Background = Brushes.Yellow;
+				}
+				else
+				{
+					SF_Debris.Background = null;
+				}
+
+				if ( ( IRSDK.normalizedSession.sessionFlags & (uint) SessionFlags.Crossed ) != 0 )
+				{
+					SF_Crossed.Background = Brushes.White;
+				}
+				else
+				{
+					SF_Crossed.Background = null;
+				}
+
+				if ( ( IRSDK.normalizedSession.sessionFlags & (uint) SessionFlags.YellowWaving ) != 0 )
+				{
+					SF_YellowWaving.Background = Brushes.Yellow;
+				}
+				else
+				{
+					SF_YellowWaving.Background = null;
+				}
+
+				if ( ( IRSDK.normalizedSession.sessionFlags & (uint) SessionFlags.OneLapToGreen ) != 0 )
+				{
+					SF_OneLapToGreen.Background = Brushes.Green;
+					SF_OneLapToGreen.Foreground = Brushes.White;
+				}
+				else
+				{
+					SF_OneLapToGreen.Background = null;
+					SF_OneLapToGreen.Foreground = Brushes.Black;
+				}
+
+				if ( ( IRSDK.normalizedSession.sessionFlags & (uint) SessionFlags.GreenHeld ) != 0 )
+				{
+					SF_GreenHeld.Background = Brushes.Green;
+					SF_GreenHeld.Foreground = Brushes.White;
+				}
+				else
+				{
+					SF_GreenHeld.Background = null;
+					SF_GreenHeld.Foreground = Brushes.Black;
+				}
+
+				if ( ( IRSDK.normalizedSession.sessionFlags & (uint) SessionFlags.TenToGo ) != 0 )
+				{
+					SF_TenToGo.Background = Brushes.White;
+				}
+				else
+				{
+					SF_TenToGo.Background = null;
+				}
+
+				if ( ( IRSDK.normalizedSession.sessionFlags & (uint) SessionFlags.FiveToGo ) != 0 )
+				{
+					SF_FiveToGo.Background = Brushes.White;
+				}
+				else
+				{
+					SF_FiveToGo.Background = null;
+				}
+
+				if ( ( IRSDK.normalizedSession.sessionFlags & (uint) SessionFlags.RandomWaving ) != 0 )
+				{
+					SF_RandomWaving.Background = Brushes.White;
+				}
+				else
+				{
+					SF_RandomWaving.Background = null;
+				}
+
+				if ( ( IRSDK.normalizedSession.sessionFlags & (uint) SessionFlags.Caution ) != 0 )
+				{
+					SF_Caution.Background = Brushes.Yellow;
+				}
+				else
+				{
+					SF_Caution.Background = null;
+				}
+
+				if ( ( IRSDK.normalizedSession.sessionFlags & (uint) SessionFlags.CautionWaving ) != 0 )
+				{
+					SF_CautionWaving.Background = Brushes.Yellow;
+				}
+				else
+				{
+					SF_CautionWaving.Background = null;
+				}
+
+				if ( ( IRSDK.normalizedSession.sessionFlags & (uint) SessionFlags.Black ) != 0 )
+				{
+					SF_Black.Background = Brushes.Black;
+					SF_Black.Foreground = Brushes.White;
+				}
+				else
+				{
+					SF_Black.Background = null;
+					SF_Black.Foreground = Brushes.Black;
+				}
+
+				if ( ( IRSDK.normalizedSession.sessionFlags & (uint) SessionFlags.Disqualify ) != 0 )
+				{
+					SF_Black.Background = Brushes.Black;
+					SF_Black.Foreground = Brushes.White;
+				}
+				else
+				{
+					SF_Black.Background = null;
+					SF_Black.Foreground = Brushes.Black;
+				}
+
+				if ( ( IRSDK.normalizedSession.sessionFlags & (uint) SessionFlags.Servicible ) != 0 )
+				{
+					SF_Black.Background = Brushes.Black;
+					SF_Black.Foreground = Brushes.White;
+				}
+				else
+				{
+					SF_Black.Background = null;
+					SF_Black.Foreground = Brushes.Black;
+				}
+
+				if ( ( IRSDK.normalizedSession.sessionFlags & (uint) SessionFlags.Furled ) != 0 )
+				{
+					SF_Black.Background = Brushes.Black;
+					SF_Black.Foreground = Brushes.White;
+				}
+				else
+				{
+					SF_Black.Background = null;
+					SF_Black.Foreground = Brushes.Black;
+				}
+
+				if ( ( IRSDK.normalizedSession.sessionFlags & (uint) SessionFlags.Repair ) != 0 )
+				{
+					SF_Black.Background = Brushes.Black;
+					SF_Black.Foreground = Brushes.White;
+				}
+				else
+				{
+					SF_Black.Background = null;
+					SF_Black.Foreground = Brushes.Black;
+				}
+
+				if ( ( IRSDK.normalizedSession.sessionFlags & (uint) SessionFlags.StartHidden ) != 0 )
+				{
+					SF_StartHidden.Background = Brushes.Green;
+					SF_StartHidden.Foreground = Brushes.White;
+				}
+				else
+				{
+					SF_StartHidden.Background = null;
+					SF_StartHidden.Foreground = Brushes.Black;
+				}
+
+				if ( ( IRSDK.normalizedSession.sessionFlags & (uint) SessionFlags.StartReady ) != 0 )
+				{
+					SF_StartReady.Background = Brushes.Green;
+					SF_StartReady.Foreground = Brushes.White;
+				}
+				else
+				{
+					SF_StartReady.Background = null;
+					SF_StartReady.Foreground = Brushes.Black;
+				}
+
+				if ( ( IRSDK.normalizedSession.sessionFlags & (uint) SessionFlags.StartSet ) != 0 )
+				{
+					SF_StartSet.Background = Brushes.Green;
+					SF_StartSet.Foreground = Brushes.White;
+				}
+				else
+				{
+					SF_StartSet.Background = null;
+					SF_StartSet.Foreground = Brushes.Black;
+				}
+
+				if ( ( IRSDK.normalizedSession.sessionFlags & (uint) SessionFlags.StartGo ) != 0 )
+				{
+					SF_StartGo.Background = Brushes.Green;
+					SF_StartGo.Foreground = Brushes.White;
+				}
+				else
+				{
+					SF_StartGo.Background = null;
+					SF_StartGo.Foreground = Brushes.Black;
+				}
+			} );
+		}
+
+		public void UpdateTarget()
+		{
+			Dispatcher.Invoke( () =>
+			{
+				Debug_TargetCar.Text = IRSDK.targetCameraCarNumber;
+				Debug_TargetCameraGroup.Text = IRSDK.targetCameraGroup.ToString();
+				Debug_TargetReason.Text = IRSDK.targetCameraReason;
+			} );
+		}
+
 		public void AddToStatusTextBox( string message )
 		{
 			Dispatcher.Invoke( () =>
@@ -123,7 +401,7 @@ namespace iRacingTV
 
 		private void ResetDataButton_Click( object sender, RoutedEventArgs e )
 		{
-			IRSDK.forceResetRace = true;
+			IRSDK.sessionResetRequested = true;
 		}
 
 		private void ScanForIncidentsButton_Click( object sender, RoutedEventArgs e )
@@ -197,9 +475,9 @@ namespace iRacingTV
 			Settings.data.ScenicCameraGroupName = ScenicCameraTextBox.Text;
 		}
 
-		private void PreferredCarNumber_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
+		private void PreferredCarNumberTextBox_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
 		{
-			Settings.data.PreferredCarNumber = PreferredCarNumber.Text;
+			Settings.data.PreferredCarNumber = PreferredCarNumberTextBox.Text;
 		}
 
 		private void SwitchCameraToTalkingDriverCheckBox_Click( object sender, RoutedEventArgs e )
@@ -263,13 +541,38 @@ namespace iRacingTV
 			Settings.data.CarNumberSlantOverride = CarNumberImageSlantOverrideTextBox.Text;
 		}
 
+		private void UsernameTextBox_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
+		{
+			Settings.data.Username = UsernameTextBox.Text;
+		}
+
+		private void PasswordTextBox_PasswordChanged( object sender, RoutedEventArgs e )
+		{
+			Settings.data.Password = PasswordTextBox.Password;
+		}
+
+		private void EnableIntroCheckBox_Click( object sender, RoutedEventArgs e )
+		{
+			Settings.data.EnableIntro = EnableIntroCheckBox.IsChecked ?? false;
+		}
+
+		private void IntroStartTimeTextBox_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
+		{
+			Settings.data.IntroStartTime = double.Parse( IntroStartTimeTextBox.Text );
+		}
+
+		private void IntroDurationTextBox_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
+		{
+			Settings.data.IntroDuration = double.Parse( IntroDurationTextBox.Text );
+		}
+
 		private void ApplyChangesButton_Click( object sender, RoutedEventArgs e )
 		{
 			MainWindowTabControl.SelectedIndex = 0;
 
 			Settings.Save();
 
-			Program.forceReinitialize = true;
+			Program.applySettingChangesRequested = true;
 		}
 
 		private void Window_Closed( object sender, EventArgs e )

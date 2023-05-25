@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:iRacingTV"
         mc:Ignorable="d"
-        Title="iRacing-TV 1.8" ResizeMode="CanMinimize" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen" Closed="Window_Closed">
+        Title="iRacing-TV 1.9" ResizeMode="CanMinimize" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen" Closed="Window_Closed">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -14,13 +14,40 @@
         <TabControl x:Name="MainWindowTabControl" Grid.Column="0" Width="800">
             <TabItem Header="Status">
                 <StackPanel Margin="6,6,6,6">
-                    <StackPanel Orientation="Horizontal">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                        <TextBlock x:Name="SF_Checkered" FontSize="10" Text="CHK" Padding="3,0,3,0" Margin="0,0,3,0" />
+                        <TextBlock x:Name="SF_White" FontSize="10" Text="WHT" Padding="3,0,3,0" Margin="3,0,3,0" />
+                        <TextBlock x:Name="SF_Green" FontSize="10" Text="GRN" Padding="3,0,3,0" Margin="3,0,3,0" />
+                        <TextBlock x:Name="SF_Yellow" FontSize="10" Text="YEL" Padding="3,0,3,0" Margin="3,0,3,0" />
+                        <TextBlock x:Name="SF_Red" FontSize="10" Text="RED" Padding="3,0,3,0" Margin="3,0,3,0" />
+                        <TextBlock x:Name="SF_Blue" FontSize="10" Text="BLU" Padding="3,0,3,0" Margin="3,0,3,0" />
+                        <TextBlock x:Name="SF_Debris" FontSize="10" Text="DEB" Padding="3,0,3,0" Margin="3,0,3,0" />
+                        <TextBlock x:Name="SF_Crossed" FontSize="10" Text="CRX" Padding="3,0,3,0" Margin="3,0,3,0" />
+                        <TextBlock x:Name="SF_YellowWaving" FontSize="10" Text="Ywave" Padding="3,0,3,0" Margin="3,0,3,0" />
+                        <TextBlock x:Name="SF_OneLapToGreen" FontSize="10" Text="1LTG" Padding="3,0,3,0" Margin="3,0,3,0" />
+                        <TextBlock x:Name="SF_GreenHeld" FontSize="10" Text="Gheld" Padding="3,0,3,0" Margin="3,0,3,0" />
+                        <TextBlock x:Name="SF_TenToGo" FontSize="10" Text="10TG" Padding="3,0,3,0" Margin="3,0,3,0" />
+                        <TextBlock x:Name="SF_FiveToGo" FontSize="10" Text="5TG" Padding="3,0,3,0" Margin="3,0,3,0" />
+                        <TextBlock x:Name="SF_RandomWaving" FontSize="10" Text="Rwave" Padding="3,0,3,0" Margin="3,0,3,0" />
+                        <TextBlock x:Name="SF_Caution" FontSize="10" Text="CAU" Padding="3,0,3,0" Margin="3,0,3,0" />
+                        <TextBlock x:Name="SF_CautionWaving" FontSize="10" Text="Cwave" Padding="3,0,3,0" Margin="3,0,3,0" />
+                        <TextBlock x:Name="SF_Black" FontSize="10" Text="BLK" Padding="3,0,3,0" Margin="3,0,3,0" />
+                        <TextBlock x:Name="SF_Disqualify" FontSize="10" Text="DQ" Padding="3,0,3,0" Margin="3,0,3,0" />
+                        <TextBlock x:Name="SF_Servicable" FontSize="10" Text="SRV" Padding="3,0,3,0" Margin="3,0,3,0" />
+                        <TextBlock x:Name="SF_Furled" FontSize="10" Text="FUR" Padding="3,0,3,0" Margin="3,0,3,0" />
+                        <TextBlock x:Name="SF_Repair" FontSize="10" Text="REP" Padding="3,0,3,0" Margin="3,0,3,0" />
+                        <TextBlock x:Name="SF_StartHidden" FontSize="10" Text="STH" Padding="3,0,3,0" Margin="3,0,3,0" />
+                        <TextBlock x:Name="SF_StartReady" FontSize="10" Text="RDY" Padding="3,0,3,0" Margin="3,0,3,0" />
+                        <TextBlock x:Name="SF_StartSet" FontSize="10" Text="SET" Padding="3,0,3,0" Margin="3,0,3,0" />
+                        <TextBlock x:Name="SF_StartGo" FontSize="10" Text="GO" Padding="3,0,3,0" Margin="3,0,0,0" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,6,0,6">
                         <TextBlock Text="Frame" FontSize="10" Margin="0,0,3,0" />
                         <TextBox x:Name="Debug_Frame" Width="52" FontSize="11" TextAlignment="Right" FontFamily="Courier New" Margin="0,0,3,0" IsEnabled="False" />
                         <TextBlock Text="Time" FontSize="10" Margin="3,0,3,0" />
                         <TextBox x:Name="Debug_Time" Width="52" FontSize="11" TextAlignment="Right" FontFamily="Courier New" Margin="0,0,3,0" IsEnabled="False" />
                         <TextBlock Text="IS-S" FontSize="10" Margin="3,0,3,0" />
-                        <TextBox x:Name="Debug_IS_S" Width="208" FontSize="11" FontFamily="Courier New" Margin="0,0,3,0" IsEnabled="False" />
+                        <TextBox x:Name="Debug_IS_S" Width="214" FontSize="11" FontFamily="Courier New" Margin="0,0,3,0" IsEnabled="False" />
                         <TextBlock Text="IS-SSFN" FontSize="10" Margin="3,0,3,0" />
                         <TextBox x:Name="Debug_IS_SSFN" Width="52" FontSize="11" TextAlignment="Right" FontFamily="Courier New" Margin="0,0,3,0" IsEnabled="False" />
                         <TextBlock Text="IS-STFN" FontSize="10" Margin="3,0,3,0" />
@@ -29,6 +56,14 @@
                         <TextBox x:Name="Debug_IS_SLFN" Width="52" FontSize="11" TextAlignment="Right" FontFamily="Courier New" Margin="0,0,3,0" IsEnabled="False" />
                         <TextBlock Text="IS-SLC" FontSize="10" Margin="3,0,3,0" />
                         <TextBox x:Name="Debug_IS_SLC" Width="52" FontSize="11" TextAlignment="Right" FontFamily="Courier New" Margin="0,0,0,0" IsEnabled="False" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,6,0,6">
+                        <TextBlock Text="Target Car" FontSize="10" Margin="0,0,3,0" />
+                        <TextBox x:Name="Debug_TargetCar" Width="52" FontSize="11" FontFamily="Courier New" Margin="0,0,3,0" IsEnabled="False" />
+                        <TextBlock Text="Target Camera Group" FontSize="10" Margin="3,0,3,0" />
+                        <TextBox x:Name="Debug_TargetCameraGroup" Width="52" FontSize="11" FontFamily="Courier New" Margin="0,0,3,0" IsEnabled="False" />
+                        <TextBlock Text="Target Reason" FontSize="10" Margin="3,0,3,0" />
+                        <TextBox x:Name="Debug_TargetReason" FontSize="11" FontFamily="Courier New" Margin="0,0,3,0" IsEnabled="False" Width="456" />
                     </StackPanel>
                     <TextBox x:Name="StatusTextBox" TextWrapping="Wrap" IsReadOnly="True" Padding="3" Margin="0,6,0,12" ScrollViewer.VerticalScrollBarVisibility="Visible" Height="150"/>
                     <Grid>
@@ -45,7 +80,7 @@
                     </Grid>
                 </StackPanel>
             </TabItem>
-            <TabItem Header="Settings">
+            <TabItem Header="Overlay">
                 <StackPanel Margin="6,6,6,6">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -71,44 +106,13 @@
                             <TextBox x:Name="OverlayHeight" TextChanged="OverlayHeight_TextChanged" />
                         </StackPanel>
                     </Grid>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0" Margin="0,0,3,0">
-                            <Label Content="Inside Camera" />
-                            <TextBox x:Name="InsideCameraTextBox" TextChanged="InsideCameraTextBox_TextChanged" />
-                        </StackPanel>
-                        <StackPanel Grid.Column="1" Margin="3,0,3,0">
-                            <Label Content="Close Camera" />
-                            <TextBox x:Name="CloseCameraTextBox" TextChanged="CloseCameraTextBox_TextChanged" />
-                        </StackPanel>
-                        <StackPanel Grid.Column="2" Margin="3,0,3,0">
-                            <Label Content="Medium Camera" />
-                            <TextBox x:Name="MediumCameraTextBox" TextChanged="MediumCameraTextBox_TextChanged" />
-                        </StackPanel>
-                        <StackPanel Grid.Column="3" Margin="3,0,3,0">
-                            <Label Content="Far Camera" />
-                            <TextBox x:Name="FarCameraTextBox" TextChanged="FarCameraTextBox_TextChanged" />
-                        </StackPanel>
-                        <StackPanel Grid.Column="4" Margin="3,0,3,0">
-                            <Label Content="Blimp Camera" />
-                            <TextBox x:Name="BlimpCameraTextBox" TextChanged="BlimpCameraTextBox_TextChanged" />
-                        </StackPanel>
-                        <StackPanel Grid.Column="5" Margin="3,0,0,0">
-                            <Label Content="Scenic Camera" />
-                            <TextBox x:Name="ScenicCameraTextBox" TextChanged="ScenicCameraTextBox_TextChanged" />
-                        </StackPanel>
-                    </Grid>
-                    <Label Content="Preferred Car Number" />
-                    <TextBox x:Name="PreferredCarNumber" TextChanged="PreferredCarNumber_TextChanged" Margin="0,0,0,12" />
-                    <CheckBox x:Name="SwitchCameraToTalkingDriverCheckBox" Content="Switch Camera to Talking Drivers" Margin="0,0,0,12" Click="SwitchCameraToTalkingDriverCheckBox_Click" />
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                    <Button Content="Save and Apply Changes" Grid.Column="0" Margin="0,12,0,0" Click="ApplyChangesButton_Click" />
+                </StackPanel>
+            </TabItem>
+            <TabItem Header="Leaderboard">
+                <StackPanel Margin="6,6,6,6">
+                    <Label Content="Telemetry" />
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
                         <RadioButton x:Name="ShowLapsRadioButton" GroupName="LeaderboardMode" Content="Show Laps" Margin="0,0,12,0" Click="ShowLapsRadioButton_Click" />
                         <RadioButton x:Name="ShowDistanceRadioButton" GroupName="LeaderboardMode" Content="Show Distance" Margin="0,0,12,0" Click="ShowDistanceRadioButton_Click" />
                         <RadioButton x:Name="ShowTimeRadioButton" GroupName="LeaderboardMode" Content="Show Time" Margin="0,0,12,0" Click="ShowTimeRadioButton_Click" />
@@ -144,7 +148,78 @@
                             <TextBox x:Name="CarNumberImageSlantOverrideTextBox" TextChanged="CarNumberImageSlantOverride_TextChanged" />
                         </StackPanel>
                     </Grid>
-                    <Button x:Name="ApplyChangesButton" Content="Save and Apply Changes" Grid.Column="0" Margin="0,12,0,0" Click="ApplyChangesButton_Click" />
+                    <Button Content="Save and Apply Changes" Grid.Column="0" Margin="0,12,0,0" Click="ApplyChangesButton_Click" />
+                </StackPanel>
+            </TabItem>
+            <TabItem Header="Director">
+                <StackPanel Margin="6,6,6,6">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="130.333"/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,3,0">
+                            <Label Content="Inside Camera" />
+                            <TextBox x:Name="InsideCameraTextBox" TextChanged="InsideCameraTextBox_TextChanged" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Margin="3,0,3,0">
+                            <Label Content="Close Camera" />
+                            <TextBox x:Name="CloseCameraTextBox" TextChanged="CloseCameraTextBox_TextChanged" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" Margin="3,0,3,0">
+                            <Label Content="Medium Camera" />
+                            <TextBox x:Name="MediumCameraTextBox" TextChanged="MediumCameraTextBox_TextChanged" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="3" Margin="3,0,3,0">
+                            <Label Content="Far Camera" />
+                            <TextBox x:Name="FarCameraTextBox" TextChanged="FarCameraTextBox_TextChanged" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="4" Margin="3,0,3,0">
+                            <Label Content="Blimp Camera" />
+                            <TextBox x:Name="BlimpCameraTextBox" TextChanged="BlimpCameraTextBox_TextChanged" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="5" Margin="3,0,0,0">
+                            <Label Content="Scenic Camera" />
+                            <TextBox x:Name="ScenicCameraTextBox" TextChanged="ScenicCameraTextBox_TextChanged" />
+                        </StackPanel>
+                    </Grid>
+                    <Label Content="Preferred Car Number" />
+                    <TextBox x:Name="PreferredCarNumberTextBox" TextChanged="PreferredCarNumberTextBox_TextChanged" Margin="0,0,0,12" />
+                    <CheckBox x:Name="SwitchCameraToTalkingDriverCheckBox" Content="Switch Camera to Talking Drivers" Click="SwitchCameraToTalkingDriverCheckBox_Click" />
+                    <Button Content="Save and Apply Changes" Grid.Column="0" Margin="0,12,0,0" Click="ApplyChangesButton_Click" />
+                </StackPanel>
+            </TabItem>
+            <TabItem Header="Intro">
+                <StackPanel Margin="6,6,6,6">
+                    <CheckBox x:Name="EnableIntroCheckBox" Content="Enable Intro" Click="EnableIntroCheckBox_Click" />
+                    <Grid Margin="0,6,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,6,0">
+                            <Label Content="Start Time (in seconds)" />
+                            <TextBox x:Name="IntroStartTimeTextBox" TextChanged="IntroStartTimeTextBox_TextChanged" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Margin="6,0,0,0">
+                            <Label Content="Duration (in seconds)" />
+                            <TextBox x:Name="IntroDurationTextBox" TextChanged="IntroDurationTextBox_TextChanged" />
+                        </StackPanel>
+                    </Grid>
+                    <Button Content="Save and Apply Changes" Grid.Column="0" Margin="0,12,0,0" Click="ApplyChangesButton_Click" />
+                </StackPanel>
+            </TabItem>
+            <TabItem Header="Account">
+                <StackPanel Margin="6,6,6,6">
+                    <Label Content="iRacing Username" />
+                    <TextBox x:Name="UsernameTextBox" TextChanged="UsernameTextBox_TextChanged" />
+                    <Label Content="iRacing Password" />
+                    <PasswordBox x:Name="PasswordTextBox" PasswordChanged="PasswordTextBox_PasswordChanged" />
+                    <Button Content="Save and Apply Changes" Grid.Column="0" Margin="0,12,0,0" Click="ApplyChangesButton_Click" />
                 </StackPanel>
             </TabItem>
         </TabControl>

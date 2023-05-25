@@ -2,6 +2,9 @@
 using System;
 using System.IO;
 using System.Numerics;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 
 using Veldrid;
 using Veldrid.ImageSharp;
@@ -62,6 +65,36 @@ namespace iRacingTV
 			ImGui.SetCursorPos( position );
 
 			ImGui.Image( textureId, size ?? new Vector2( texture.Width, texture.Height ), Vector2.Zero, Vector2.One, tintColor ?? Vector4.One );
+		}
+
+		public static async Task<OverlayTexture?> CreateViaUrlAsync( string url )
+		{
+			if ( url != string.Empty )
+			{
+				var attempts = 0;
+
+				while ( attempts < 5 )
+				{
+					attempts++;
+
+					try
+					{
+						var httpClient = new HttpClient();
+
+						var stream = await httpClient.GetStreamAsync( url );
+
+						return new OverlayTexture( stream );
+					}
+					catch ( Exception )
+					{
+						Thread.Sleep( 100 );
+					}
+				}
+
+				LogFile.Write( $"Failed to get an overlay texture after {attempts} attempts!\r\n{url}\r\n" );
+			}
+
+			return null;
 		}
 	}
 }

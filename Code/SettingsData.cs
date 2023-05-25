@@ -44,7 +44,7 @@ namespace iRacingTV
 
 		public string PracticeString = "PRACTICE";
 		public string QualifyingString = "QUALIFYING";
-		public string RaceString = "";
+		public string RaceString = string.Empty;
 		public string LapString = "LAP";
 		public string TimeString = "TIME";
 		public string LapsRemainingString = "TO GO";
@@ -107,11 +107,11 @@ namespace iRacingTV
 		public Vector2 PlaceTextPosition = new( 87, 256 );
 		public Vector4 PlaceTextColor = new( 176 / 255.0f, 181 / 255.0f, 177 / 255.0f, 1.0f );
 
-		public string CarNumberColorOverrideA = "";
-		public string CarNumberColorOverrideB = "";
-		public string CarNumberColorOverrideC = "";
-		public string CarNumberPatternOverride = "";
-		public string CarNumberSlantOverride = "";
+		public string CarNumberColorOverrideA = string.Empty;
+		public string CarNumberColorOverrideB = string.Empty;
+		public string CarNumberColorOverrideC = string.Empty;
+		public string CarNumberPatternOverride = string.Empty;
+		public string CarNumberSlantOverride = string.Empty;
 		public Vector2 CarNumberImagePosition = new( 120, 254 );
 		public int CarNumberImageHeight = 28;
 
@@ -139,9 +139,28 @@ namespace iRacingTV
 		public Vector2 VoiceOfCarImageOffset = new( 155, -37 );
 		public int VoiceOfCarImageHeight = 160;
 
-		public Vector2 SubtitleCenterPosition = new( 960, 800 );
+		public Vector2 SubtitleCenterPosition = new( 1146, 939 );
 		public Vector2 SubtitleBackgroundPadding = new( 20, 5 );
 		public uint SubtitleBackgroundColor = 0xDD000000;
-		public int SubtitleMaxWidth = 1100;
+		public int SubtitleMaxWidth = 1210;
+
+		public string Username = string.Empty;
+		public string Password = string.Empty;
+
+		public Vector2 TrackImagePosition = new( 541, 165 );
+		public Vector2 TrackImageSize = new( 1210, 680 );
+
+		public Vector2 TrackLogoImagePosition = new( 1147, 282 );
+
+		public bool EnableIntro = true;
+		public double IntroStartTime = 10;
+		public double IntroDuration = 100;
+
+		public Vector2 IntroPositionTextOffset = new( 30, 20 );
+		public Vector4 IntroPositionTextColor = new( 1, 1, 1, 1 );
+		public Vector2 IntroQualifyingTimeTextOffset = new( 30, 50 );
+		public Vector4 IntroQualifyingTimeTextColor = new( 176 / 255.0f, 181 / 255.0f, 177 / 255.0f, 1.0f );
+		public Vector2 IntroDriverNameTextOffset = new( 30, 80 );
+		public Vector4 IntroDriverNameTextColor = new( 35 / 255.0f, 31 / 255.0f, 32 / 255.0f, 1.0f );
 	}
 }

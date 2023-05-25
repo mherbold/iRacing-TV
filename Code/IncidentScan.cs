@@ -12,7 +12,6 @@ namespace iRacingTV
 		public static readonly List<IncidentData> incidentList = new();
 
 		public static int currentSession = 0;
-		public static int startOfRaceFrameNumber = 0;
 
 		public static int settleStartingFrameNumber = 0;
 		public static int settleTargetFrameNumber = 0;
@@ -21,13 +20,14 @@ namespace iRacingTV
 
 		public enum IncidentScanStateEnum
 		{
-			Startup,
+			RewindToStartOfReplay,
 			FindStartOfRace,
 			LookAtPaceCarWithScenicCamera,
 			WaitForLookAtPaceCarToComplete,
 			SearchForNextIncident,
 			AddIncidentToList,
-			NoMoreIncidents,
+			RewindToStartOfReplayAgain,
+			FindStartOfRaceAgain,
 			Complete,
 			Idle,
 			WaitForFrameNumberToSettle
@@ -57,7 +57,7 @@ namespace iRacingTV
 
 		public static void Start()
 		{
-			currentIncidentScanState = IncidentScanStateEnum.Startup;
+			currentIncidentScanState = IncidentScanStateEnum.RewindToStartOfReplay;
 
 			Director.isEnabled = false;
 			
@@ -78,17 +78,17 @@ namespace iRacingTV
 		{
 			switch ( currentIncidentScanState )
 			{
-				case IncidentScanStateEnum.Startup:
+				case IncidentScanStateEnum.RewindToStartOfReplay:
 
 					incidentList.Clear();
 
 					LogFile.Write( "Rewinding to the start of the replay...\r\n" );
 
 					IRSDK.AddMessage( BroadcastMessageTypes.ReplaySetPlaySpeed, 0, 0, 0 );
-					IRSDK.AddMessage( BroadcastMessageTypes.ReplaySetPlayPosition, 0, 1, 0 );
+					IRSDK.AddMessage( BroadcastMessageTypes.ReplaySetPlayPosition, (int) ReplayPositionModeTypes.Begin, 1, 0 );
 
 					currentSession = 1;
-
+					
 					LogFile.Write( "Finding the start of the race event...\r\n" );
 
 					WaitForFrameNumberToSettleState( IncidentScanStateEnum.FindStartOfRace, 1 );
@@ -99,7 +99,7 @@ namespace iRacingTV
 
 					if ( currentSession < IRSDK.normalizedSession.sessionCount )
 					{
-						LogFile.Write( "Jumping to the next event...\r\n" );
+						LogFile.Write( "Jumping to the next session...\r\n" );
 
 						currentSession++;
 
@@ -111,7 +111,7 @@ namespace iRacingTV
 					{
 						LogFile.Write( $"Start of race found at frame {IRSDK.normalizedSession.replayFrameNum}.\r\n" );
 
-						startOfRaceFrameNumber = IRSDK.normalizedSession.replayFrameNum;
+						LogFile.Write( "Switching to the scenic camera, looking at the pace car...\r\n" );
 
 						currentIncidentScanState = IncidentScanStateEnum.LookAtPaceCarWithScenicCamera;
 					}
@@ -155,31 +155,56 @@ namespace iRacingTV
 
 					break;
 
-				case IncidentScanStateEnum.NoMoreIncidents:
+				case IncidentScanStateEnum.RewindToStartOfReplayAgain:
 
-					LogFile.Write( $"Done with finding incidents, rewinding to the start of the race (frame {startOfRaceFrameNumber}).\r\n" );
-
-					IRSDK.AddMessage( BroadcastMessageTypes.ReplaySetPlayPosition, 0, startOfRaceFrameNumber, 0 );
+					LogFile.Write( $"Done with finding incidents, rewinding to the start of the replay again.\r\n" );
 
 					incidentList.Reverse();
 
-					WaitForFrameNumberToSettleState( IncidentScanStateEnum.Complete, startOfRaceFrameNumber );
+					IRSDK.AddMessage( BroadcastMessageTypes.ReplaySetPlayPosition, (int) ReplayPositionModeTypes.Begin, 1, 0 );
+
+					currentSession = 1;
+
+					LogFile.Write( "Finding the start of the race event again...\r\n" );
+
+					WaitForFrameNumberToSettleState( IncidentScanStateEnum.FindStartOfRaceAgain, 1 );
+
+					break;
+
+				case IncidentScanStateEnum.FindStartOfRaceAgain:
+
+					if ( currentSession < IRSDK.normalizedSession.sessionCount )
+					{
+						LogFile.Write( "Jumping to the next session...\r\n" );
+
+						currentSession++;
+
+						IRSDK.AddMessage( BroadcastMessageTypes.ReplaySearch, (int) ReplaySearchModeTypes.NextSession, 0, 0 );
+
+						WaitForFrameNumberToSettleState( IncidentScanStateEnum.FindStartOfRaceAgain, 0 );
+					}
+					else
+					{
+						LogFile.Write( $"Start of race found at frame {IRSDK.normalizedSession.replayFrameNum}.\r\n" );
+
+						currentIncidentScanState = IncidentScanStateEnum.Complete;
+					}
 
 					break;
 
 				case IncidentScanStateEnum.Complete:
 
+					LogFile.Write( "Incident scan is all done!\r\n" );
+
 					currentIncidentScanState = IncidentScanStateEnum.Idle;
 
 					MainWindow.instance?.Update();
 
-					IRSDK.forceResetRace = true;
+					IRSDK.sessionResetRequested = true;
 
 					break;
 
 				case IncidentScanStateEnum.WaitForFrameNumberToSettle:
-
-					// LogFile.Write( $"SFN={settleStartingFrameNumber}, TFN={settleTargetFrameNumber}, LFN={settleLastFrameNumber}, LOOP={settleLoopCount}\r\n" );
 
 					if ( settleTargetFrameNumber != 0 )
 					{
@@ -213,7 +238,7 @@ namespace iRacingTV
 
 							if ( settleLoopCount == IRSDK.MinimumSendMessageWaitTicks * 10 )
 							{
-								currentIncidentScanState = IncidentScanStateEnum.NoMoreIncidents;
+								currentIncidentScanState = IncidentScanStateEnum.RewindToStartOfReplayAgain;
 							}
 						}
 					}

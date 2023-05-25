@@ -18,14 +18,14 @@ namespace iRacingTV
 		public static DispatcherTimer dispatcherTimer = new( DispatcherPriority.Render );
 
 		public static bool keepRunning = true;
-		public static bool forceReinitialize = false;
+		public static bool applySettingChangesRequested = false;
 		public static int tickMutex = 0;
 
 		public static void Initialize()
 		{
 			LogFile.Initialize();
 
-			LogFile.Write( $"{AppName} is starting up!\r\n\r\n" );
+			LogFile.Write( $"{MainWindow.instance?.Title} is starting up!\r\n\r\n" );
 
 			Settings.Load();
 
@@ -38,7 +38,9 @@ namespace iRacingTV
 			{
 				Overlay.Initialize();
 
-				dispatcherTimer.Tick += new EventHandler( Tick );
+				await DataApi.InitializeAsync();
+
+				dispatcherTimer.Tick += async ( sender, e ) => await TickAsync( sender, e );
 				dispatcherTimer.Interval = TimeSpan.FromSeconds( 1 / 60.0f );
 				dispatcherTimer.Start();
 
@@ -57,15 +59,17 @@ namespace iRacingTV
 			}
 		}
 
-		private static void Tick( object? sender, EventArgs e )
+		private static async Task TickAsync( object? sender, EventArgs e )
 		{
 			int tickMutex = Interlocked.Increment( ref Program.tickMutex );
 
 			if ( tickMutex == 1 )
 			{
-				if ( forceReinitialize )
+				if ( applySettingChangesRequested )
 				{
-					forceReinitialize = false;
+					LogFile.Write( "Reinitializing..." );
+
+					applySettingChangesRequested = false;
 
 					Overlay.isVisible = false;
 
@@ -73,7 +77,9 @@ namespace iRacingTV
 
 					Overlay.Initialize();
 
-					IRSDK.forceResetRace = true;
+					await DataApi.InitializeAsync();
+
+					IRSDK.sessionResetRequested = true;
 				}
 
 				IRSDK.Update();

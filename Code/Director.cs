@@ -17,6 +17,10 @@ namespace iRacingTV
 				return;
 			}
 
+			var oldTargetCameraCarNumber = IRSDK.targetCameraCarNumber;
+			var oldTargetCameraGroup = IRSDK.targetCameraGroup;
+			var oldTargetCameraReason = IRSDK.targetCameraReason;
+
 			IncidentData? currentIncident = IncidentScan.GetCurrentIncident();
 
 			IRSDK.targetCameraReason = string.Empty;
@@ -40,10 +44,11 @@ namespace iRacingTV
 								highestLapPosition = normalizedCar.lapPosition;
 
 								IRSDK.targetCameraCarIdx = normalizedCar.carIdx;
+								IRSDK.targetCameraCarNumber = normalizedCar.carNumber;
 
 								IRSDK.cameraSwitchWaitTicksRemaining = IRSDK.sendMessageWaitTicksRemaining;
 
-								IRSDK.targetCameraReason = $"Checkered flag, car #{normalizedCar.carNumber} is closest to the finish line.";
+								IRSDK.targetCameraReason = "Checkered flag and this car is closest to the finish line";
 							}
 						}
 					}
@@ -58,8 +63,9 @@ namespace iRacingTV
 				var normalizedCar = IRSDK.normalizedSession.FindNormalizedCarByCarIdx( currentIncident.carIdx );
 
 				IRSDK.targetCameraCarIdx = currentIncident.carIdx;
+				IRSDK.targetCameraCarNumber = normalizedCar?.carNumber ?? "?!?";
 
-				IRSDK.targetCameraReason = $"Incident at frame {currentIncident.frameNumber} involving {normalizedCar?.userName ?? "<Unknown driver>"} in car #{normalizedCar?.carNumber ?? "<Unknown car number>"}.";
+				IRSDK.targetCameraReason = $"Incident at frame {currentIncident.frameNumber} involving this car";
 
 				driverWasTalking = false;
 			}
@@ -68,8 +74,9 @@ namespace iRacingTV
 				var normalizedCar = IRSDK.normalizedSession.sortedNormalizedCars[ 0 ];
 
 				IRSDK.targetCameraCarIdx = normalizedCar.carIdx;
+				IRSDK.targetCameraCarNumber = normalizedCar.carNumber;
 
-				IRSDK.targetCameraReason = $"Session flags = GreenHeld or StartReady or StartSet or StartGo, looking at lead car #{normalizedCar.carNumber}.";
+				IRSDK.targetCameraReason = "The race is about to start and this is the lead car";
 
 				driverWasTalking = false;
 			}
@@ -80,10 +87,11 @@ namespace iRacingTV
 				var normalizedCar = IRSDK.normalizedSession.FindNormalizedCarByCarIdx( IRSDK.targetCameraCarIdx );
 
 				IRSDK.targetCameraCarIdx = IRSDK.normalizedSession.radioTransmitCarIdx;
+				IRSDK.targetCameraCarNumber = normalizedCar?.carNumber ?? "?!?";
 
 				IRSDK.cameraSwitchWaitTicksRemaining = IRSDK.sendMessageWaitTicksRemaining;
 
-				IRSDK.targetCameraReason = $"{normalizedCar?.userName ?? "<Unknown driver>"} is talking.";
+				IRSDK.targetCameraReason = "Driver of this car is talking";
 
 				driverWasTalking = true;
 			}
@@ -98,8 +106,9 @@ namespace iRacingTV
 				cameraGroup = IRSDK.CameraGroupEnum.Scenic;
 
 				IRSDK.targetCameraCarIdx = 0;
+				IRSDK.targetCameraCarNumber = string.Empty;
 
-				IRSDK.targetCameraReason = "Race has not started yet.";
+				IRSDK.targetCameraReason = "The race has not started yet";
 			}
 			else
 			{
@@ -114,8 +123,9 @@ namespace iRacingTV
 							highestHeat = normalizedCar.heat;
 
 							IRSDK.targetCameraCarIdx = normalizedCar.carIdx;
+							IRSDK.targetCameraCarNumber = normalizedCar.carNumber;
 
-							IRSDK.targetCameraReason = $"Hottest car is #{normalizedCar.carNumber}.";
+							IRSDK.targetCameraReason = "This is the hottest car";
 						}
 					}
 				}
@@ -125,8 +135,9 @@ namespace iRacingTV
 					var normalizedCar = IRSDK.normalizedSession.sortedNormalizedCars[ 0 ];
 
 					IRSDK.targetCameraCarIdx = normalizedCar.carIdx;
+					IRSDK.targetCameraCarNumber = normalizedCar.carNumber;
 
-					IRSDK.targetCameraReason = $"No hot cars - focusing on leader car #{normalizedCar.carNumber}.";
+					IRSDK.targetCameraReason = "There are no hot cars and this is the lead car";
 				}
 
 				cameraGroup = IRSDK.CameraGroupEnum.Medium;
@@ -135,7 +146,7 @@ namespace iRacingTV
 				{
 					cameraGroup = IRSDK.CameraGroupEnum.Far;
 
-					IRSDK.targetCameraReason += " (Caution waving)";
+					IRSDK.targetCameraReason += " (caution waving)";
 				}
 				else
 				{
@@ -150,44 +161,45 @@ namespace iRacingTV
 								if ( nearestCarDistance < 50 )
 								{
 									IRSDK.targetCameraCarIdx = normalizedCar.carIdx;
+									IRSDK.targetCameraCarNumber = normalizedCar.carNumber;
 
-									IRSDK.targetCameraReason = $"Preferred car is #{normalizedCar.carNumber}.";
+									IRSDK.targetCameraReason = "This is the preferred car";
 
 									if ( IRSDK.normalizedSession.isUnderCaution )
 									{
 										cameraGroup = IRSDK.CameraGroupEnum.Far;
 
-										IRSDK.targetCameraReason += " (Under caution)";
+										IRSDK.targetCameraReason += " (under caution)";
 									}
 									else if ( normalizedCar.distanceToCarInFrontInMeters < 10 )
 									{
 										cameraGroup = IRSDK.CameraGroupEnum.Inside;
 
-										IRSDK.targetCameraReason += " (Car in front < 10m)";
+										IRSDK.targetCameraReason += " (car in front < 10m)";
 									}
 									else if ( nearestCarDistance < 10 )
 									{
 										cameraGroup = IRSDK.CameraGroupEnum.Close;
 
-										IRSDK.targetCameraReason += " (Car within 10m)";
+										IRSDK.targetCameraReason += " (car within 10m)";
 									}
 									else if ( nearestCarDistance < 20 )
 									{
 										cameraGroup = IRSDK.CameraGroupEnum.Medium;
 
-										IRSDK.targetCameraReason += " (Car within 20m)";
+										IRSDK.targetCameraReason += " (car within 20m)";
 									}
 									else if ( nearestCarDistance < 30 )
 									{
 										cameraGroup = IRSDK.CameraGroupEnum.Far;
 
-										IRSDK.targetCameraReason += " (Car within 30m)";
+										IRSDK.targetCameraReason += " (car within 30m)";
 									}
 									else
 									{
 										cameraGroup = IRSDK.CameraGroupEnum.Blimp;
 
-										IRSDK.targetCameraReason += " (Car within 50m)";
+										IRSDK.targetCameraReason += " (car within 50m)";
 									}
 								}
 
@@ -199,8 +211,12 @@ namespace iRacingTV
 			}
 
 			IRSDK.targetCameraGroupNumber = IRSDK.cameraGroupNumbers[ (int) cameraGroup ];
+			IRSDK.targetCameraGroup = cameraGroup;
 
-			IRSDK.targetCameraReason += $" ({cameraGroup})";
+			if ( ( IRSDK.targetCameraCarNumber != oldTargetCameraCarNumber ) || ( IRSDK.targetCameraGroup != oldTargetCameraGroup ) || ( IRSDK.targetCameraReason != oldTargetCameraReason ) )
+			{
+				MainWindow.instance?.UpdateTarget();
+			}
 		}
 	}
 }

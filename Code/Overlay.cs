@@ -256,7 +256,7 @@ namespace iRacingTV
 			{
 				DrawText( fontB, Settings.data.ModeTextPosition, Settings.data.ModeTextColor, Settings.data.PracticeString, 0 );
 			}
-			else if ( IRSDK.normalizedSession.isQualifying )
+			else if ( !IRSDK.normalizedSession.isRacing )
 			{
 				DrawText( fontB, Settings.data.ModeTextPosition, Settings.data.ModeTextColor, Settings.data.QualifyingString, 0 );
 			}
@@ -269,7 +269,7 @@ namespace iRacingTV
 
 			if ( IRSDK.normalizedSession.isTimedSession )
 			{
-				textString = GetTimeString( IRSDK.normalizedSession.sessionTimeRemain );
+				textString = GetTimeString( IRSDK.normalizedSession.sessionTimeRemain, false );
 
 				DrawText( fontB, Settings.data.TimeRemainingTextPosition, Settings.data.TimeRemainingTextColor, textString, 2 );
 			}
@@ -322,7 +322,7 @@ namespace iRacingTV
 
 			if ( IRSDK.normalizedSession.isTimedSession )
 			{
-				textString = GetTimeString( IRSDK.normalizedSession.sessionTimeTotal - IRSDK.normalizedSession.sessionTimeRemain ) + " | " + GetTimeString( IRSDK.normalizedSession.sessionTimeTotal );
+				textString = GetTimeString( IRSDK.normalizedSession.sessionTimeTotal - IRSDK.normalizedSession.sessionTimeRemain, false ) + " | " + GetTimeString( IRSDK.normalizedSession.sessionTimeTotal, false );
 
 				DrawText( fontA, Settings.data.CurrentTimeTextPosition, Settings.data.CurrentTimeTextColor, textString, 2 );
 			}
@@ -377,18 +377,9 @@ namespace iRacingTV
 
 				// driver name
 
-				if ( normalizedCar.abbrevName != null )
-				{
-					textString = Regex.Replace( normalizedCar.abbrevName, @"[\d-]", string.Empty );
-				}
-				else
-				{
-					textString = "---";
-				}
-
 				var driverNamePosition = Settings.data.DriverNameTextPosition + new Vector2( 0.0f, Settings.data.LeaderboardPlaceSpacing * leaderboardIndex );
 
-				DrawText( fontD, driverNamePosition, Settings.data.DriverNameTextColor, textString );
+				DrawText( fontD, driverNamePosition, Settings.data.DriverNameTextColor, normalizedCar.abbrevName );
 
 				// telemetry
 
@@ -405,7 +396,7 @@ namespace iRacingTV
 					textString = Settings.data.OutString;
 					textColor = Settings.data.OutTextColor;
 				}
-				else if ( !IRSDK.normalizedSession.isPracticing && !IRSDK.normalizedSession.isQualifying )
+				else if ( IRSDK.normalizedSession.isRacing )
 				{
 					if ( normalizedCar.hasCrossedStartLine )
 					{
@@ -479,17 +470,20 @@ namespace iRacingTV
 
 				// speed
 
-				if ( IRSDK.normalizedSession.camCarIdx == normalizedCar.carIdx )
+				if ( IRSDK.normalizedSession.isRacing && IRSDK.normalizedSession.raceHasStarted )
 				{
-					var currentTargetPosition = Settings.data.CurrentTargetImagePosition + new Vector2( 0.0f, Settings.data.LeaderboardPlaceSpacing * leaderboardIndex );
+					if ( IRSDK.normalizedSession.camCarIdx == normalizedCar.carIdx )
+					{
+						var currentTargetPosition = Settings.data.CurrentTargetImagePosition + new Vector2( 0.0f, Settings.data.LeaderboardPlaceSpacing * leaderboardIndex );
 
-					overlayTextures[ (int) TextureEnum.CurrentTarget ]?.Draw( currentTargetPosition );
+						overlayTextures[ (int) TextureEnum.CurrentTarget ]?.Draw( currentTargetPosition );
 
-					var speedPosition = currentTargetPosition + Settings.data.CurrentTargetSpeedTextOffset;
+						var speedPosition = currentTargetPosition + Settings.data.CurrentTargetSpeedTextOffset;
 
-					textString = $"{normalizedCar.speedInMetersPerSecond * ( IRSDK.normalizedSession.displayIsMetric ? 3.6f : 2.23694f ):0} {( IRSDK.normalizedSession.displayIsMetric ? Settings.data.KphString : Settings.data.MphString )}";
+						textString = $"{normalizedCar.speedInMetersPerSecond * ( IRSDK.normalizedSession.displayIsMetric ? 3.6f : 2.23694f ):0} {( IRSDK.normalizedSession.displayIsMetric ? Settings.data.KphString : Settings.data.MphString )}";
 
-					DrawText( fontC, speedPosition, Settings.data.CurrentTargetSpeedTextColor, textString, 2 );
+						DrawText( fontC, speedPosition, Settings.data.CurrentTargetSpeedTextColor, textString, 2 );
+					}
 				}
 
 				//
@@ -513,6 +507,101 @@ namespace iRacingTV
 			else if ( ( IRSDK.normalizedSession.sessionFlags & (uint) SessionFlags.StartGo ) != 0 )
 			{
 				overlayTextures[ (int) TextureEnum.FlagGreen ]?.Draw( Settings.data.FlagImagePosition );
+			}
+
+			// intro
+
+			if ( Settings.data.EnableIntro )
+			{
+				if ( IRSDK.normalizedSession.isRacing )
+				{
+					var secondsFromStart = IRSDK.normalizedSession.sessionTime - Settings.data.IntroStartTime;
+					var secondsRemaining = Settings.data.IntroDuration - secondsFromStart;
+
+					var introPct = secondsFromStart / Settings.data.IntroDuration;
+
+					if ( ( introPct >= 0.0f ) && ( introPct <= 1.0f ) )
+					{
+						if ( IRSDK.normalizedSession.largeTrackOverlayTexture != null )
+						{
+							var heightRatio = Settings.data.TrackImageSize.Y / IRSDK.normalizedSession.largeTrackOverlayTexture.texture.Height;
+							var adjustedWidth = IRSDK.normalizedSession.largeTrackOverlayTexture.texture.Width * heightRatio;
+							var xOffset = ( Settings.data.TrackImageSize.X - adjustedWidth ) * 0.5f;
+							var alpha = (float) Math.Min( Math.Min( 1.0f, secondsFromStart ), secondsRemaining );
+
+							IRSDK.normalizedSession.largeTrackOverlayTexture.Draw( Settings.data.TrackImagePosition + new Vector2( xOffset, 0 ), new Vector2( adjustedWidth, Settings.data.TrackImageSize.Y ), Vector4.One * alpha );
+
+							if ( IRSDK.normalizedSession.trackLogoOverlayTexture != null )
+							{
+								var position = Settings.data.TrackLogoImagePosition - new Vector2( IRSDK.normalizedSession.trackLogoOverlayTexture.texture.Width, IRSDK.normalizedSession.trackLogoOverlayTexture.texture.Height ) * 0.5f;
+
+								IRSDK.normalizedSession.trackLogoOverlayTexture.Draw( position, null, Vector4.One * alpha );
+							}
+						}
+
+						var numCarsPerStartingGridGroup = 4;
+
+						var numStartingGridGroups = (int) Math.Floor( (float) IRSDK.normalizedSession.numCars / numCarsPerStartingGridGroup ) + 1;
+
+						var startingGridStartTime = 3.0f;
+						var startingGridDuration = Settings.data.IntroDuration - 6.0f;
+
+						var startingGridGroupDuration = startingGridDuration / numStartingGridGroups;
+
+						if ( ( secondsFromStart >= startingGridStartTime ) && ( secondsFromStart <= startingGridStartTime + startingGridDuration ) )
+						{
+							var startingGridGroupPct = ( secondsFromStart - startingGridStartTime ) / startingGridGroupDuration;
+
+							var currentStartingGridGroup = (int) Math.Floor( startingGridGroupPct );
+
+							startingGridGroupPct -= Math.Floor( startingGridGroupPct );
+
+							var startingGridGroupSecondsFromStart = startingGridGroupPct * startingGridGroupDuration;
+							var startingGridGroupSecondsRemaining = startingGridGroupDuration - startingGridGroupSecondsFromStart;
+
+							var firstSlotPosition = currentStartingGridGroup * numCarsPerStartingGridGroup + 1;
+							var lastSlotPosition = currentStartingGridGroup * numCarsPerStartingGridGroup + numCarsPerStartingGridGroup;
+
+							var bodyImageWidth = Settings.data.TrackImageSize.X / numCarsPerStartingGridGroup;
+
+							foreach ( var normalizedCar in IRSDK.normalizedSession.sortedNormalizedCars )
+							{
+								if ( ( normalizedCar.qualifyingPosition >= firstSlotPosition ) && ( normalizedCar.qualifyingPosition <= lastSlotPosition ) )
+								{
+									if ( normalizedCar.bodyOverlayTexture != null )
+									{
+										var slot = normalizedCar.qualifyingPosition - firstSlotPosition;
+
+										var widthRatio = Settings.data.SeriesImageSize.X / normalizedCar.bodyOverlayTexture.texture.Width;
+										var adjustedHeight = normalizedCar.bodyOverlayTexture.texture.Height * widthRatio;
+
+										var alpha = (float) Math.Min( Math.Min( 1.0f, startingGridGroupSecondsFromStart - slot * 0.25f ), startingGridGroupSecondsRemaining - ( numCarsPerStartingGridGroup - slot - 1 ) * 0.25f );
+
+										var imagePosition = Settings.data.TrackImagePosition + new Vector2( bodyImageWidth * slot, Settings.data.TrackImageSize.Y - adjustedHeight );
+										var imageSize = new Vector2( bodyImageWidth, adjustedHeight );
+
+										normalizedCar.bodyOverlayTexture.Draw( imagePosition, imageSize, Vector4.One * alpha );
+
+										DrawText( fontA, imagePosition + Settings.data.IntroPositionTextOffset, Settings.data.IntroPositionTextColor * alpha, $"P{normalizedCar.qualifyingPosition}" );
+
+										if ( normalizedCar.qualifyingTime > 1 )
+										{
+											textString = GetTimeString( normalizedCar.qualifyingTime, true );
+										}
+										else
+										{
+											textString = "DNQ";
+										}
+
+										DrawText( fontB, imagePosition + Settings.data.IntroQualifyingTimeTextOffset, Settings.data.IntroQualifyingTimeTextColor * alpha, $"{textString}" );
+
+										DrawText( fontA, imagePosition + Settings.data.IntroDriverNameTextOffset, Settings.data.IntroDriverNameTextColor * alpha, normalizedCar.abbrevName );
+									}
+								}
+							}
+						}
+					}
+				}
 			}
 
 			// voice of
@@ -630,17 +719,28 @@ namespace iRacingTV
 			ImGui.PopFont();
 		}
 
-		public static string GetTimeString( double timeInSeconds )
+		public static string GetTimeString( double timeInSeconds, bool includeMilliseconds )
 		{
 			TimeSpan time = TimeSpan.FromSeconds( timeInSeconds );
 
 			if ( time.Hours > 0 )
 			{
-				return time.ToString( @"hh\:mm\:ss" );
+				return time.ToString( @"h\:mm\:ss" );
+			}
+			else if ( includeMilliseconds )
+			{
+				if ( time.Minutes > 0 )
+				{
+					return time.ToString( @"m\:ss\.fff" );
+				}
+				else
+				{
+					return time.ToString( @"ss\.fff" );
+				}
 			}
 			else
 			{
-				return time.ToString( @"mm\:ss" );
+				return time.ToString( @"m\:ss" );
 			}
 		}
 

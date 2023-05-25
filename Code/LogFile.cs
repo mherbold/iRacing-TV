@@ -1,11 +1,14 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 
 namespace iRacingTV
 {
 	internal static class LogFile
 	{
 		public const string fileName = $"{Program.AppName}.log";
+
+		public static ReaderWriterLock readerWriterLock = new();
 
 		public static void Initialize()
 		{
@@ -17,9 +20,18 @@ namespace iRacingTV
 
 		public static void Write( string message )
 		{
-			File.AppendAllText( Program.appDataFolderPath + fileName, message );
-
 			MainWindow.instance?.AddToStatusTextBox( message );
+
+			try
+			{
+				readerWriterLock.AcquireWriterLock( 250 );
+
+				File.AppendAllText( Program.appDataFolderPath + fileName, message );
+			}
+			finally
+			{
+				readerWriterLock.ReleaseWriterLock();
+			}
 		}
 
 		public static void WriteException( Exception exception )

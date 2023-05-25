@@ -1,7 +1,10 @@
-﻿using irsdkSharp.Serialization.Models.Session.DriverInfo;
+﻿
 using System;
-using System.Net.Http;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+
+using irsdkSharp.Serialization.Models.Session.DriverInfo;
 
 namespace iRacingTV
 {
@@ -39,14 +42,16 @@ namespace iRacingTV
 		public double[] checkpoints = new double[ 100 ];
 
 		public int leaderboardPosition = int.MaxValue;
-		public int qualifyingPosition = int.MaxValue;
 		public int officialPosition = int.MaxValue;
+		public int qualifyingPosition = int.MaxValue;
+		public float qualifyingTime = 0;
 
 		public OverlayTexture? carOverlayTexture = null;
 		public OverlayTexture? carNumberOverlayTexture = null;
 		public OverlayTexture? helmetOverlayTexture = null;
+		public OverlayTexture? bodyOverlayTexture = null;
 
-		public async void Initialize( int carIdx, bool reset )
+		public void Initialize( int carIdx, bool reset )
 		{
 			if ( IRSDK.session == null ) { throw new Exception( "iRacing session data is missing." ); }
 
@@ -101,24 +106,20 @@ namespace iRacingTV
 				}
 
 				leaderboardPosition = int.MaxValue;
-				qualifyingPosition = int.MaxValue;
 				officialPosition = int.MaxValue;
+				qualifyingPosition = int.MaxValue;
+				qualifyingTime = 0;
 
 				carOverlayTexture = null;
 				carNumberOverlayTexture = null;
 				helmetOverlayTexture = null;
+				bodyOverlayTexture = null;
 
 				if ( ( driverIdx != -1 ) && ( driver != null ) )
 				{
-					userName = driver.UserName;
-					abbrevName = driver.AbbrevName;
+					userName = Regex.Replace( driver.UserName, @"[\d]", string.Empty );
 
-					if ( abbrevName == null )
-					{
-						var userNameParts = userName.Split( " ", 2 );
-
-						abbrevName = $"{userNameParts[ 0 ]?[ ..1 ] ?? ""}. {userNameParts[ 1 ] ?? ""}";
-					}
+					GenerateAbbrevName( false );
 
 					carNumber = driver.CarNumber;
 					carNumberRaw = driver.CarNumberRaw;
@@ -136,6 +137,7 @@ namespace iRacingTV
 									if ( position.CarIdx == carIdx )
 									{
 										qualifyingPosition = position.Position;
+										qualifyingTime = position.Time;
 										break;
 									}
 								}
@@ -146,72 +148,53 @@ namespace iRacingTV
 
 						if ( numberDesignMatch.Success )
 						{
-							try
-							{
-								var colorA = ( Settings.data.CarNumberColorOverrideA != string.Empty ) ? Settings.data.CarNumberColorOverrideA : numberDesignMatch.Groups[ 3 ].Value;
-								var colorB = ( Settings.data.CarNumberColorOverrideB != string.Empty ) ? Settings.data.CarNumberColorOverrideB : numberDesignMatch.Groups[ 4 ].Value;
-								var colorC = ( Settings.data.CarNumberColorOverrideC != string.Empty ) ? Settings.data.CarNumberColorOverrideC : numberDesignMatch.Groups[ 5 ].Value;
+							var colorA = ( Settings.data.CarNumberColorOverrideA != string.Empty ) ? Settings.data.CarNumberColorOverrideA : numberDesignMatch.Groups[ 3 ].Value;
+							var colorB = ( Settings.data.CarNumberColorOverrideB != string.Empty ) ? Settings.data.CarNumberColorOverrideB : numberDesignMatch.Groups[ 4 ].Value;
+							var colorC = ( Settings.data.CarNumberColorOverrideC != string.Empty ) ? Settings.data.CarNumberColorOverrideC : numberDesignMatch.Groups[ 5 ].Value;
 
-								var pattern = ( Settings.data.CarNumberPatternOverride != string.Empty ) ? Settings.data.CarNumberPatternOverride : numberDesignMatch.Groups[ 1 ].Value;
-								var slant = ( Settings.data.CarNumberSlantOverride != string.Empty ) ? Settings.data.CarNumberSlantOverride : numberDesignMatch.Groups[ 2 ].Value;
+							var pattern = ( Settings.data.CarNumberPatternOverride != string.Empty ) ? Settings.data.CarNumberPatternOverride : numberDesignMatch.Groups[ 1 ].Value;
+							var slant = ( Settings.data.CarNumberSlantOverride != string.Empty ) ? Settings.data.CarNumberSlantOverride : numberDesignMatch.Groups[ 2 ].Value;
 
-								var carNumberUrl = $"http://localhost:32034/pk_number.png?size={Settings.data.CarNumberImageHeight}&view=0&number={carNumber}&numPat={pattern}&numCol={colorA},{colorB},{colorC}&numSlnt={slant}";
+							var carNumberUrl = $"http://localhost:32034/pk_number.png?size={Settings.data.CarNumberImageHeight}&view=0&number={carNumber}&numPat={pattern}&numCol={colorA},{colorB},{colorC}&numSlnt={slant}";
 
-								var httpClient = new HttpClient();
-
-								var stream = await httpClient.GetStreamAsync( carNumberUrl );
-
-								carNumberOverlayTexture = new OverlayTexture( stream );
-							}
-							catch ( Exception )
-							{
-
-							}
+							_ = Task.Run( async () => { carNumberOverlayTexture = await OverlayTexture.CreateViaUrlAsync( carNumberUrl ); } );
 						}
 
 						var carDesignMatch = CarDesignStringRegex().Match( driver.CarDesignStr );
 
 						if ( numberDesignMatch.Success && carDesignMatch.Success )
 						{
-							try
-							{
-								var licColor = driver.LicColor[ 2.. ];
-								var carPath = driver.CarPath.Replace( " ", "%5C" );
+							var licColor = driver.LicColor[ 2.. ];
+							var carPath = driver.CarPath.Replace( " ", "%5C" );
 
-								var carUrl = $"http://localhost:32034/pk_car.png?size=2&view=1&licCol={licColor}&club={driver.ClubID}&sponsors={driver.CarSponsor_1},{driver.CarSponsor_2}&numPat={numberDesignMatch.Groups[ 1 ].Value}&numCol={numberDesignMatch.Groups[ 3 ].Value},{numberDesignMatch.Groups[ 4 ].Value},{numberDesignMatch.Groups[ 5 ].Value}&numSlnt={numberDesignMatch.Groups[ 2 ].Value}&number={carNumber}&carPath={carPath}&carPat={carDesignMatch.Groups[ 1 ].Value}&carCol={carDesignMatch.Groups[ 2 ].Value},{carDesignMatch.Groups[ 3 ].Value},{carDesignMatch.Groups[ 4 ].Value}&carRimType=2&carRimCol={carDesignMatch.Groups[ 5 ].Value}";
+							var carUrl = $"http://localhost:32034/pk_car.png?size=2&view=1&licCol={licColor}&club={driver.ClubID}&sponsors={driver.CarSponsor_1},{driver.CarSponsor_2}&numPat={numberDesignMatch.Groups[ 1 ].Value}&numCol={numberDesignMatch.Groups[ 3 ].Value},{numberDesignMatch.Groups[ 4 ].Value},{numberDesignMatch.Groups[ 5 ].Value}&numSlnt={numberDesignMatch.Groups[ 2 ].Value}&number={carNumber}&carPath={carPath}&carPat={carDesignMatch.Groups[ 1 ].Value}&carCol={carDesignMatch.Groups[ 2 ].Value},{carDesignMatch.Groups[ 3 ].Value},{carDesignMatch.Groups[ 4 ].Value}&carRimType=2&carRimCol={carDesignMatch.Groups[ 5 ].Value}";
 
-								var httpClient = new HttpClient();
-
-								var stream = await httpClient.GetStreamAsync( carUrl );
-
-								carOverlayTexture = new OverlayTexture( stream );
-							}
-							catch ( Exception )
-							{
-
-							}
+							_ = Task.Run( async () => { carOverlayTexture = await OverlayTexture.CreateViaUrlAsync( carUrl ); } );
 						}
 
 						var helmetDesignMatch = HelmetDesignStringRegex().Match( driver.HelmetDesignStr );
 
 						if ( helmetDesignMatch.Success )
 						{
-							try
-							{
-								var licColor = driver.LicColor[ 2.. ];
+							var licColor = driver.LicColor[ 2.. ];
+							var helmetType = 0; // TODO add support for this in next season
 
-								var helmetUrl = $"http://localhost:32034/pk_helmet.png?size=7&hlmtPat={helmetDesignMatch.Groups[ 1 ].Value}&licCol={licColor}&hlmtCol={numberDesignMatch.Groups[ 2 ].Value},{numberDesignMatch.Groups[ 3 ].Value},{numberDesignMatch.Groups[ 4 ].Value}&view=1&hlmtType=0";
+							var helmetUrl = $"http://localhost:32034/pk_helmet.png?size=7&hlmtPat={helmetDesignMatch.Groups[ 1 ].Value}&licCol={licColor}&hlmtCol={helmetDesignMatch.Groups[ 2 ].Value},{helmetDesignMatch.Groups[ 3 ].Value},{helmetDesignMatch.Groups[ 4 ].Value}&view=1&hlmtType={helmetType}";
 
-								var httpClient = new HttpClient();
+							_ = Task.Run( async () => { helmetOverlayTexture = await OverlayTexture.CreateViaUrlAsync( helmetUrl ); } );
+						}
 
-								var stream = await httpClient.GetStreamAsync( helmetUrl );
+						var suitDesignMatch = SuitDesignStringRegex().Match( driver.SuitDesignStr );
 
-								helmetOverlayTexture = new OverlayTexture( stream );
-							}
-							catch ( Exception )
-							{
+						if ( suitDesignMatch.Success && helmetDesignMatch.Success )
+						{
+							var suitType = 0; // TODO add support for this in next season
+							var helmetType = 0; // TODO add support for this in next season
+							var faceType = 0; // TODO add support for this in next season
 
-							}
+							var bodyUrl = $"http://localhost:32034/pk_body.png?size=1&view=2&suitType={suitType}&suitPat={suitDesignMatch.Groups[ 1 ].Value}&suitCol={suitDesignMatch.Groups[ 2 ].Value},{suitDesignMatch.Groups[ 3 ].Value},{suitDesignMatch.Groups[ 4 ].Value}&hlmtType={helmetType}&hlmtPat={helmetDesignMatch.Groups[ 1 ].Value}&hlmtCol={helmetDesignMatch.Groups[ 2 ].Value},{helmetDesignMatch.Groups[ 3 ].Value},{helmetDesignMatch.Groups[ 4 ].Value}&faceType={faceType}";
+
+							_ = Task.Run( async () => { bodyOverlayTexture = await OverlayTexture.CreateViaUrlAsync( bodyUrl ); } );
 						}
 					}
 				}
@@ -286,6 +269,28 @@ namespace iRacingTV
 			speedInMetersPerSecond = distanceMovedInMeters / normalizedSession.deltaSessionTime;
 		}
 
+		public void GenerateAbbrevName( bool includeFirstNameInitial )
+		{
+			var userNameParts = userName.Split( " " );
+
+			if ( userNameParts.Length == 0 )
+			{
+				abbrevName = "---";
+			}
+			else if ( userNameParts.Length == 1 )
+			{
+				abbrevName = userNameParts[ 0 ];
+			}
+			else if ( includeFirstNameInitial )
+			{
+				abbrevName = $"{userNameParts[ 0 ][ ..1 ]}. {userNameParts[ userNameParts.Length - 1 ]}";
+			}
+			else
+			{
+				abbrevName = userNameParts[ userNameParts.Length - 1 ];
+			}
+		}
+
 		public static Comparison<NormalizedCar> LapPositionComparison = delegate ( NormalizedCar object1, NormalizedCar object2 )
 		{
 			if ( object1.includeInLeaderboard && object2.includeInLeaderboard )
@@ -348,5 +353,8 @@ namespace iRacingTV
 
 		[GeneratedRegex( "(\\d+),(.{6}),(.{6}),(.{6})" )]
 		public static partial Regex HelmetDesignStringRegex();
+
+		[GeneratedRegex( "(\\d+),(.{6}),(.{6}),(.{6})" )]
+		public static partial Regex SuitDesignStringRegex();
 	}
 }

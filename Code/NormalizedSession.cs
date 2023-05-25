@@ -1,9 +1,11 @@
-﻿using irsdkSharp.Serialization.Enums.Fastest;
+﻿
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Net.Http;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+
+using irsdkSharp.Serialization.Enums.Fastest;
 
 namespace iRacingTV
 {
@@ -24,7 +26,7 @@ namespace iRacingTV
 		public bool isCheckeredFlag = false;
 		public bool isTimedSession = false;
 		public bool isPracticing = false;
-		public bool isQualifying = false;
+		public bool isRacing = false;
 
 		public float deltaSessionTime = 0;
 		public double sessionTime = 0;
@@ -47,12 +49,18 @@ namespace iRacingTV
 		public int camCameraNumber = -1;
 		public int camCarIdx = -1;
 
+		public int numCars = 0;
+
 		public ChatLogData? chatLogData = null;
 
 		public NormalizedCar[] normalizedCars = new NormalizedCar[ MaxNumCars ];
 		public List<NormalizedCar> sortedNormalizedCars = new( MaxNumCars );
 
 		public OverlayTexture? seriesOverlayTexture = null;
+		public OverlayTexture? largeTrackOverlayTexture = null;
+		public OverlayTexture? trackLogoOverlayTexture = null;
+
+		public List<OverlayTexture> trackScreenshotOverlayTextureList = new();
 
 		public NormalizedSession()
 		{
@@ -64,13 +72,15 @@ namespace iRacingTV
 			}
 		}
 
-		public async void Initialize( bool forceResetRace )
+		public void Initialize( bool forceResetRace )
 		{
 			if ( IRSDK.session == null ) { throw new Exception( "iRacing session data is missing." ); }
 			if ( IRSDK.data == null ) { throw new Exception( "iRacing telemetry data is missing." ); }
 
 			if ( ( sessionID != IRSDK.session.WeekendInfo.SessionID ) || ( subSessionID != IRSDK.session.WeekendInfo.SubSessionID ) || forceResetRace )
 			{
+				trackScreenshotOverlayTextureList.Clear();
+
 				sessionID = IRSDK.session.WeekendInfo.SessionID;
 				subSessionID = IRSDK.session.WeekendInfo.SubSessionID;
 				sessionCount = IRSDK.session.SessionInfo.Sessions.Count;
@@ -97,25 +107,65 @@ namespace iRacingTV
 
 				chatLogData = null;
 
+				numCars = 0;
+
 				for ( var carIdx = 0; carIdx < MaxNumCars; carIdx++ )
 				{
 					normalizedCars[ carIdx ].Initialize( carIdx, true );
+
+					if ( normalizedCars[ carIdx ].includeInLeaderboard )
+					{
+						numCars++;
+					}
 				}
 
-				try
+				for ( var carIdx = 0; carIdx < MaxNumCars; carIdx++ )
 				{
-					var seriesImageUrl = $"https://ir-core-sites.iracing.com/members/member_images/series/seriesid_{IRSDK.session.WeekendInfo.SeriesID}/logo.jpg";
+					var normalizedCar = normalizedCars[ carIdx ];
 
-					var httpClient = new HttpClient();
+					var originalAbbrevName = normalizedCar.abbrevName;
 
-					var stream = await httpClient.GetStreamAsync( seriesImageUrl );
+					for ( var otherCarIdx = carIdx + 1; otherCarIdx < MaxNumCars; otherCarIdx++ )
+					{
+						var otherNormalizedCar = normalizedCars[ otherCarIdx ];
 
-					seriesOverlayTexture = new OverlayTexture( stream );
+						if ( otherNormalizedCar.abbrevName == originalAbbrevName )
+						{
+							normalizedCar.GenerateAbbrevName( true );
+							otherNormalizedCar.GenerateAbbrevName( true );
+						}
+					}
 				}
-				catch ( Exception )
+
+				var seriesImageUrl = $"https://ir-core-sites.iracing.com/members/member_images/series/seriesid_{IRSDK.session.WeekendInfo.SeriesID}/logo.jpg";
+
+				_ = Task.Run( async () => { seriesOverlayTexture = await OverlayTexture.CreateViaUrlAsync( seriesImageUrl ); } );
+
+				var trackImageUrl = DataApi.GetLargeTrackImageUrl( IRSDK.session.WeekendInfo.TrackID );
+
+				_ = Task.Run( async () => { largeTrackOverlayTexture = await OverlayTexture.CreateViaUrlAsync( trackImageUrl ); } );
+
+				var trackLogoUrl = DataApi.GetTrackLogoUrl( IRSDK.session.WeekendInfo.TrackID );
+
+				_ = Task.Run( async () => { trackLogoOverlayTexture = await OverlayTexture.CreateViaUrlAsync( trackLogoUrl ); } );
+
+				_ = Task.Run( async () =>
 				{
+					var trackScreenshotUrls = await DataApi.GetTrackScreenshotUrlsAsync( IRSDK.session.WeekendInfo.TrackID );
 
-				}
+					if ( trackScreenshotUrls != null )
+					{
+						foreach ( var trackScreenshotUrl in trackScreenshotUrls )
+						{
+							var overlayTexture = await OverlayTexture.CreateViaUrlAsync( trackScreenshotUrl.ToString() );
+
+							if ( overlayTexture != null )
+							{
+								trackScreenshotOverlayTextureList.Add( overlayTexture );
+							}
+						}
+					}
+				} );
 			}
 			else
 			{
@@ -146,9 +196,9 @@ namespace iRacingTV
 			isTimedSession = IRSDK.data.SessionLapsTotal == 32767;
 
 			isPracticing = IRSDK.session.SessionInfo.Sessions[ IRSDK.data.SessionNum ].SessionName == "PRACTICE";
-			isQualifying = IRSDK.session.SessionInfo.Sessions[ IRSDK.data.SessionNum ].SessionName == "QUALIFY";
+			isRacing = IRSDK.session.SessionInfo.Sessions[ IRSDK.data.SessionNum ].SessionName == "RACE";
 
-			if ( !isPracticing && !isQualifying )
+			if ( isRacing )
 			{
 				isCheckeredFlag |= ( sessionFlags & ( (uint) SessionFlags.Checkered ) ) != 0;
 
@@ -240,7 +290,7 @@ namespace iRacingTV
 					{
 						normalizedCar.leaderboardPosition = 1;
 					}
-					else if ( isQualifying )
+					else if ( !isRacing )
 					{
 						normalizedCar.leaderboardPosition = normalizedCar.officialPosition;
 					}
@@ -289,7 +339,7 @@ namespace iRacingTV
 
 				raceHasStarted |= sortedNormalizedCars[ 0 ].raceHasStarted;
 
-				if ( !isPracticing && !isQualifying )
+				if ( isRacing )
 				{
 					isCheckeredFlag |= sortedNormalizedCars[ 0 ].lapPosition >= ( sessionLapsTotal - ( 200.0f / trackLengthInMeters ) );
 				}

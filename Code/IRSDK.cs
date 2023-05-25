@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -19,7 +20,7 @@ namespace iRacingTV
 
 		public static int sessionInfoUpdate = -1;
 		public static int sessionNum = -1;
-		public static bool forceResetRace = false;
+		public static bool sessionResetRequested = false;
 
 		public static IRacingSessionModel? session = null;
 		public static DataModel? data = null;
@@ -28,6 +29,7 @@ namespace iRacingTV
 
 		public enum CameraGroupEnum
 		{
+			None,
 			Inside,
 			Close,
 			Medium,
@@ -52,7 +54,9 @@ namespace iRacingTV
 
 		public static bool cameraSwitchingEnabled = false;
 		public static int targetCameraCarIdx = 0;
+		public static string targetCameraCarNumber = string.Empty;
 		public static int targetCameraGroupNumber = 0;
+		public static CameraGroupEnum targetCameraGroup = CameraGroupEnum.None;
 		public static string targetCameraReason = string.Empty;
 
 		public static readonly List<Message> messageBuffer = new();
@@ -81,7 +85,7 @@ namespace iRacingTV
 			{
 				sessionInfoUpdate = -1;
 				sessionNum = -1;
-				forceResetRace = false;
+				sessionResetRequested = false;
 
 				session = null;
 				data = null;
@@ -95,7 +99,9 @@ namespace iRacingTV
 
 				cameraSwitchingEnabled = false;
 				targetCameraCarIdx = 0;
+				targetCameraCarNumber = string.Empty;
 				targetCameraGroupNumber = 0;
+				targetCameraGroup = CameraGroupEnum.None;
 				targetCameraReason = string.Empty;
 
 				messageBuffer.Clear();
@@ -106,19 +112,33 @@ namespace iRacingTV
 		{
 			data = iRacingSdk.GetSerializedData().Data;
 
-			if ( sessionNum != data.SessionNum )
+			if ( !IncidentScan.IsRunning() )
 			{
-				forceResetRace = true;
+				if ( sessionNum != data.SessionNum )
+				{
+					LogFile.Write( $"The session number has changed - we are now in session #{data.SessionNum + 1}.\r\n" );
+
+					sessionResetRequested = true;
+				}
 			}
 
-			if ( ( sessionInfoUpdate != iRacingSdk.Header.SessionInfoUpdate ) || forceResetRace )
+			if ( ( sessionInfoUpdate != iRacingSdk.Header.SessionInfoUpdate ) || sessionResetRequested )
 			{
+				if ( sessionResetRequested )
+				{
+					LogFile.Write( "Session reset has been requested, doing a hard reinitialize.\r\n" );
+				}
+				else
+				{
+					LogFile.Write( "Session information has been updated, doing a soft reinitialize.\r\n" );
+				}
+
 				sessionInfoUpdate = iRacingSdk.Header.SessionInfoUpdate;
 				sessionNum = data.SessionNum;
 
 				session = iRacingSdk.GetSerializedSessionInfo();
 
-				normalizedSession.Initialize( forceResetRace );
+				normalizedSession.Initialize( sessionResetRequested );
 
 				UpdateCameraGroupNumbers();
 
@@ -128,7 +148,7 @@ namespace iRacingTV
 
 				MainWindow.instance?.Update();
 
-				forceResetRace = false;
+				sessionResetRequested = false;
 			}
 
 			normalizedSession.Update();
@@ -222,8 +242,6 @@ namespace iRacingTV
 
 							sendMessageWaitTicksRemaining = MinimumSendMessageWaitTicks;
 							cameraSwitchWaitTicksRemaining = MinimumCameraSwitchWaitTicks;
-
-							LogFile.Write( $"Camera switched: {targetCameraReason}\r\n" );
 						}
 					}
 				}
