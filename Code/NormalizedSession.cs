@@ -54,7 +54,8 @@ namespace iRacingTV
 		public ChatLogData? chatLogData = null;
 
 		public NormalizedCar[] normalizedCars = new NormalizedCar[ MaxNumCars ];
-		public List<NormalizedCar> sortedNormalizedCars = new( MaxNumCars );
+		public List<NormalizedCar> leaderboardSortedNormalizedCars = new( MaxNumCars );
+		public List<NormalizedCar> heatSortedNormalizedCars = new( MaxNumCars );
 
 		public OverlayTexture? seriesOverlayTexture = null;
 		public OverlayTexture? largeTrackOverlayTexture = null;
@@ -68,7 +69,8 @@ namespace iRacingTV
 			{
 				normalizedCars[ i ] = new NormalizedCar();
 
-				sortedNormalizedCars.Add( normalizedCars[ i ] );
+				leaderboardSortedNormalizedCars.Add( normalizedCars[ i ] );
+				heatSortedNormalizedCars.Add( normalizedCars[ i ] );
 			}
 		}
 
@@ -279,12 +281,16 @@ namespace iRacingTV
 					}
 				}
 
-				sortedNormalizedCars.Sort( NormalizedCar.LapPositionComparison );
+				leaderboardSortedNormalizedCars.Sort( NormalizedCar.LapPositionComparison );
+
+				heatSortedNormalizedCars.Sort( NormalizedCar.HeatComparison );
+
+				MainWindow.instance?.UpdateHottestCars();
 
 				var leaderboardPosition = 1;
-				var leaderLapPosition = sortedNormalizedCars[ 0 ].lapPosition;
+				var leaderLapPosition = leaderboardSortedNormalizedCars[ 0 ].lapPosition;
 
-				foreach ( var normalizedCar in sortedNormalizedCars )
+				foreach ( var normalizedCar in leaderboardSortedNormalizedCars )
 				{
 					if ( isPracticing )
 					{
@@ -328,20 +334,20 @@ namespace iRacingTV
 					normalizedCar.lapPositionRelativeToLeader = leaderLapPosition - normalizedCar.lapPosition;
 				}
 
-				sortedNormalizedCars.Sort( NormalizedCar.LeaderboardPositionComparison );
+				leaderboardSortedNormalizedCars.Sort( NormalizedCar.LeaderboardPositionComparison );
 
 				leaderboardPosition = 1;
 
-				foreach ( var normalizedCar in sortedNormalizedCars )
+				foreach ( var normalizedCar in leaderboardSortedNormalizedCars )
 				{
 					normalizedCar.leaderboardPosition = leaderboardPosition++;
 				}
 
-				raceHasStarted |= sortedNormalizedCars[ 0 ].raceHasStarted;
+				raceHasStarted |= leaderboardSortedNormalizedCars[ 0 ].raceHasStarted;
 
 				if ( isRacing )
 				{
-					isCheckeredFlag |= sortedNormalizedCars[ 0 ].lapPosition >= ( sessionLapsTotal - ( 200.0f / trackLengthInMeters ) );
+					isCheckeredFlag |= leaderboardSortedNormalizedCars[ 0 ].lapPosition >= ( sessionLapsTotal - ( 200.0f / trackLengthInMeters ) );
 				}
 			}
 		}

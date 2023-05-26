@@ -19,6 +19,8 @@ namespace iRacingTV
 		public string ScenicCameraGroupName = "Scenic";
 
 		public string PreferredCarNumber = string.Empty;
+		public bool PreferredCarLockOnHeatEnabled = true;
+		public float PreferredCarLockOnHeat = 0.85f;
 
 		public bool SwitchCameraToTalkingDriver = true;
 		public bool ShowLaps = false;

@@ -318,6 +318,33 @@ namespace iRacingTV
 			}
 		};
 
+		public static Comparison<NormalizedCar> HeatComparison = delegate ( NormalizedCar object1, NormalizedCar object2 )
+		{
+			if ( object1.includeInLeaderboard && object2.includeInLeaderboard )
+			{
+				if ( object1.heat == object2.heat )
+				{
+					return object1.carIdx.CompareTo( object2.carIdx );
+				}
+				else
+				{
+					return object2.heat.CompareTo( object1.heat );
+				}
+			}
+			else if ( object1.includeInLeaderboard )
+			{
+				return -1;
+			}
+			else if ( object2.includeInLeaderboard )
+			{
+				return 1;
+			}
+			else
+			{
+				return 0;
+			}
+		};
+
 		public static Comparison<NormalizedCar> LeaderboardPositionComparison = delegate ( NormalizedCar object1, NormalizedCar object2 )
 		{
 			if ( object1.includeInLeaderboard && object2.includeInLeaderboard )

@@ -27,7 +27,24 @@ namespace iRacingTV
 
 			var cameraGroup = IRSDK.CameraGroupEnum.Far;
 
-			if ( IRSDK.normalizedSession.isCheckeredFlag )
+			NormalizedCar? preferredCar = null;
+
+			foreach ( var normalizedCar in IRSDK.normalizedSession.normalizedCars )
+			{
+				if ( normalizedCar.includeInLeaderboard && ( normalizedCar.carNumber == Settings.data.PreferredCarNumber ) )
+				{
+					preferredCar = normalizedCar;
+					break;
+				}
+			}
+
+			if ( Settings.data.PreferredCarLockOnHeatEnabled && ( preferredCar.heat >= Settings.data.PreferredCarLockOnHeat ) )
+			{
+				IRSDK.targetCameraCarIdx = preferredCar.carIdx;
+				IRSDK.targetCameraCarNumber = preferredCar.carNumber;
+				IRSDK.targetCameraReason = $"Preferred car heat is >= {Settings.data.PreferredCarLockOnHeat}";
+			}
+			else if ( IRSDK.normalizedSession.isCheckeredFlag )
 			{
 				cameraGroup = IRSDK.CameraGroupEnum.Medium;
 
@@ -45,9 +62,7 @@ namespace iRacingTV
 
 								IRSDK.targetCameraCarIdx = normalizedCar.carIdx;
 								IRSDK.targetCameraCarNumber = normalizedCar.carNumber;
-
 								IRSDK.cameraSwitchWaitTicksRemaining = IRSDK.sendMessageWaitTicksRemaining;
-
 								IRSDK.targetCameraReason = "Checkered flag and this car is closest to the finish line";
 							}
 						}
@@ -64,18 +79,16 @@ namespace iRacingTV
 
 				IRSDK.targetCameraCarIdx = currentIncident.carIdx;
 				IRSDK.targetCameraCarNumber = normalizedCar?.carNumber ?? "?!?";
-
 				IRSDK.targetCameraReason = $"Incident at frame {currentIncident.frameNumber} involving this car";
 
 				driverWasTalking = false;
 			}
 			else if ( ( IRSDK.normalizedSession.sessionFlags & ( (uint) SessionFlags.GreenHeld | (uint) SessionFlags.StartReady | (uint) SessionFlags.StartSet | (uint) SessionFlags.StartGo ) ) != 0 )
 			{
-				var normalizedCar = IRSDK.normalizedSession.sortedNormalizedCars[ 0 ];
+				var normalizedCar = IRSDK.normalizedSession.leaderboardSortedNormalizedCars[ 0 ];
 
 				IRSDK.targetCameraCarIdx = normalizedCar.carIdx;
 				IRSDK.targetCameraCarNumber = normalizedCar.carNumber;
-
 				IRSDK.targetCameraReason = "The race is about to start and this is the lead car";
 
 				driverWasTalking = false;
@@ -88,9 +101,7 @@ namespace iRacingTV
 
 				IRSDK.targetCameraCarIdx = IRSDK.normalizedSession.radioTransmitCarIdx;
 				IRSDK.targetCameraCarNumber = normalizedCar?.carNumber ?? "?!?";
-
 				IRSDK.cameraSwitchWaitTicksRemaining = IRSDK.sendMessageWaitTicksRemaining;
-
 				IRSDK.targetCameraReason = "Driver of this car is talking";
 
 				driverWasTalking = true;
@@ -107,7 +118,6 @@ namespace iRacingTV
 
 				IRSDK.targetCameraCarIdx = 0;
 				IRSDK.targetCameraCarNumber = string.Empty;
-
 				IRSDK.targetCameraReason = "The race has not started yet";
 			}
 			else
@@ -124,7 +134,6 @@ namespace iRacingTV
 
 							IRSDK.targetCameraCarIdx = normalizedCar.carIdx;
 							IRSDK.targetCameraCarNumber = normalizedCar.carNumber;
-
 							IRSDK.targetCameraReason = "This is the hottest car";
 						}
 					}
@@ -132,11 +141,10 @@ namespace iRacingTV
 
 				if ( highestHeat == 0 )
 				{
-					var normalizedCar = IRSDK.normalizedSession.sortedNormalizedCars[ 0 ];
+					var normalizedCar = IRSDK.normalizedSession.leaderboardSortedNormalizedCars[ 0 ];
 
 					IRSDK.targetCameraCarIdx = normalizedCar.carIdx;
 					IRSDK.targetCameraCarNumber = normalizedCar.carNumber;
-
 					IRSDK.targetCameraReason = "There are no hot cars and this is the lead car";
 				}
 
@@ -162,7 +170,6 @@ namespace iRacingTV
 								{
 									IRSDK.targetCameraCarIdx = normalizedCar.carIdx;
 									IRSDK.targetCameraCarNumber = normalizedCar.carNumber;
-
 									IRSDK.targetCameraReason = "This is the preferred car";
 
 									if ( IRSDK.normalizedSession.isUnderCaution )

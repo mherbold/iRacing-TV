@@ -2,6 +2,7 @@
 using irsdkSharp.Serialization.Enums.Fastest;
 using System;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
@@ -18,6 +19,8 @@ namespace iRacingTV
 		public readonly BitmapImage statusDisconnectedBitmapImage = new( new Uri( $"pack://application:,,,/{StatusDisconnectedImageFileName}" ) );
 		public readonly BitmapImage statusConnectedBitmapImage = new( new Uri( $"pack://application:,,,/{StatusConnectedImageFileName}" ) );
 
+		public static TextBox[] heatTextBoxes = new TextBox[ 12 ];
+
 		public MainWindow()
 		{
 			instance = this;
@@ -25,6 +28,19 @@ namespace iRacingTV
 			try
 			{
 				InitializeComponent();
+
+				heatTextBoxes[ 0 ] = Debug_H1;
+				heatTextBoxes[ 1 ] = Debug_H2;
+				heatTextBoxes[ 2 ] = Debug_H3;
+				heatTextBoxes[ 3 ] = Debug_H4;
+				heatTextBoxes[ 4 ] = Debug_H5;
+				heatTextBoxes[ 5 ] = Debug_H6;
+				heatTextBoxes[ 6 ] = Debug_H7;
+				heatTextBoxes[ 7 ] = Debug_H8;
+				heatTextBoxes[ 8 ] = Debug_H9;
+				heatTextBoxes[ 9 ] = Debug_H10;
+				heatTextBoxes[ 10 ] = Debug_H11;
+				heatTextBoxes[ 11 ] = Debug_H12;
 
 				Program.Initialize();
 			}
@@ -51,6 +67,8 @@ namespace iRacingTV
 				ScenicCameraTextBox.Text = Settings.data.ScenicCameraGroupName.ToString();
 
 				PreferredCarNumberTextBox.Text = Settings.data.PreferredCarNumber;
+				PreferredCarLockOnHeatEnabledCheckBox.IsChecked = Settings.data.PreferredCarLockOnHeatEnabled;
+				PreferredCarLockOnHeatTextBox.Text = Settings.data.PreferredCarLockOnHeat.ToString();
 
 				SwitchCameraToTalkingDriverCheckBox.IsChecked = Settings.data.SwitchCameraToTalkingDriver;
 
@@ -389,6 +407,26 @@ namespace iRacingTV
 			} );
 		}
 
+		public void UpdateHottestCars()
+		{
+			Dispatcher.Invoke( () =>
+			{
+				for ( var i = 0; i < 12; i++ )
+				{
+					var text = string.Empty;
+
+					var normalizedCar = IRSDK.normalizedSession.heatSortedNormalizedCars[ i ];
+
+					if ( ( normalizedCar.includeInLeaderboard ) && ( normalizedCar.heat > 0 ) )
+					{
+						text = $"#{normalizedCar.carNumber}:{normalizedCar.heat:0.0}";
+					}
+
+					heatTextBoxes[ i ].Text = text;
+				}
+			} );
+		}
+
 		public void AddToStatusTextBox( string message )
 		{
 			Dispatcher.Invoke( () =>
@@ -478,6 +516,16 @@ namespace iRacingTV
 		private void PreferredCarNumberTextBox_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
 		{
 			Settings.data.PreferredCarNumber = PreferredCarNumberTextBox.Text;
+		}
+
+		private void PreferredCarLockOnHeatEnabledCheckBox_Click( object sender, RoutedEventArgs e )
+		{
+			Settings.data.PreferredCarLockOnHeatEnabled = PreferredCarLockOnHeatEnabledCheckBox.IsChecked ?? false;
+		}
+
+		private void PreferredCarLockOnHeatTextBox_TextChanged( object sender, TextChangedEventArgs e )
+		{
+			Settings.data.PreferredCarLockOnHeat = float.Parse( PreferredCarLockOnHeatTextBox.Text );
 		}
 
 		private void SwitchCameraToTalkingDriverCheckBox_Click( object sender, RoutedEventArgs e )

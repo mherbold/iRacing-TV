@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:iRacingTV"
         mc:Ignorable="d"
-        Title="iRacing-TV 1.9" ResizeMode="CanMinimize" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen" Closed="Window_Closed">
+        Title="iRacing-TV 1.10" ResizeMode="CanMinimize" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen" Closed="Window_Closed">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -57,13 +57,28 @@
                         <TextBlock Text="IS-SLC" FontSize="10" Margin="3,0,3,0" />
                         <TextBox x:Name="Debug_IS_SLC" Width="52" FontSize="11" TextAlignment="Right" FontFamily="Courier New" Margin="0,0,0,0" IsEnabled="False" />
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,6,0,6">
+                    <StackPanel  Orientation="Horizontal" Margin="0,6,0,6">
                         <TextBlock Text="Target Car" FontSize="10" Margin="0,0,3,0" />
                         <TextBox x:Name="Debug_TargetCar" Width="52" FontSize="11" FontFamily="Courier New" Margin="0,0,3,0" IsEnabled="False" />
                         <TextBlock Text="Target Camera Group" FontSize="10" Margin="3,0,3,0" />
                         <TextBox x:Name="Debug_TargetCameraGroup" Width="52" FontSize="11" FontFamily="Courier New" Margin="0,0,3,0" IsEnabled="False" />
                         <TextBlock Text="Target Reason" FontSize="10" Margin="3,0,3,0" />
                         <TextBox x:Name="Debug_TargetReason" FontSize="11" FontFamily="Courier New" Margin="0,0,3,0" IsEnabled="False" Width="456" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,6,0,6">
+                        <TextBlock Text="Hottest Cars" FontSize="10" Margin="0,0,3,0" />
+                        <TextBox x:Name="Debug_H1" Width="55" FontSize="9" FontFamily="Courier New" Margin="0,0,3,0" IsEnabled="False" Height="14.46" />
+                        <TextBox x:Name="Debug_H2" Width="55" FontSize="9" FontFamily="Courier New" Margin="3,0,3,0" IsEnabled="False" Height="14.46" />
+                        <TextBox x:Name="Debug_H3" Width="55" FontSize="9" FontFamily="Courier New" Margin="3,0,3,0" IsEnabled="False" Height="14.46" />
+                        <TextBox x:Name="Debug_H4" Width="55" FontSize="9" FontFamily="Courier New" Margin="3,0,3,0" IsEnabled="False" Height="14.46" />
+                        <TextBox x:Name="Debug_H5" Width="55" FontSize="9" FontFamily="Courier New" Margin="3,0,3,0" IsEnabled="False" Height="14.46" />
+                        <TextBox x:Name="Debug_H6" Width="55" FontSize="9" FontFamily="Courier New" Margin="3,0,3,0" IsEnabled="False" Height="14.46" />
+                        <TextBox x:Name="Debug_H7" Width="55" FontSize="9" FontFamily="Courier New" Margin="3,0,3,0" IsEnabled="False" Height="14.46" />
+                        <TextBox x:Name="Debug_H8" Width="55" FontSize="9" FontFamily="Courier New" Margin="3,0,3,0" IsEnabled="False" Height="14.46" />
+                        <TextBox x:Name="Debug_H9" Width="55" FontSize="9" FontFamily="Courier New" Margin="3,0,3,0" IsEnabled="False" Height="14.46" />
+                        <TextBox x:Name="Debug_H10" Width="55" FontSize="9" FontFamily="Courier New" Margin="3,0,3,0" IsEnabled="False" Height="14.46" />
+                        <TextBox x:Name="Debug_H11" Width="55" FontSize="9" FontFamily="Courier New" Margin="3,0,3,0" IsEnabled="False" Height="14.46" />
+                        <TextBox x:Name="Debug_H12" Width="53" FontSize="9" FontFamily="Courier New" Margin="3,0,3,0" IsEnabled="False" Height="14.46" />
                     </StackPanel>
                     <TextBox x:Name="StatusTextBox" TextWrapping="Wrap" IsReadOnly="True" Padding="3" Margin="0,6,0,12" ScrollViewer.VerticalScrollBarVisibility="Visible" Height="150"/>
                     <Grid>
@@ -187,8 +202,12 @@
                             <TextBox x:Name="ScenicCameraTextBox" TextChanged="ScenicCameraTextBox_TextChanged" />
                         </StackPanel>
                     </Grid>
-                    <Label Content="Preferred Car Number" />
-                    <TextBox x:Name="PreferredCarNumberTextBox" TextChanged="PreferredCarNumberTextBox_TextChanged" Margin="0,0,0,12" />
+                    <StackPanel Orientation="Horizontal" Margin="0,3,0,6">
+                        <Label Content="Preferred Car Number" />
+                        <TextBox x:Name="PreferredCarNumberTextBox" TextChanged="PreferredCarNumberTextBox_TextChanged" Width="55" Height="17.96" Margin="0,0,6,0" />
+                        <CheckBox x:Name="PreferredCarLockOnHeatEnabledCheckBox" Content="Lock On When Heat Is Above" Click="PreferredCarLockOnHeatEnabledCheckBox_Click" VerticalAlignment="Center" Margin="0,1,6,0" />
+                        <TextBox x:Name="PreferredCarLockOnHeatTextBox" TextChanged="PreferredCarLockOnHeatTextBox_TextChanged" Height="17.96" Width="55" />
+                    </StackPanel>
                     <CheckBox x:Name="SwitchCameraToTalkingDriverCheckBox" Content="Switch Camera to Talking Drivers" Click="SwitchCameraToTalkingDriverCheckBox_Click" />
                     <Button Content="Save and Apply Changes" Grid.Column="0" Margin="0,12,0,0" Click="ApplyChangesButton_Click" />
                 </StackPanel>

@@ -339,7 +339,7 @@ namespace iRacingTV
 
 			NormalizedCar? normalizedCarInFront = null;
 
-			foreach ( var normalizedCar in IRSDK.normalizedSession.sortedNormalizedCars )
+			foreach ( var normalizedCar in IRSDK.normalizedSession.leaderboardSortedNormalizedCars )
 			{
 				if ( !normalizedCar.includeInLeaderboard )
 				{
@@ -564,7 +564,7 @@ namespace iRacingTV
 
 							var bodyImageWidth = Settings.data.TrackImageSize.X / numCarsPerStartingGridGroup;
 
-							foreach ( var normalizedCar in IRSDK.normalizedSession.sortedNormalizedCars )
+							foreach ( var normalizedCar in IRSDK.normalizedSession.leaderboardSortedNormalizedCars )
 							{
 								if ( ( normalizedCar.qualifyingPosition >= firstSlotPosition ) && ( normalizedCar.qualifyingPosition <= lastSlotPosition ) )
 								{
