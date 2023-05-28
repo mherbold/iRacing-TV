@@ -38,8 +38,10 @@ namespace iRacingTV
 				}
 			}
 
-			if ( Settings.data.PreferredCarLockOnHeatEnabled && ( preferredCar.heat >= Settings.data.PreferredCarLockOnHeat ) )
+			if ( Settings.data.PreferredCarLockOnHeatEnabled && ( preferredCar != null ) && ( preferredCar.heat >= Settings.data.PreferredCarLockOnHeat ) && IRSDK.normalizedSession.raceHasStarted )
 			{
+				cameraGroup = IRSDK.CameraGroupEnum.Medium;
+
 				IRSDK.targetCameraCarIdx = preferredCar.carIdx;
 				IRSDK.targetCameraCarNumber = preferredCar.carNumber;
 				IRSDK.targetCameraReason = $"Preferred car heat is >= {Settings.data.PreferredCarLockOnHeat}";

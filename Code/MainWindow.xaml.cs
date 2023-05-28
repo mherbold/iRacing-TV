@@ -78,6 +78,9 @@ namespace iRacingTV
 				BetweenCarsCheckBox.IsChecked = Settings.data.BetweenCars;
 				NumberOfCheckpointsSlider.Value = Settings.data.NumberOfCheckpoints;
 
+				UseClassColorsForDriverNamesCheckBox.IsChecked = Settings.data.UseClassColorsForDriverNames;
+				ClassColorStrengthSlider.Value = Settings.data.ClassColorStrength;
+
 				CarNumberImageColorOverrideATextBox.Text = Settings.data.CarNumberColorOverrideA;
 				CarNumberImageColorOverrideBTextBox.Text = Settings.data.CarNumberColorOverrideB;
 				CarNumberImageColorOverrideCTextBox.Text = Settings.data.CarNumberColorOverrideC;
@@ -533,6 +536,16 @@ namespace iRacingTV
 			Settings.data.SwitchCameraToTalkingDriver = SwitchCameraToTalkingDriverCheckBox.IsChecked ?? false;
 		}
 
+		private void UseClassColorsForDriverNamesCheckBox_Click( object sender, RoutedEventArgs e )
+		{
+			Settings.data.UseClassColorsForDriverNames = UseClassColorsForDriverNamesCheckBox.IsChecked ?? false;
+		}
+
+		private void ClassColorStrengthSlider_ValueChanged( object sender, RoutedPropertyChangedEventArgs<double> e )
+		{
+			Settings.data.ClassColorStrength = (int) ClassColorStrengthSlider.Value;
+		}
+
 		private void ShowLapsRadioButton_Click( object sender, RoutedEventArgs e )
 		{
 			Settings.data.ShowLaps = true;
@@ -627,5 +640,5 @@ namespace iRacingTV
 		{
 			Program.keepRunning = false;
 		}
-	}
+    }
 }

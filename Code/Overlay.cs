@@ -38,6 +38,7 @@ namespace iRacingTV
 		{
 			RaceStatus,
 			Leaderboard,
+			PositionSplitter,
 			LightBlack,
 			LightGreen,
 			LightWhite,
@@ -180,6 +181,7 @@ namespace iRacingTV
 
 			overlayTextures[ (int) TextureEnum.RaceStatus ] = new OverlayTexture( Settings.data.RaceStatusImageFileName );
 			overlayTextures[ (int) TextureEnum.Leaderboard ] = new OverlayTexture( Settings.data.LeaderboardImageFileName );
+			overlayTextures[ (int) TextureEnum.PositionSplitter ] = new OverlayTexture( Settings.data.PositionSplitterFileName );
 			overlayTextures[ (int) TextureEnum.LightBlack ] = new OverlayTexture( Settings.data.LightImageBlackFileName );
 			overlayTextures[ (int) TextureEnum.LightGreen ] = new OverlayTexture( Settings.data.LightImageGreenFileName );
 			overlayTextures[ (int) TextureEnum.LightWhite ] = new OverlayTexture( Settings.data.LightImageWhiteFileName );
@@ -333,6 +335,46 @@ namespace iRacingTV
 				DrawText( fontA, Settings.data.CurrentLapTextPosition, Settings.data.CurrentLapTextColor, textString, 2 );
 			}
 
+			// leaderboard bottom split
+
+			var bottomSplitCount = Settings.data.LeaderboardPlaceCount / 2;
+			var bottomSplitLastPosition = Settings.data.LeaderboardPlaceCount;
+
+			if ( IRSDK.normalizedSession.isRacing && IRSDK.normalizedSession.raceHasStarted )
+			{
+				foreach ( var normalizedCar in IRSDK.normalizedSession.leaderboardSortedNormalizedCars )
+				{
+					if ( !normalizedCar.includeInLeaderboard )
+					{
+						break;
+					}
+
+					if ( IRSDK.normalizedSession.camCarIdx == normalizedCar.carIdx )
+					{
+						if ( normalizedCar.leaderboardPosition > bottomSplitLastPosition )
+						{
+							while ( bottomSplitLastPosition < normalizedCar.leaderboardPosition )
+							{
+								bottomSplitLastPosition += bottomSplitCount;
+							}
+
+							if ( bottomSplitLastPosition > IRSDK.normalizedSession.numCars )
+							{
+								bottomSplitLastPosition = IRSDK.normalizedSession.numCars;
+							}
+
+							overlayTextures[ (int) TextureEnum.PositionSplitter ]?.Draw( Settings.data.PositionSplitterImagePosition, null, Settings.data.PositionSplitterImageTint );
+
+							break;
+						}
+					}
+				}
+			}
+
+			var topSplitFirstPosition = 1;
+			var topSplitLastPosition = Settings.data.LeaderboardPlaceCount - bottomSplitCount;
+			var bottomSplitFirstPosition = bottomSplitLastPosition - bottomSplitCount + 1;
+
 			// leaderboard
 
 			var carInFrontLapPosition = 0.0f;
@@ -346,12 +388,12 @@ namespace iRacingTV
 					break;
 				}
 
-				var leaderboardIndex = normalizedCar.leaderboardPosition - 1;
-
-				if ( leaderboardIndex >= Settings.data.LeaderboardPlaceCount )
+				if ( ( ( normalizedCar.leaderboardPosition < topSplitFirstPosition ) || ( normalizedCar.leaderboardPosition > topSplitLastPosition ) ) && ( ( normalizedCar.leaderboardPosition < bottomSplitFirstPosition ) || ( normalizedCar.leaderboardPosition > bottomSplitLastPosition ) ) )
 				{
-					break;
+					continue;
 				}
+
+				var leaderboardIndex = normalizedCar.leaderboardPosition - ( ( normalizedCar.leaderboardPosition >= bottomSplitFirstPosition ) ? bottomSplitFirstPosition - topSplitLastPosition : topSplitFirstPosition );
 
 				// place
 
@@ -379,7 +421,11 @@ namespace iRacingTV
 
 				var driverNamePosition = Settings.data.DriverNameTextPosition + new Vector2( 0.0f, Settings.data.LeaderboardPlaceSpacing * leaderboardIndex );
 
-				DrawText( fontD, driverNamePosition, Settings.data.DriverNameTextColor, normalizedCar.abbrevName );
+				var driverNameTextColor = Settings.data.UseClassColorsForDriverNames ? Vector4.Lerp( Settings.data.DriverNameTextColor, normalizedCar.classColor, ( Settings.data.ClassColorStrength / 100.0f ) ) : Settings.data.DriverNameTextColor;
+
+				driverNameTextColor.W = Settings.data.DriverNameTextColor.W;
+
+				DrawText( fontD, driverNamePosition, driverNameTextColor, normalizedCar.abbrevName );
 
 				// telemetry
 
@@ -468,7 +514,7 @@ namespace iRacingTV
 					DrawText( fontC, lapsDownPosition, textColor, textString, 2 );
 				}
 
-				// speed
+				// current target and speed
 
 				if ( IRSDK.normalizedSession.isRacing && IRSDK.normalizedSession.raceHasStarted )
 				{

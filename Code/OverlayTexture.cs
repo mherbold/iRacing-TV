@@ -57,6 +57,8 @@ namespace iRacingTV
 
 			Overlay.imGuiRenderer.RemoveImGuiBinding( textureView );
 
+			textureView.Dispose();
+
 			texture.Dispose();
 		}
 

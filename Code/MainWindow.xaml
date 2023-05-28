@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:iRacingTV"
         mc:Ignorable="d"
-        Title="iRacing-TV 1.10" ResizeMode="CanMinimize" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen" Closed="Window_Closed">
+        Title="iRacing-TV 1.11" ResizeMode="CanMinimize" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen" Closed="Window_Closed">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -126,7 +126,12 @@
             </TabItem>
             <TabItem Header="Leaderboard">
                 <StackPanel Margin="6,6,6,6">
-                    <Label Content="Telemetry" />
+                    <StackPanel Orientation="Horizontal">
+                        <CheckBox x:Name="UseClassColorsForDriverNamesCheckBox" Content="Use Class Colors for Driver Names" Click="UseClassColorsForDriverNamesCheckBox_Click" Margin="0,0,12,0" />
+                        <Slider x:Name="ClassColorStrengthSlider" Maximum="100" Minimum="0" LargeChange="10" SmallChange="1" ValueChanged="ClassColorStrengthSlider_ValueChanged" Value="100" Margin="0,0,6,0" Width="518" />
+                        <TextBlock Text="Strength" />
+                    </StackPanel>
+                    <Label Content="Telemetry" Margin="0,3,0,0" />
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
                         <RadioButton x:Name="ShowLapsRadioButton" GroupName="LeaderboardMode" Content="Show Laps" Margin="0,0,12,0" Click="ShowLapsRadioButton_Click" />
                         <RadioButton x:Name="ShowDistanceRadioButton" GroupName="LeaderboardMode" Content="Show Distance" Margin="0,0,12,0" Click="ShowDistanceRadioButton_Click" />

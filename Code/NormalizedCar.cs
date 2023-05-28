@@ -1,9 +1,9 @@
 ﻿
 using System;
-using System.Runtime.InteropServices;
+using System.Numerics;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-
+using System.Windows.Media;
 using irsdkSharp.Serialization.Models.Session.DriverInfo;
 
 namespace iRacingTV
@@ -50,6 +50,8 @@ namespace iRacingTV
 		public OverlayTexture? carNumberOverlayTexture = null;
 		public OverlayTexture? helmetOverlayTexture = null;
 		public OverlayTexture? bodyOverlayTexture = null;
+
+		public Vector4 classColor = Vector4.One;
 
 		public void Initialize( int carIdx, bool reset )
 		{
@@ -114,6 +116,10 @@ namespace iRacingTV
 				carNumberOverlayTexture = null;
 				helmetOverlayTexture = null;
 				bodyOverlayTexture = null;
+
+				var color = (Color) ColorConverter.ConvertFromString( $"#{driver?.CarClassColor[ 2.. ]}" );
+
+				classColor = new Vector4( color.ScR, color.ScG, color.ScB, color.ScA );
 
 				if ( ( driverIdx != -1 ) && ( driver != null ) )
 				{

@@ -68,6 +68,10 @@ namespace iRacingTV
 		public Vector2 LeaderboardImagePosition = new( 44, 244 );
 		public Vector4 LeaderboardImageTint = new( 1, 1, 1, 0.9f );
 
+		public string PositionSplitterFileName = "Assets\\position-splitter.png";
+		public Vector2 PositionSplitterImagePosition = new( 44, 656 );
+		public Vector4 PositionSplitterImageTint = new( 1, 1, 1, 0.9f );
+
 		public Vector2 SeriesImagePosition = new( 51, 16 );
 		public Vector2 SeriesImageSize = new( 305, 103 );
 
@@ -108,6 +112,9 @@ namespace iRacingTV
 
 		public Vector2 PlaceTextPosition = new( 87, 256 );
 		public Vector4 PlaceTextColor = new( 176 / 255.0f, 181 / 255.0f, 177 / 255.0f, 1.0f );
+
+		public bool UseClassColorsForDriverNames = false;
+		public int ClassColorStrength = 50;
 
 		public string CarNumberColorOverrideA = string.Empty;
 		public string CarNumberColorOverrideB = string.Empty;
