@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:iRacingTV"
         mc:Ignorable="d"
-        Title="iRacing-TV 1.11" ResizeMode="CanMinimize" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen" Closed="Window_Closed">
+        Title="iRacing-TV 1.12" ResizeMode="CanMinimize" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen" Closed="Window_Closed">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -43,19 +43,27 @@
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,6,0,6">
                         <TextBlock Text="Frame" FontSize="10" Margin="0,0,3,0" />
-                        <TextBox x:Name="Debug_Frame" Width="52" FontSize="11" TextAlignment="Right" FontFamily="Courier New" Margin="0,0,3,0" IsEnabled="False" />
+                        <TextBox x:Name="Debug_Frame" Width="64" FontSize="11" TextAlignment="Right" FontFamily="Courier New" Margin="0,0,3,0" IsEnabled="False" />
                         <TextBlock Text="Time" FontSize="10" Margin="3,0,3,0" />
-                        <TextBox x:Name="Debug_Time" Width="52" FontSize="11" TextAlignment="Right" FontFamily="Courier New" Margin="0,0,3,0" IsEnabled="False" />
-                        <TextBlock Text="IS-S" FontSize="10" Margin="3,0,3,0" />
-                        <TextBox x:Name="Debug_IS_S" Width="214" FontSize="11" FontFamily="Courier New" Margin="0,0,3,0" IsEnabled="False" />
+                        <TextBox x:Name="Debug_Time" Width="64" FontSize="11" TextAlignment="Right" FontFamily="Courier New" Margin="0,0,3,0" IsEnabled="False" />
+                        <TextBlock Text="Mode" FontSize="10" Margin="3,0,3,0" />
+                        <TextBox x:Name="Debug_Mode" Width="96" FontSize="11" FontFamily="Courier New" Margin="0,0,3,0" IsEnabled="False" />
+                        <TextBlock Text="State" FontSize="10" Margin="3,0,3,0" />
+                        <TextBox x:Name="Debug_State" Width="96" FontSize="11" FontFamily="Courier New" Margin="0,0,3,0" IsEnabled="False" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,6,0,6">
+                        <TextBlock Text="IS-S" FontSize="10" Margin="0,0,3,0" />
+                        <TextBox x:Name="Debug_IS_S" Width="258" FontSize="11" FontFamily="Courier New" Margin="0,0,3,0" IsEnabled="False" />
                         <TextBlock Text="IS-SSFN" FontSize="10" Margin="3,0,3,0" />
-                        <TextBox x:Name="Debug_IS_SSFN" Width="52" FontSize="11" TextAlignment="Right" FontFamily="Courier New" Margin="0,0,3,0" IsEnabled="False" />
+                        <TextBox x:Name="Debug_IS_SSFN" Width="64" FontSize="11" TextAlignment="Right" FontFamily="Courier New" Margin="0,0,3,0" IsEnabled="False" />
                         <TextBlock Text="IS-STFN" FontSize="10" Margin="3,0,3,0" />
-                        <TextBox x:Name="Debug_IS_STFN" Width="52" FontSize="11" TextAlignment="Right" FontFamily="Courier New" Margin="0,0,3,0" IsEnabled="False" />
+                        <TextBox x:Name="Debug_IS_STFN" Width="64" FontSize="11" TextAlignment="Right" FontFamily="Courier New" Margin="0,0,3,0" IsEnabled="False" />
                         <TextBlock Text="IS-SLFN" FontSize="10" Margin="3,0,3,0" />
-                        <TextBox x:Name="Debug_IS_SLFN" Width="52" FontSize="11" TextAlignment="Right" FontFamily="Courier New" Margin="0,0,3,0" IsEnabled="False" />
+                        <TextBox x:Name="Debug_IS_SLFN" Width="64" FontSize="11" TextAlignment="Right" FontFamily="Courier New" Margin="0,0,3,0" IsEnabled="False" />
                         <TextBlock Text="IS-SLC" FontSize="10" Margin="3,0,3,0" />
-                        <TextBox x:Name="Debug_IS_SLC" Width="52" FontSize="11" TextAlignment="Right" FontFamily="Courier New" Margin="0,0,0,0" IsEnabled="False" />
+                        <TextBox x:Name="Debug_IS_SLC" Width="32" FontSize="11" TextAlignment="Right" FontFamily="Courier New" Margin="0,0,3,0" IsEnabled="False" />
+                        <TextBlock Text="Incidents Found" FontSize="10" Margin="3,0,3,0" />
+                        <TextBox x:Name="Debug_IS_TOTAL" Width="32" FontSize="11" TextAlignment="Right" FontFamily="Courier New" Margin="0,0,0,0" IsEnabled="False" />
                     </StackPanel>
                     <StackPanel  Orientation="Horizontal" Margin="0,6,0,6">
                         <TextBlock Text="Target Car" FontSize="10" Margin="0,0,3,0" />
@@ -214,6 +222,25 @@
                         <TextBox x:Name="PreferredCarLockOnHeatTextBox" TextChanged="PreferredCarLockOnHeatTextBox_TextChanged" Height="17.96" Width="55" />
                     </StackPanel>
                     <CheckBox x:Name="SwitchCameraToTalkingDriverCheckBox" Content="Switch Camera to Talking Drivers" Click="SwitchCameraToTalkingDriverCheckBox_Click" />
+                    <Button Content="Save and Apply Changes" Grid.Column="0" Margin="0,12,0,0" Click="ApplyChangesButton_Click" />
+                </StackPanel>
+            </TabItem>
+            <TabItem Header="Incidents">
+                <StackPanel Margin="6,6,6,6">
+                    <StackPanel Orientation="Horizontal">
+                        <StackPanel Margin="0,0,3,0">
+                            <Label Content="Preroll Frames" />
+                            <TextBox x:Name="IncidentPrerollFramesTextBox" Width="128" TextChanged="IncidentPrerollFramesTextBox_TextChanged" />
+                        </StackPanel>
+                        <StackPanel Margin="3,0,3,0">
+                            <Label Content="Incident Frames" />
+                            <TextBox x:Name="IncidentFramesTextBox" Width="128" TextChanged="IncidentFramesTextBox_TextChanged" />
+                        </StackPanel>
+                        <StackPanel Margin="3,0,0,0">
+                            <Label Content="Offset Frames" />
+                            <TextBox x:Name="IncidentOffsetFramesTextBox" Width="128" TextChanged="IncidentOffsetFramesTextBox_TextChanged" />
+                        </StackPanel>
+                    </StackPanel>
                     <Button Content="Save and Apply Changes" Grid.Column="0" Margin="0,12,0,0" Click="ApplyChangesButton_Click" />
                 </StackPanel>
             </TabItem>

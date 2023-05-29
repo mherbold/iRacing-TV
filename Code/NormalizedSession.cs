@@ -20,13 +20,10 @@ namespace iRacingTV
 		public float trackLengthInMeters = 0;
 
 		public bool isReplay = false;
-		public bool raceHasStarted = false;
 		public bool displayIsMetric = false;
 		public bool isUnderCaution = false;
-		public bool isCheckeredFlag = false;
-		public bool isTimedSession = false;
-		public bool isPracticing = false;
-		public bool isRacing = false;
+		public bool isInTimedRace = false;
+		public bool isInRaceSession = false;
 
 		public float deltaSessionTime = 0;
 		public double sessionTime = 0;
@@ -36,12 +33,14 @@ namespace iRacingTV
 
 		public int sessionLap = 0;
 		public int sessionLapsTotal = 0;
-		public int sessionLapsRemain = 0;
+		public int sessionLapsRemaining = 0;
 
 		public double sessionTimeTotal = 0;
 		public double sessionTimeRemain = 0;
 
+		public string sessionName = string.Empty;
 		public uint sessionFlags = 0;
+		public SessionState sessionState = SessionState.StateInvalid;
 
 		public int radioTransmitCarIdx = -1;
 
@@ -101,9 +100,12 @@ namespace iRacingTV
 				}
 
 				isReplay = IRSDK.session.WeekendInfo.SimMode == "replay";
-				raceHasStarted = false;
 				isUnderCaution = false;
-				isCheckeredFlag = false;
+
+				sessionName = IRSDK.session.SessionInfo.Sessions[ IRSDK.data.SessionNum ].SessionName;
+				sessionState = SessionState.StateInvalid;
+
+				isInRaceSession = sessionName == "RACE";
 
 				sessionTime = IRSDK.data.SessionTime;
 
@@ -139,18 +141,39 @@ namespace iRacingTV
 					}
 				}
 
-				var seriesImageUrl = $"https://ir-core-sites.iracing.com/members/member_images/series/seriesid_{IRSDK.session.WeekendInfo.SeriesID}/logo.jpg";
+				if ( Settings.data.SeriesImageOverrideFileName != string.Empty )
+				{
+					seriesOverlayTexture = new OverlayTexture( Settings.data.SeriesImageOverrideFileName );
+				}
+				else
+				{
+					var seriesImageUrl = $"https://ir-core-sites.iracing.com/members/member_images/series/seriesid_{IRSDK.session.WeekendInfo.SeriesID}/logo.jpg";
 
-				_ = Task.Run( async () => { seriesOverlayTexture = await OverlayTexture.CreateViaUrlAsync( seriesImageUrl ); } );
+					_ = Task.Run( async () => { seriesOverlayTexture = await OverlayTexture.CreateViaUrlAsync( seriesImageUrl ); } );
+				}
 
-				var trackImageUrl = DataApi.GetLargeTrackImageUrl( IRSDK.session.WeekendInfo.TrackID );
+				if ( Settings.data.TrackImageOverrideFileName != string.Empty )
+				{
+					largeTrackOverlayTexture = new OverlayTexture( Settings.data.TrackImageOverrideFileName );
+				}
+				else
+				{
+					var trackImageUrl = DataApi.GetLargeTrackImageUrl( IRSDK.session.WeekendInfo.TrackID );
 
-				_ = Task.Run( async () => { largeTrackOverlayTexture = await OverlayTexture.CreateViaUrlAsync( trackImageUrl ); } );
+					_ = Task.Run( async () => { largeTrackOverlayTexture = await OverlayTexture.CreateViaUrlAsync( trackImageUrl ); } );
+				}
 
-				var trackLogoUrl = DataApi.GetTrackLogoUrl( IRSDK.session.WeekendInfo.TrackID );
+				if ( Settings.data.TrackLogoOverrideFileName != string.Empty )
+				{
+					trackLogoOverlayTexture = new OverlayTexture( Settings.data.TrackLogoOverrideFileName );
+				}
+				else
+				{
+					var trackLogoUrl = DataApi.GetTrackLogoUrl( IRSDK.session.WeekendInfo.TrackID );
 
-				_ = Task.Run( async () => { trackLogoOverlayTexture = await OverlayTexture.CreateViaUrlAsync( trackLogoUrl ); } );
-
+					_ = Task.Run( async () => { trackLogoOverlayTexture = await OverlayTexture.CreateViaUrlAsync( trackLogoUrl ); } );
+				}
+				/*
 				_ = Task.Run( async () =>
 				{
 					var trackScreenshotUrls = await DataApi.GetTrackScreenshotUrlsAsync( IRSDK.session.WeekendInfo.TrackID );
@@ -168,6 +191,7 @@ namespace iRacingTV
 						}
 					}
 				} );
+				*/
 			}
 			else
 			{
@@ -195,20 +219,7 @@ namespace iRacingTV
 
 			displayIsMetric = IRSDK.data.DisplayUnits == 1;
 			isUnderCaution = ( sessionFlags & ( (uint) SessionFlags.CautionWaving | (uint) SessionFlags.Caution | (uint) SessionFlags.YellowWaving | (uint) SessionFlags.Yellow ) ) != 0;
-			isTimedSession = IRSDK.data.SessionLapsTotal == 32767;
-
-			isPracticing = IRSDK.session.SessionInfo.Sessions[ IRSDK.data.SessionNum ].SessionName == "PRACTICE";
-			isRacing = IRSDK.session.SessionInfo.Sessions[ IRSDK.data.SessionNum ].SessionName == "RACE";
-
-			if ( isRacing )
-			{
-				isCheckeredFlag |= ( sessionFlags & ( (uint) SessionFlags.Checkered ) ) != 0;
-
-				if ( raceHasStarted && isTimedSession && ( IRSDK.data.SessionTimeRemain < 5 ) )
-				{
-					isCheckeredFlag = true;
-				}
-			}
+			isInTimedRace = IRSDK.data.SessionLapsTotal == 32767;
 
 			deltaSessionTime = (float) Math.Round( ( IRSDK.data.SessionTime - sessionTime ) / ( 1.0f / 60.0f ) ) * ( 1.0f / 60.0f );
 			sessionTime = IRSDK.data.SessionTime;
@@ -218,10 +229,19 @@ namespace iRacingTV
 
 			sessionLap = IRSDK.data.SessionLapsTotal - Math.Max( 0, IRSDK.data.SessionLapsRemain );
 			sessionLapsTotal = IRSDK.data.SessionLapsTotal;
-			sessionLapsRemain = Math.Max( 0, IRSDK.data.SessionLapsRemain );
+			sessionLapsRemaining = Math.Max( 0, IRSDK.data.SessionLapsRemain );
 
 			sessionTimeTotal = IRSDK.data.SessionTimeTotal;
 			sessionTimeRemain = Math.Max( 0, IRSDK.data.SessionTimeRemain );
+
+			if ( isInRaceSession )
+			{
+				sessionState = (SessionState) IRSDK.data.SessionState;
+			}
+			else
+			{
+				sessionState = SessionState.StateInvalid;
+			}
 
 			radioTransmitCarIdx = IRSDK.data.RadioTransmitCarIdx;
 
@@ -292,15 +312,11 @@ namespace iRacingTV
 
 				foreach ( var normalizedCar in leaderboardSortedNormalizedCars )
 				{
-					if ( isPracticing )
-					{
-						normalizedCar.leaderboardPosition = 1;
-					}
-					else if ( !isRacing )
+					if ( !isInRaceSession )
 					{
 						normalizedCar.leaderboardPosition = normalizedCar.officialPosition;
 					}
-					else if ( isUnderCaution || isCheckeredFlag )
+					else if ( isUnderCaution || ( sessionState == SessionState.StateCheckered ) )
 					{
 						if ( normalizedCar.officialPosition >= 1 )
 						{
@@ -315,7 +331,7 @@ namespace iRacingTV
 					{
 						normalizedCar.leaderboardPosition = leaderboardPosition++;
 					}
-					else if ( raceHasStarted )
+					else if ( sessionState == SessionState.StateRacing )
 					{
 						if ( normalizedCar.officialPosition > 0 )
 						{
@@ -341,13 +357,6 @@ namespace iRacingTV
 				foreach ( var normalizedCar in leaderboardSortedNormalizedCars )
 				{
 					normalizedCar.leaderboardPosition = leaderboardPosition++;
-				}
-
-				raceHasStarted |= leaderboardSortedNormalizedCars[ 0 ].raceHasStarted;
-
-				if ( isRacing )
-				{
-					isCheckeredFlag |= leaderboardSortedNormalizedCars[ 0 ].lapPosition >= ( sessionLapsTotal - ( 200.0f / trackLengthInMeters ) );
 				}
 			}
 		}

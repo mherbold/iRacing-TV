@@ -254,34 +254,26 @@ namespace iRacingTV
 
 			// mode
 
-			if ( IRSDK.normalizedSession.isPracticing )
+			if ( !IRSDK.normalizedSession.isInRaceSession )
 			{
-				DrawText( fontB, Settings.data.ModeTextPosition, Settings.data.ModeTextColor, Settings.data.PracticeString, 0 );
-			}
-			else if ( !IRSDK.normalizedSession.isRacing )
-			{
-				DrawText( fontB, Settings.data.ModeTextPosition, Settings.data.ModeTextColor, Settings.data.QualifyingString, 0 );
-			}
-			else
-			{
-				DrawText( fontB, Settings.data.ModeTextPosition, Settings.data.ModeTextColor, Settings.data.RaceString, 0 );
+				DrawText( fontB, Settings.data.ModeTextPosition, Settings.data.ModeTextColor, IRSDK.normalizedSession.sessionName, 0 );
 			}
 
 			// remaining laps / time
 
-			if ( IRSDK.normalizedSession.isTimedSession )
+			if ( IRSDK.normalizedSession.isInTimedRace )
 			{
 				textString = GetTimeString( IRSDK.normalizedSession.sessionTimeRemain, false );
 
 				DrawText( fontB, Settings.data.TimeRemainingTextPosition, Settings.data.TimeRemainingTextColor, textString, 2 );
 			}
-			else if ( IRSDK.normalizedSession.sessionLapsRemain == 0 )
+			else if ( IRSDK.normalizedSession.sessionLapsRemaining == 0 )
 			{
 				DrawText( fontB, Settings.data.LapsRemainingTextPosition, Settings.data.LapsRemainingTextColor, Settings.data.FinalLapString, 2 );
 			}
 			else
 			{
-				textString = Math.Min( IRSDK.normalizedSession.sessionLapsTotal, IRSDK.normalizedSession.sessionLapsRemain + 1 ).ToString() + " " + Settings.data.LapsRemainingString;
+				textString = Math.Min( IRSDK.normalizedSession.sessionLapsTotal, IRSDK.normalizedSession.sessionLapsRemaining + 1 ).ToString() + " " + Settings.data.LapsRemainingString;
 
 				DrawText( fontB, Settings.data.LapsRemainingTextPosition, Settings.data.LapsRemainingTextColor, textString, 2 );
 			}
@@ -294,11 +286,11 @@ namespace iRacingTV
 			{
 				lightTextureEnum = TextureEnum.LightYellow;
 			}
-			else if ( !IRSDK.normalizedSession.raceHasStarted )
+			else if ( IRSDK.normalizedSession.isInRaceSession && ( IRSDK.normalizedSession.sessionState != SessionState.StateRacing ) )
 			{
 				lightTextureEnum = TextureEnum.LightBlack;
 			}
-			else if ( IRSDK.normalizedSession.sessionLapsRemain == 0 || ( IRSDK.normalizedSession.sessionFlags & (uint) SessionFlags.White ) != 0 )
+			else if ( ( IRSDK.normalizedSession.sessionLapsRemaining == 0 ) || ( ( IRSDK.normalizedSession.sessionFlags & (uint) SessionFlags.White ) != 0 ) )
 			{
 				lightTextureEnum = TextureEnum.LightWhite;
 			}
@@ -311,7 +303,7 @@ namespace iRacingTV
 
 			// lap / time string
 
-			if ( IRSDK.normalizedSession.isTimedSession )
+			if ( IRSDK.normalizedSession.isInTimedRace )
 			{
 				DrawText( fontB, Settings.data.TimeTextPosition, Settings.data.TimeTextColor, Settings.data.TimeString );
 			}
@@ -322,7 +314,7 @@ namespace iRacingTV
 
 			// current and total laps / time
 
-			if ( IRSDK.normalizedSession.isTimedSession )
+			if ( IRSDK.normalizedSession.isInTimedRace )
 			{
 				textString = GetTimeString( IRSDK.normalizedSession.sessionTimeTotal - IRSDK.normalizedSession.sessionTimeRemain, false ) + " | " + GetTimeString( IRSDK.normalizedSession.sessionTimeTotal, false );
 
@@ -340,7 +332,7 @@ namespace iRacingTV
 			var bottomSplitCount = Settings.data.LeaderboardPlaceCount / 2;
 			var bottomSplitLastPosition = Settings.data.LeaderboardPlaceCount;
 
-			if ( IRSDK.normalizedSession.isRacing && IRSDK.normalizedSession.raceHasStarted )
+			if ( IRSDK.normalizedSession.isInRaceSession && ( IRSDK.normalizedSession.sessionState == SessionState.StateRacing ) )
 			{
 				foreach ( var normalizedCar in IRSDK.normalizedSession.leaderboardSortedNormalizedCars )
 				{
@@ -442,7 +434,7 @@ namespace iRacingTV
 					textString = Settings.data.OutString;
 					textColor = Settings.data.OutTextColor;
 				}
-				else if ( IRSDK.normalizedSession.isRacing )
+				else if ( IRSDK.normalizedSession.isInRaceSession )
 				{
 					if ( normalizedCar.hasCrossedStartLine )
 					{
@@ -516,7 +508,7 @@ namespace iRacingTV
 
 				// current target and speed
 
-				if ( IRSDK.normalizedSession.isRacing && IRSDK.normalizedSession.raceHasStarted )
+				if ( IRSDK.normalizedSession.isInRaceSession && ( IRSDK.normalizedSession.sessionState == SessionState.StateRacing ) )
 				{
 					if ( IRSDK.normalizedSession.camCarIdx == normalizedCar.carIdx )
 					{
@@ -542,7 +534,7 @@ namespace iRacingTV
 
 			// flags
 
-			if ( IRSDK.normalizedSession.isCheckeredFlag )
+			if ( ( IRSDK.normalizedSession.sessionState == SessionState.StateCheckered ) )
 			{
 				overlayTextures[ (int) TextureEnum.FlagCheckered ]?.Draw( Settings.data.FlagImagePosition );
 			}
@@ -559,7 +551,7 @@ namespace iRacingTV
 
 			if ( Settings.data.EnableIntro )
 			{
-				if ( IRSDK.normalizedSession.isRacing )
+				if ( IRSDK.normalizedSession.isInRaceSession )
 				{
 					var secondsFromStart = IRSDK.normalizedSession.sessionTime - Settings.data.IntroStartTime;
 					var secondsRemaining = Settings.data.IntroDuration - secondsFromStart;
@@ -679,9 +671,11 @@ namespace iRacingTV
 
 				var voiceOfPosition = t * ( Settings.data.VoiceOfImageFinalPosition - Settings.data.VoiceOfImageStartPosition ) + Settings.data.VoiceOfImageStartPosition;
 
-				overlayTextures[ (int) TextureEnum.VoiceOf ]?.Draw( voiceOfPosition );
+				var tintColor = new Vector4( 1, 1, 1, t );
 
-				DrawText( fontB, voiceOfPosition + Settings.data.VoiceOfTextOffset, Settings.data.VoiceOfTextColor, Settings.data.VoiceOfString );
+				overlayTextures[ (int) TextureEnum.VoiceOf ]?.Draw( voiceOfPosition, null, tintColor );
+
+				DrawText( fontB, voiceOfPosition + Settings.data.VoiceOfTextOffset, Settings.data.VoiceOfTextColor * tintColor, Settings.data.VoiceOfString );
 
 				var normalizedCar = IRSDK.normalizedSession.FindNormalizedCarByCarIdx( radioTransmitCarIdx );
 
@@ -689,7 +683,7 @@ namespace iRacingTV
 				{
 					textString = DigitsMatchRegex().Replace( normalizedCar.userName, string.Empty );
 
-					DrawText( fontA, voiceOfPosition + Settings.data.VoiceOfDriverNameOffset, Settings.data.VoiceOfDriverNameColor, textString );
+					DrawText( fontA, voiceOfPosition + Settings.data.VoiceOfDriverNameOffset, Settings.data.VoiceOfDriverNameColor * tintColor, textString );
 
 					if ( normalizedCar.carOverlayTexture != null )
 					{
@@ -698,7 +692,7 @@ namespace iRacingTV
 							var heightRatio = (float) Settings.data.VoiceOfCarImageHeight / normalizedCar.carOverlayTexture.texture.Height;
 							var adjustedWidth = normalizedCar.carOverlayTexture.texture.Width * heightRatio;
 
-							normalizedCar.carOverlayTexture.Draw( voiceOfPosition + Settings.data.VoiceOfCarImageOffset, new Vector2( adjustedWidth, Settings.data.VoiceOfCarImageHeight ) );
+							normalizedCar.carOverlayTexture.Draw( voiceOfPosition + Settings.data.VoiceOfCarImageOffset, new Vector2( adjustedWidth, Settings.data.VoiceOfCarImageHeight ), tintColor );
 						}
 					}
 				}

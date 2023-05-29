@@ -5,7 +5,7 @@
 
 [Setup]
 AppName=iRacing-TV
-AppVersion=1.11
+AppVersion=1.12
 AppCopyright=Created by Marvin Herbold
 AppPublisher=Marvin Herbold
 AppPublisherURL=http://herboldracing.com/blog/iracing/iracing-tv/
@@ -43,6 +43,7 @@ Source: "C:\Users\marvi\OneDrive\Desktop\iRacing-TV\Assets\light-green.png"; Des
 Source: "C:\Users\marvi\OneDrive\Desktop\iRacing-TV\Assets\light-white.png"; DestDir: "{app}\Assets"
 Source: "C:\Users\marvi\OneDrive\Desktop\iRacing-TV\Assets\light-yellow.png"; DestDir: "{app}\Assets"
 Source: "C:\Users\marvi\OneDrive\Desktop\iRacing-TV\Assets\nascar-logo.png"; DestDir: "{app}\Assets"
+Source: "C:\Users\marvi\OneDrive\Desktop\iRacing-TV\Assets\position-splitter.png"; DestDir: "{app}\Assets"
 Source: "C:\Users\marvi\OneDrive\Desktop\iRacing-TV\Assets\race-status.png"; DestDir: "{app}\Assets"
 Source: "C:\Users\marvi\OneDrive\Desktop\iRacing-TV\Assets\voice-of.png"; DestDir: "{app}\Assets"
 

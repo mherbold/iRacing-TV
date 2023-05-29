@@ -72,6 +72,7 @@ namespace iRacingTV
 		public Vector2 PositionSplitterImagePosition = new( 44, 656 );
 		public Vector4 PositionSplitterImageTint = new( 1, 1, 1, 0.9f );
 
+		public string SeriesImageOverrideFileName = string.Empty;
 		public Vector2 SeriesImagePosition = new( 51, 16 );
 		public Vector2 SeriesImageSize = new( 305, 103 );
 
@@ -156,14 +157,16 @@ namespace iRacingTV
 		public string Username = string.Empty;
 		public string Password = string.Empty;
 
+		public string TrackImageOverrideFileName = string.Empty;
 		public Vector2 TrackImagePosition = new( 541, 165 );
 		public Vector2 TrackImageSize = new( 1210, 680 );
 
+		public string TrackLogoOverrideFileName = string.Empty;
 		public Vector2 TrackLogoImagePosition = new( 1147, 282 );
 
 		public bool EnableIntro = true;
-		public double IntroStartTime = 10;
-		public double IntroDuration = 100;
+		public double IntroStartTime = 35;
+		public double IntroDuration = 80;
 
 		public Vector2 IntroPositionTextOffset = new( 30, 20 );
 		public Vector4 IntroPositionTextColor = new( 1, 1, 1, 1 );
@@ -171,5 +174,9 @@ namespace iRacingTV
 		public Vector4 IntroQualifyingTimeTextColor = new( 176 / 255.0f, 181 / 255.0f, 177 / 255.0f, 1.0f );
 		public Vector2 IntroDriverNameTextOffset = new( 30, 80 );
 		public Vector4 IntroDriverNameTextColor = new( 35 / 255.0f, 31 / 255.0f, 32 / 255.0f, 1.0f );
+
+		public int IncidentOffsetFrames = 90;
+		public int IncidentPrerollFrames = 30;
+		public int IncidentFrames = 240;
 	}
 }

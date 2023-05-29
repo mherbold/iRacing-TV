@@ -93,6 +93,10 @@ namespace iRacingTV
 
 				UsernameTextBox.Text = Settings.data.Username;
 				PasswordTextBox.Password = Settings.data.Password;
+
+				IncidentPrerollFramesTextBox.Text = Settings.data.IncidentPrerollFrames.ToString();
+				IncidentFramesTextBox.Text = Settings.data.IncidentFrames.ToString();
+				IncidentOffsetFramesTextBox.Text = Settings.data.IncidentOffsetFrames.ToString();
 			} );
 		}
 
@@ -133,11 +137,15 @@ namespace iRacingTV
 			{
 				Debug_Frame.Text = IRSDK.normalizedSession.replayFrameNum.ToString();
 				Debug_Time.Text = $"{IRSDK.normalizedSession.sessionTime:0.0}";
+				Debug_Mode.Text = IRSDK.normalizedSession.sessionName;
+				Debug_State.Text = IRSDK.normalizedSession.sessionState.ToString();
+
 				Debug_IS_S.Text = IncidentScan.currentIncidentScanState.ToString();
 				Debug_IS_SSFN.Text = IncidentScan.settleStartingFrameNumber.ToString();
 				Debug_IS_STFN.Text = IncidentScan.settleTargetFrameNumber.ToString();
 				Debug_IS_SLFN.Text = IncidentScan.settleLastFrameNumber.ToString();
 				Debug_IS_SLC.Text = IncidentScan.settleLoopCount.ToString();
+				Debug_IS_TOTAL.Text = IncidentScan.incidentList.Count.ToString();
 			} );
 		}
 
@@ -602,6 +610,21 @@ namespace iRacingTV
 			Settings.data.CarNumberSlantOverride = CarNumberImageSlantOverrideTextBox.Text;
 		}
 
+		private void IncidentPrerollFramesTextBox_TextChanged( object sender, TextChangedEventArgs e )
+		{
+			Settings.data.IncidentPrerollFrames = int.Parse( IncidentPrerollFramesTextBox.Text );
+		}
+
+		private void IncidentFramesTextBox_TextChanged( object sender, TextChangedEventArgs e )
+		{
+			Settings.data.IncidentFrames = int.Parse( IncidentFramesTextBox.Text );
+		}
+
+		private void IncidentOffsetFramesTextBox_TextChanged( object sender, TextChangedEventArgs e )
+		{
+			Settings.data.IncidentOffsetFrames = int.Parse( IncidentOffsetFramesTextBox.Text );
+		}
+
 		private void UsernameTextBox_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
 		{
 			Settings.data.Username = UsernameTextBox.Text;
@@ -640,5 +663,5 @@ namespace iRacingTV
 		{
 			Program.keepRunning = false;
 		}
-    }
+	}
 }

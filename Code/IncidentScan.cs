@@ -1,13 +1,13 @@
-﻿using irsdkSharp.Enums;
-using System.Collections.Generic;
-using System.Threading;
+﻿using System.Collections.Generic;
+
+using irsdkSharp.Enums;
 
 namespace iRacingTV
 {
 	internal static class IncidentScan
 	{
-		public const int IncidentFrameCount = 240;
-		public const int IncidentPrerollFrameCount = 90;
+		public const int IncidentFrameCount = 180;
+		public const int IncidentPrerollFrameCount = 60;
 
 		public static readonly List<IncidentData> incidentList = new();
 
@@ -42,13 +42,16 @@ namespace iRacingTV
 
 			foreach ( var incident in incidentList )
 			{
-				if ( ( ( incident.frameNumber + IncidentFrameCount ) >= IRSDK.normalizedSession.replayFrameNum ) && ( ( incident.frameNumber - IncidentPrerollFrameCount ) <= IRSDK.normalizedSession.replayFrameNum ) )
+				var incidentStartFrame = incident.frameNumber + Settings.data.IncidentOffsetFrames;
+				var incidentEndFrame = incidentStartFrame + Settings.data.IncidentFrames;
+
+				incidentStartFrame -= Settings.data.IncidentPrerollFrames;
+
+				if ( ( IRSDK.normalizedSession.replayFrameNum >= incidentStartFrame ) && ( IRSDK.normalizedSession.replayFrameNum < incidentEndFrame ) )
 				{
-					if ( ( currentIncident == null ) || ( currentIncident.frameNumber < incident.frameNumber ) )
-					{
-						currentIncident = incident;
-						break;
-					}
+					currentIncident = incident;
+
+					break;
 				}
 			}
 
@@ -60,7 +63,7 @@ namespace iRacingTV
 			currentIncidentScanState = IncidentScanStateEnum.RewindToStartOfReplay;
 
 			Director.isEnabled = false;
-			
+
 			if ( Overlay.isVisible )
 			{
 				Overlay.ToggleVisibility();
@@ -88,7 +91,7 @@ namespace iRacingTV
 					IRSDK.AddMessage( BroadcastMessageTypes.ReplaySetPlayPosition, (int) ReplayPositionModeTypes.Begin, 1, 0 );
 
 					currentSession = 1;
-					
+
 					LogFile.Write( "Finding the start of the race event...\r\n" );
 
 					WaitForFrameNumberToSettleState( IncidentScanStateEnum.FindStartOfRace, 1 );

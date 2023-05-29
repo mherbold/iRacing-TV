@@ -4,6 +4,7 @@ using System.Numerics;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Media;
+
 using irsdkSharp.Serialization.Models.Session.DriverInfo;
 
 namespace iRacingTV
@@ -21,7 +22,6 @@ namespace iRacingTV
 
 		public bool includeInLeaderboard = false;
 		public bool hasCrossedStartLine = false;
-		public bool raceHasStarted = false;
 		public bool isOnPitRoad = false;
 		public bool isOutOfCar = false;
 
@@ -83,7 +83,6 @@ namespace iRacingTV
 
 				includeInLeaderboard = false;
 				hasCrossedStartLine = false;
-				raceHasStarted = false;
 				isOnPitRoad = false;
 				isOutOfCar = false;
 
@@ -226,7 +225,6 @@ namespace iRacingTV
 				}
 			}
 
-			raceHasStarted = car.CarIdxPosition > 0;
 			isOnPitRoad = car.CarIdxOnPitRoad;
 			isOutOfCar = car.CarIdxLapDistPct == -1;
 
