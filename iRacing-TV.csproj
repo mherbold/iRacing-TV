@@ -9,7 +9,7 @@
     <RootNamespace>$(MSBuildProjectName.Replace("-", ""))</RootNamespace>
     <ApplicationIcon>Assets\iRacing-TV-Icon.ico</ApplicationIcon>
     <StartupObject></StartupObject>
-    <VersionPrefix>1.12</VersionPrefix>
+    <VersionPrefix>1.13</VersionPrefix>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,6 +26,7 @@
   <ItemGroup>
     <PackageReference Include="Aydsko.iRacingData" Version="0.10.0" />
     <PackageReference Include="Veldrid.SDL2" Version="4.9.0" />
+    <PackageReference Include="winapicp" Version="1.1.0" />
   </ItemGroup>
 
   <ItemGroup>

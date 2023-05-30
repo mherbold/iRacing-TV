@@ -24,6 +24,7 @@ namespace iRacingTV
 		public bool isUnderCaution = false;
 		public bool isInTimedRace = false;
 		public bool isInRaceSession = false;
+		public bool isInQualifyingSession = false;
 
 		public float deltaSessionTime = 0;
 		public double sessionTime = 0;
@@ -78,6 +79,11 @@ namespace iRacingTV
 			if ( IRSDK.session == null ) { throw new Exception( "iRacing session data is missing." ); }
 			if ( IRSDK.data == null ) { throw new Exception( "iRacing telemetry data is missing." ); }
 
+			if ( IRSDK.data.SessionNum == -1 )
+			{
+				return;
+			}
+
 			if ( ( sessionID != IRSDK.session.WeekendInfo.SessionID ) || ( subSessionID != IRSDK.session.WeekendInfo.SubSessionID ) || forceResetRace )
 			{
 				trackScreenshotOverlayTextureList.Clear();
@@ -106,6 +112,7 @@ namespace iRacingTV
 				sessionState = SessionState.StateInvalid;
 
 				isInRaceSession = sessionName == "RACE";
+				isInQualifyingSession = sessionName == "QUALIFY";
 
 				sessionTime = IRSDK.data.SessionTime;
 
@@ -145,7 +152,7 @@ namespace iRacingTV
 				{
 					seriesOverlayTexture = new OverlayTexture( Settings.data.SeriesImageOverrideFileName );
 				}
-				else
+				else if ( IRSDK.session.WeekendInfo.SeriesID > 0 )
 				{
 					var seriesImageUrl = $"https://ir-core-sites.iracing.com/members/member_images/series/seriesid_{IRSDK.session.WeekendInfo.SeriesID}/logo.jpg";
 
@@ -312,11 +319,7 @@ namespace iRacingTV
 
 				foreach ( var normalizedCar in leaderboardSortedNormalizedCars )
 				{
-					if ( !isInRaceSession )
-					{
-						normalizedCar.leaderboardPosition = normalizedCar.officialPosition;
-					}
-					else if ( isUnderCaution || ( sessionState == SessionState.StateCheckered ) )
+					if ( !isInRaceSession || isUnderCaution || ( sessionState == SessionState.StateCheckered ) )
 					{
 						if ( normalizedCar.officialPosition >= 1 )
 						{

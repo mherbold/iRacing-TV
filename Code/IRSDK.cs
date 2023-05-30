@@ -114,7 +114,7 @@ namespace iRacingTV
 
 			if ( !IncidentScan.IsRunning() )
 			{
-				if ( sessionNum != data.SessionNum )
+				if ( sessionNum != data.SessionNum && ( data.SessionNum != -1 ) )
 				{
 					LogFile.Write( $"The session number has changed - we are now in session #{data.SessionNum + 1}.\r\n" );
 

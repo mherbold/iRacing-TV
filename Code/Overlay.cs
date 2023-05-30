@@ -236,10 +236,9 @@ namespace iRacingTV
 			ImGui.SetWindowPos( Vector2.Zero );
 			ImGui.SetWindowSize( new Vector2( graphicsDevice.MainSwapchain.Framebuffer.Width, graphicsDevice.MainSwapchain.Framebuffer.Height ) );
 
-			// draw main backgrounds
+			// race status background
 
 			overlayTextures[ (int) TextureEnum.RaceStatus ]?.Draw( Settings.data.RaceStatusImagePosition, null, Settings.data.RaceStatusImageTint );
-			overlayTextures[ (int) TextureEnum.Leaderboard ]?.Draw( Settings.data.LeaderboardImagePosition, null, Settings.data.LeaderboardImageTint );
 
 			// draw series image
 
@@ -261,7 +260,7 @@ namespace iRacingTV
 
 			// remaining laps / time
 
-			if ( IRSDK.normalizedSession.isInTimedRace )
+			if ( IRSDK.normalizedSession.isInTimedRace || !IRSDK.normalizedSession.isInRaceSession )
 			{
 				textString = GetTimeString( IRSDK.normalizedSession.sessionTimeRemain, false );
 
@@ -290,7 +289,7 @@ namespace iRacingTV
 			{
 				lightTextureEnum = TextureEnum.LightBlack;
 			}
-			else if ( ( IRSDK.normalizedSession.sessionLapsRemaining == 0 ) || ( ( IRSDK.normalizedSession.sessionFlags & (uint) SessionFlags.White ) != 0 ) )
+			else if ( IRSDK.normalizedSession.isInRaceSession && ( ( IRSDK.normalizedSession.sessionLapsRemaining == 0 ) || ( ( IRSDK.normalizedSession.sessionFlags & (uint) SessionFlags.White ) != 0 ) ) )
 			{
 				lightTextureEnum = TextureEnum.LightWhite;
 			}
@@ -303,7 +302,7 @@ namespace iRacingTV
 
 			// lap / time string
 
-			if ( IRSDK.normalizedSession.isInTimedRace )
+			if ( IRSDK.normalizedSession.isInTimedRace || !IRSDK.normalizedSession.isInRaceSession )
 			{
 				DrawText( fontB, Settings.data.TimeTextPosition, Settings.data.TimeTextColor, Settings.data.TimeString );
 			}
@@ -314,7 +313,7 @@ namespace iRacingTV
 
 			// current and total laps / time
 
-			if ( IRSDK.normalizedSession.isInTimedRace )
+			if ( IRSDK.normalizedSession.isInTimedRace || !IRSDK.normalizedSession.isInRaceSession )
 			{
 				textString = GetTimeString( IRSDK.normalizedSession.sessionTimeTotal - IRSDK.normalizedSession.sessionTimeRemain, false ) + " | " + GetTimeString( IRSDK.normalizedSession.sessionTimeTotal, false );
 
@@ -367,40 +366,109 @@ namespace iRacingTV
 			var topSplitLastPosition = Settings.data.LeaderboardPlaceCount - bottomSplitCount;
 			var bottomSplitFirstPosition = bottomSplitLastPosition - bottomSplitCount + 1;
 
+			// reset cars
+
+			bool leaderboardBackgroundDrawn = false;
+
+			foreach ( var normalizedCar in IRSDK.normalizedSession.leaderboardSortedNormalizedCars )
+			{
+				normalizedCar.visibleOnLeaderboard = false;
+			}
+
 			// leaderboard
 
 			var carInFrontLapPosition = 0.0f;
+			var leadCarBestLapTime = 0.0f;
 
 			NormalizedCar? normalizedCarInFront = null;
 
 			foreach ( var normalizedCar in IRSDK.normalizedSession.leaderboardSortedNormalizedCars )
 			{
+				// stop when we run out of cars to show
+
 				if ( !normalizedCar.includeInLeaderboard )
 				{
 					break;
 				}
+
+				// lead car best lap time
+
+				if ( leadCarBestLapTime == 0 )
+				{
+					leadCarBestLapTime = normalizedCar.bestLapTime;
+				}
+
+				// skip cars not visible on the leaderboard
 
 				if ( ( ( normalizedCar.leaderboardPosition < topSplitFirstPosition ) || ( normalizedCar.leaderboardPosition > topSplitLastPosition ) ) && ( ( normalizedCar.leaderboardPosition < bottomSplitFirstPosition ) || ( normalizedCar.leaderboardPosition > bottomSplitLastPosition ) ) )
 				{
 					continue;
 				}
 
+				// stop when we get to cars that have not qualified yet (only during qualifying)
+
+				if ( IRSDK.normalizedSession.isInQualifyingSession )
+				{
+					if ( normalizedCar.bestLapTime == 0 )
+					{
+						break;
+					}
+				}
+
+				// leaderboard background
+
+				if ( !leaderboardBackgroundDrawn )
+				{
+					leaderboardBackgroundDrawn = true;
+
+					overlayTextures[ (int) TextureEnum.Leaderboard ]?.Draw( Settings.data.LeaderboardImagePosition, null, Settings.data.LeaderboardImageTint );
+				}
+
+				// visible
+
+				normalizedCar.visibleOnLeaderboard = true;
+
+				// index
+
 				var leaderboardIndex = normalizedCar.leaderboardPosition - ( ( normalizedCar.leaderboardPosition >= bottomSplitFirstPosition ) ? bottomSplitFirstPosition - topSplitLastPosition : topSplitFirstPosition );
+
+				// offset
+
+				var targetOffsetPosition = new Vector2( 0.0f, Settings.data.LeaderboardPlaceSpacing * leaderboardIndex );
+
+				if ( !normalizedCar.offsetPositionIsValid )
+				{
+					normalizedCar.offsetPositionIsValid = true;
+					normalizedCar.offsetPosition = targetOffsetPosition;
+					normalizedCar.offsetPositionVelocity = 0;
+				}
+				else if ( normalizedCar.offsetPosition != targetOffsetPosition )
+				{
+					var offsetVector = targetOffsetPosition - normalizedCar.offsetPosition;
+
+					var remainingDistance = Vector2.Distance( Vector2.Zero, offsetVector );
+
+					var acceleration = ( remainingDistance - 10.0f ) * 0.025f;
+
+					normalizedCar.offsetPositionVelocity += acceleration;
+
+					normalizedCar.offsetPositionVelocity = Math.Min( Math.Max( Math.Min( normalizedCar.offsetPositionVelocity, 10.0f ), 0.1f ), remainingDistance );
+
+					normalizedCar.offsetPosition += Vector2.Normalize( offsetVector ) * normalizedCar.offsetPositionVelocity;
+				}
 
 				// place
 
-				var placePosition = Settings.data.PlaceTextPosition + new Vector2( 0.0f, Settings.data.LeaderboardPlaceSpacing * leaderboardIndex );
-
-				DrawText( fontC, placePosition, Settings.data.PlaceTextColor, normalizedCar.leaderboardPosition.ToString(), 2 );
+				DrawText( fontC, Settings.data.PlaceTextPosition + normalizedCar.offsetPosition, Settings.data.PlaceTextColor, normalizedCar.leaderboardPosition.ToString(), 2 );
 
 				// car number
-
-				var carNumberPosition = Settings.data.CarNumberImagePosition + new Vector2( 0, Settings.data.LeaderboardPlaceSpacing * leaderboardIndex );
 
 				if ( normalizedCar.carNumberOverlayTexture != null )
 				{
 					if ( normalizedCar.carNumberOverlayTexture.texture.Height > 0 )
 					{
+						var carNumberPosition = Settings.data.CarNumberImagePosition + normalizedCar.offsetPosition;
+
 						var heightRatio = Settings.data.CarNumberImageHeight / normalizedCar.carNumberOverlayTexture.texture.Height;
 						var adjustedWidth = normalizedCar.carNumberOverlayTexture.texture.Width * heightRatio;
 						var xOffset = adjustedWidth * -0.5f;
@@ -411,7 +479,7 @@ namespace iRacingTV
 
 				// driver name
 
-				var driverNamePosition = Settings.data.DriverNameTextPosition + new Vector2( 0.0f, Settings.data.LeaderboardPlaceSpacing * leaderboardIndex );
+				var driverNamePosition = Settings.data.DriverNameTextPosition + normalizedCar.offsetPosition;
 
 				var driverNameTextColor = Settings.data.UseClassColorsForDriverNames ? Vector4.Lerp( Settings.data.DriverNameTextColor, normalizedCar.classColor, ( Settings.data.ClassColorStrength / 100.0f ) ) : Settings.data.DriverNameTextColor;
 
@@ -424,7 +492,22 @@ namespace iRacingTV
 				textString = string.Empty;
 				textColor = Vector4.Zero;
 
-				if ( normalizedCar.isOnPitRoad )
+				if ( IRSDK.normalizedSession.isInQualifyingSession )
+				{
+					if ( leadCarBestLapTime == normalizedCar.bestLapTime )
+					{
+						textString = $"{leadCarBestLapTime:0.000}";
+					}
+					else
+					{
+						var deltaTime = normalizedCar.bestLapTime - leadCarBestLapTime;
+
+						textString = $"-{deltaTime:0.000}";
+					}
+
+					textColor = Settings.data.TelemetryTextColor;
+				}
+				else if ( normalizedCar.isOnPitRoad )
 				{
 					textString = Settings.data.PitString;
 					textColor = Settings.data.PitTextColor;
@@ -436,7 +519,7 @@ namespace iRacingTV
 				}
 				else if ( IRSDK.normalizedSession.isInRaceSession )
 				{
-					if ( normalizedCar.hasCrossedStartLine )
+					if ( ( IRSDK.normalizedSession.sessionState == SessionState.StateRacing ) && normalizedCar.hasCrossedStartLine )
 					{
 						if ( !Settings.data.BetweenCars && normalizedCar.lapPositionRelativeToLeader >= 1.0f )
 						{
@@ -492,16 +575,16 @@ namespace iRacingTV
 								}
 							}
 						}
-					}
 
-					textColor = Settings.data.TelemetryTextColor;
+						textColor = Settings.data.TelemetryTextColor;
+					}
 				}
 
 				carInFrontLapPosition = normalizedCar.lapPosition;
 
 				if ( textString != string.Empty )
 				{
-					var lapsDownPosition = Settings.data.TelemetryTextPosition + new Vector2( 0.0f, Settings.data.LeaderboardPlaceSpacing * leaderboardIndex );
+					var lapsDownPosition = Settings.data.TelemetryTextPosition + normalizedCar.offsetPosition;
 
 					DrawText( fontC, lapsDownPosition, textColor, textString, 2 );
 				}
@@ -512,7 +595,7 @@ namespace iRacingTV
 				{
 					if ( IRSDK.normalizedSession.camCarIdx == normalizedCar.carIdx )
 					{
-						var currentTargetPosition = Settings.data.CurrentTargetImagePosition + new Vector2( 0.0f, Settings.data.LeaderboardPlaceSpacing * leaderboardIndex );
+						var currentTargetPosition = Settings.data.CurrentTargetImagePosition + normalizedCar.offsetPosition;
 
 						overlayTextures[ (int) TextureEnum.CurrentTarget ]?.Draw( currentTargetPosition );
 
@@ -529,6 +612,18 @@ namespace iRacingTV
 				if ( normalizedCarInFront == null || Settings.data.BetweenCars )
 				{
 					normalizedCarInFront = normalizedCar;
+				}
+			}
+
+			// reset cars
+
+			foreach ( var normalizedCar in IRSDK.normalizedSession.leaderboardSortedNormalizedCars )
+			{
+				if ( !normalizedCar.visibleOnLeaderboard )
+				{
+					normalizedCar.offsetPositionIsValid = false;
+					normalizedCar.offsetPosition = Vector2.Zero;
+					normalizedCar.offsetPositionVelocity = 0;
 				}
 			}
 
@@ -725,7 +820,14 @@ namespace iRacingTV
 			ImGui.End();
 			ImGui.PopStyleVar();
 
-			imGuiRenderer.Render( graphicsDevice, commandList );
+			try
+			{
+				imGuiRenderer.Render( graphicsDevice, commandList );
+			}
+			catch ( Exception )
+			{
+
+			}
 
 			commandList.End();
 

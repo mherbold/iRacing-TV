@@ -1,11 +1,14 @@
 ﻿
-using irsdkSharp.Serialization.Enums.Fastest;
 using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+
+using Microsoft.WindowsAPICodePack.Dialogs;
+
+using irsdkSharp.Serialization.Enums.Fastest;
 
 namespace iRacingTV
 {
@@ -54,23 +57,14 @@ namespace iRacingTV
 		{
 			Dispatcher.Invoke( () =>
 			{
+				// overlay
+
 				OverlayX.Text = Settings.data.OverlayX.ToString();
 				OverlayY.Text = Settings.data.OverlayY.ToString();
 				OverlayWidth.Text = Settings.data.OverlayWidth.ToString();
 				OverlayHeight.Text = Settings.data.OverlayHeight.ToString();
 
-				InsideCameraTextBox.Text = Settings.data.InsideCameraGroupName.ToString();
-				CloseCameraTextBox.Text = Settings.data.CloseCameraGroupName.ToString();
-				MediumCameraTextBox.Text = Settings.data.MediumCameraGroupName.ToString();
-				FarCameraTextBox.Text = Settings.data.FarCameraGroupName.ToString();
-				BlimpCameraTextBox.Text = Settings.data.BlimpCameraGroupName.ToString();
-				ScenicCameraTextBox.Text = Settings.data.ScenicCameraGroupName.ToString();
-
-				PreferredCarNumberTextBox.Text = Settings.data.PreferredCarNumber;
-				PreferredCarLockOnHeatEnabledCheckBox.IsChecked = Settings.data.PreferredCarLockOnHeatEnabled;
-				PreferredCarLockOnHeatTextBox.Text = Settings.data.PreferredCarLockOnHeat.ToString();
-
-				SwitchCameraToTalkingDriverCheckBox.IsChecked = Settings.data.SwitchCameraToTalkingDriver;
+				// leaderboard
 
 				ShowLapsRadioButton.IsChecked = Settings.data.ShowLaps;
 				ShowDistanceRadioButton.IsChecked = Settings.data.ShowDistance;
@@ -87,16 +81,38 @@ namespace iRacingTV
 				CarNumberImagePatternOverrideTextBox.Text = Settings.data.CarNumberPatternOverride;
 				CarNumberImageSlantOverrideTextBox.Text = Settings.data.CarNumberSlantOverride;
 
-				EnableIntroCheckBox.IsChecked = Settings.data.EnableIntro;
-				IntroStartTimeTextBox.Text = Settings.data.IntroStartTime.ToString();
-				IntroDurationTextBox.Text = Settings.data.IntroDuration.ToString();
+				// director
 
-				UsernameTextBox.Text = Settings.data.Username;
-				PasswordTextBox.Password = Settings.data.Password;
+				InsideCameraTextBox.Text = Settings.data.InsideCameraGroupName.ToString();
+				CloseCameraTextBox.Text = Settings.data.CloseCameraGroupName.ToString();
+				MediumCameraTextBox.Text = Settings.data.MediumCameraGroupName.ToString();
+				FarCameraTextBox.Text = Settings.data.FarCameraGroupName.ToString();
+				BlimpCameraTextBox.Text = Settings.data.BlimpCameraGroupName.ToString();
+				ScenicCameraTextBox.Text = Settings.data.ScenicCameraGroupName.ToString();
+
+				PreferredCarNumberTextBox.Text = Settings.data.PreferredCarNumber;
+				PreferredCarLockOnHeatEnabledCheckBox.IsChecked = Settings.data.PreferredCarLockOnHeatEnabled;
+				PreferredCarLockOnHeatTextBox.Text = Settings.data.PreferredCarLockOnHeat.ToString();
+
+				SwitchCameraToTalkingDriverCheckBox.IsChecked = Settings.data.SwitchCameraToTalkingDriver;
+
+				// incidents
 
 				IncidentPrerollFramesTextBox.Text = Settings.data.IncidentPrerollFrames.ToString();
 				IncidentFramesTextBox.Text = Settings.data.IncidentFrames.ToString();
 				IncidentOffsetFramesTextBox.Text = Settings.data.IncidentOffsetFrames.ToString();
+
+				// intro
+
+				EnableIntroCheckBox.IsChecked = Settings.data.EnableIntro;
+				IntroStartTimeTextBox.Text = Settings.data.IntroStartTime.ToString();
+				IntroDurationTextBox.Text = Settings.data.IntroDuration.ToString();
+
+				// iRacing
+
+				UsernameTextBox.Text = Settings.data.Username;
+				PasswordTextBox.Password = Settings.data.Password;
+				CustomPaintsDirectoryTextBox.Text = Settings.data.CustomPaintsDirectory;
 			} );
 		}
 
@@ -448,6 +464,8 @@ namespace iRacingTV
 			} );
 		}
 
+		// status
+
 		private void ResetDataButton_Click( object sender, RoutedEventArgs e )
 		{
 			IRSDK.sessionResetRequested = true;
@@ -474,6 +492,8 @@ namespace iRacingTV
 			Update();
 		}
 
+		// overlay
+
 		private void OverlayX_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
 		{
 			Settings.data.OverlayX = int.Parse( OverlayX.Text );
@@ -494,55 +514,7 @@ namespace iRacingTV
 			Settings.data.OverlayHeight = int.Parse( OverlayHeight.Text );
 		}
 
-		private void InsideCameraTextBox_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
-		{
-			Settings.data.InsideCameraGroupName = InsideCameraTextBox.Text;
-		}
-
-		private void CloseCameraTextBox_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
-		{
-			Settings.data.CloseCameraGroupName = CloseCameraTextBox.Text;
-		}
-
-		private void MediumCameraTextBox_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
-		{
-			Settings.data.MediumCameraGroupName = MediumCameraTextBox.Text;
-		}
-
-		private void FarCameraTextBox_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
-		{
-			Settings.data.FarCameraGroupName = FarCameraTextBox.Text;
-		}
-
-		private void BlimpCameraTextBox_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
-		{
-			Settings.data.BlimpCameraGroupName = BlimpCameraTextBox.Text;
-		}
-
-		private void ScenicCameraTextBox_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
-		{
-			Settings.data.ScenicCameraGroupName = ScenicCameraTextBox.Text;
-		}
-
-		private void PreferredCarNumberTextBox_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
-		{
-			Settings.data.PreferredCarNumber = PreferredCarNumberTextBox.Text;
-		}
-
-		private void PreferredCarLockOnHeatEnabledCheckBox_Click( object sender, RoutedEventArgs e )
-		{
-			Settings.data.PreferredCarLockOnHeatEnabled = PreferredCarLockOnHeatEnabledCheckBox.IsChecked ?? false;
-		}
-
-		private void PreferredCarLockOnHeatTextBox_TextChanged( object sender, TextChangedEventArgs e )
-		{
-			Settings.data.PreferredCarLockOnHeat = float.Parse( PreferredCarLockOnHeatTextBox.Text );
-		}
-
-		private void SwitchCameraToTalkingDriverCheckBox_Click( object sender, RoutedEventArgs e )
-		{
-			Settings.data.SwitchCameraToTalkingDriver = SwitchCameraToTalkingDriverCheckBox.IsChecked ?? false;
-		}
+		// leaderboard
 
 		private void UseClassColorsForDriverNamesCheckBox_Click( object sender, RoutedEventArgs e )
 		{
@@ -610,6 +582,60 @@ namespace iRacingTV
 			Settings.data.CarNumberSlantOverride = CarNumberImageSlantOverrideTextBox.Text;
 		}
 
+		// director
+
+		private void InsideCameraTextBox_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
+		{
+			Settings.data.InsideCameraGroupName = InsideCameraTextBox.Text;
+		}
+
+		private void CloseCameraTextBox_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
+		{
+			Settings.data.CloseCameraGroupName = CloseCameraTextBox.Text;
+		}
+
+		private void MediumCameraTextBox_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
+		{
+			Settings.data.MediumCameraGroupName = MediumCameraTextBox.Text;
+		}
+
+		private void FarCameraTextBox_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
+		{
+			Settings.data.FarCameraGroupName = FarCameraTextBox.Text;
+		}
+
+		private void BlimpCameraTextBox_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
+		{
+			Settings.data.BlimpCameraGroupName = BlimpCameraTextBox.Text;
+		}
+
+		private void ScenicCameraTextBox_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
+		{
+			Settings.data.ScenicCameraGroupName = ScenicCameraTextBox.Text;
+		}
+
+		private void PreferredCarNumberTextBox_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
+		{
+			Settings.data.PreferredCarNumber = PreferredCarNumberTextBox.Text;
+		}
+
+		private void PreferredCarLockOnHeatEnabledCheckBox_Click( object sender, RoutedEventArgs e )
+		{
+			Settings.data.PreferredCarLockOnHeatEnabled = PreferredCarLockOnHeatEnabledCheckBox.IsChecked ?? false;
+		}
+
+		private void PreferredCarLockOnHeatTextBox_TextChanged( object sender, TextChangedEventArgs e )
+		{
+			Settings.data.PreferredCarLockOnHeat = float.Parse( PreferredCarLockOnHeatTextBox.Text );
+		}
+
+		private void SwitchCameraToTalkingDriverCheckBox_Click( object sender, RoutedEventArgs e )
+		{
+			Settings.data.SwitchCameraToTalkingDriver = SwitchCameraToTalkingDriverCheckBox.IsChecked ?? false;
+		}
+
+		// incidents
+
 		private void IncidentPrerollFramesTextBox_TextChanged( object sender, TextChangedEventArgs e )
 		{
 			Settings.data.IncidentPrerollFrames = int.Parse( IncidentPrerollFramesTextBox.Text );
@@ -625,15 +651,7 @@ namespace iRacingTV
 			Settings.data.IncidentOffsetFrames = int.Parse( IncidentOffsetFramesTextBox.Text );
 		}
 
-		private void UsernameTextBox_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
-		{
-			Settings.data.Username = UsernameTextBox.Text;
-		}
-
-		private void PasswordTextBox_PasswordChanged( object sender, RoutedEventArgs e )
-		{
-			Settings.data.Password = PasswordTextBox.Password;
-		}
+		// intro
 
 		private void EnableIntroCheckBox_Click( object sender, RoutedEventArgs e )
 		{
@@ -650,6 +668,51 @@ namespace iRacingTV
 			Settings.data.IntroDuration = double.Parse( IntroDurationTextBox.Text );
 		}
 
+		// iRacing
+
+		private void UsernameTextBox_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
+		{
+			Settings.data.Username = UsernameTextBox.Text;
+		}
+
+		private void PasswordTextBox_PasswordChanged( object sender, RoutedEventArgs e )
+		{
+			Settings.data.Password = PasswordTextBox.Password;
+		}
+
+		private void CustomPaintsDirectoryTextBox_TextChanged( object sender, TextChangedEventArgs e )
+		{
+			Settings.data.CustomPaintsDirectory = CustomPaintsDirectoryTextBox.Text;
+		}
+
+		private void CustomPaintsDirectory_Click( object sender, RoutedEventArgs e )
+		{
+			var commonOpenFileDialog = new CommonOpenFileDialog
+			{
+				Title = "Choose the iRacing Custom Paints Folder",
+				IsFolderPicker = true,
+				InitialDirectory = Settings.data.CustomPaintsDirectory,
+				AddToMostRecentlyUsedList = false,
+				AllowNonFileSystemItems = false,
+				DefaultDirectory = Settings.data.CustomPaintsDirectory,
+				EnsureFileExists = true,
+				EnsurePathExists = true,
+				EnsureReadOnly = false,
+				EnsureValidNames = true,
+				Multiselect = false,
+				ShowPlacesList = true
+			};
+
+			if ( commonOpenFileDialog.ShowDialog() == CommonFileDialogResult.Ok )
+			{
+				Settings.data.CustomPaintsDirectory = commonOpenFileDialog.FileName;
+
+				CustomPaintsDirectoryTextBox.Text = Settings.data.CustomPaintsDirectory;
+			}
+		}
+
+		// save and apply changes
+
 		private void ApplyChangesButton_Click( object sender, RoutedEventArgs e )
 		{
 			MainWindowTabControl.SelectedIndex = 0;
@@ -658,6 +721,8 @@ namespace iRacingTV
 
 			Program.applySettingChangesRequested = true;
 		}
+
+		// window closed
 
 		private void Window_Closed( object sender, EventArgs e )
 		{

@@ -178,5 +178,7 @@ namespace iRacingTV
 		public int IncidentOffsetFrames = 90;
 		public int IncidentPrerollFrames = 30;
 		public int IncidentFrames = 240;
+
+		public string CustomPaintsDirectory = string.Empty;
 	}
 }

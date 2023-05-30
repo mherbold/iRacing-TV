@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:iRacingTV"
         mc:Ignorable="d"
-        Title="iRacing-TV 1.12" ResizeMode="CanMinimize" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen" Closed="Window_Closed">
+        Title="iRacing-TV 1.13" ResizeMode="CanMinimize" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen" Closed="Window_Closed">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -264,12 +264,21 @@
                     <Button Content="Save and Apply Changes" Grid.Column="0" Margin="0,12,0,0" Click="ApplyChangesButton_Click" />
                 </StackPanel>
             </TabItem>
-            <TabItem Header="Account">
+            <TabItem Header="iRacing">
                 <StackPanel Margin="6,6,6,6">
                     <Label Content="iRacing Username" />
                     <TextBox x:Name="UsernameTextBox" TextChanged="UsernameTextBox_TextChanged" />
                     <Label Content="iRacing Password" />
                     <PasswordBox x:Name="PasswordTextBox" PasswordChanged="PasswordTextBox_PasswordChanged" />
+                    <Label Content="Custom Paints Folder"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="CustomPaintsDirectoryTextBox" TextWrapping="NoWrap" TextChanged="CustomPaintsDirectoryTextBox_TextChanged"/>
+                        <Button x:Name="CustomPaintsDirectoryButton" Content="..." Margin="6,0,0,0" Padding="6,0,6,0" Grid.Column="1" Click="CustomPaintsDirectory_Click"/>
+                    </Grid>
                     <Button Content="Save and Apply Changes" Grid.Column="0" Margin="0,12,0,0" Click="ApplyChangesButton_Click" />
                 </StackPanel>
             </TabItem>
