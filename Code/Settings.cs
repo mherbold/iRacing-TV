@@ -41,7 +41,7 @@ namespace iRacingTV
 
 			if ( data.CustomPaintsDirectory == string.Empty )
 			{
-				data.CustomPaintsDirectory = Environment.GetFolderPath( Environment.SpecialFolder.MyDocuments ) + $"\\iRacing\\paint";
+				data.CustomPaintsDirectory = Environment.GetFolderPath( Environment.SpecialFolder.MyDocuments ) + "\\iRacing\\paint";
 			}
 
 			MainWindow.instance?.Initialize();
