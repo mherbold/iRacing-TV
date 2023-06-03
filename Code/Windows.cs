@@ -5,13 +5,6 @@ namespace iRacingTV
 {
 	internal static class Windows
 	{
-		public const int GWL_EXSTYLE = -20;
-
-		public const int WS_EX_TOPMOST = 0x8;
-		public const int WS_EX_TRANSPARENT = 0x20;
-		public const int WS_EX_LAYERED = 0x80000;
-
-		[StructLayout( LayoutKind.Sequential )]
 		public struct MARGINS
 		{
 			public int Left;
@@ -20,16 +13,27 @@ namespace iRacingTV
 			public int Bottom;
 		}
 
-		[DllImport( "user32.dll", SetLastError = true )]
-		public static extern uint GetWindowLong( IntPtr hWnd, int nIndex );
+		[DllImport( "user32.dll" )]
+		public static extern IntPtr GetActiveWindow();
 
 		[DllImport( "user32.dll" )]
-		public static extern int SetWindowLong( IntPtr hWnd, int nIndex, IntPtr dwNewLong );
+		public static extern int SetWindowLong( IntPtr hWnd, int nIndex, uint dwNewLong );
 
 		[DllImport( "user32.dll" )]
-		public static extern bool SetLayeredWindowAttributes( IntPtr hwnd, uint crKey, byte bAlpha, uint dwFlags );
+		public static extern bool SetWindowPos( IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags );
 
-		[DllImport( "dwmapi.dll" )]
-		public static extern int DwmExtendFrameIntoClientArea( IntPtr hwnd, ref MARGINS margins );
+		[DllImport( "Dwmapi.dll" )]
+		public static extern uint DwmExtendFrameIntoClientArea( IntPtr hWnd, ref MARGINS margins );
+
+		public const int GWL_EXSTYLE = -20;
+
+		public const uint WS_EX_TOPMOST = 0x00000008;
+		public const uint WS_EX_TRANSPARENT = 0x00000020;
+		public const uint WS_EX_LAYERED = 0x00080000;
+
+		public static readonly IntPtr HWND_TOPMOST = new IntPtr( -1 );
+
+		public const uint SWP_NOSIZE = 0x0001;
+		public const uint SWP_NOMOVE = 0x0002;
 	}
 }

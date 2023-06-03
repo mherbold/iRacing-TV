@@ -117,13 +117,13 @@ namespace iRacingTV
 
 			sdl2Window = new Sdl2Window( OverlayWindowName, 0, 0, Settings.data.OverlayWidth, Settings.data.OverlayHeight, flags, true );
 
-			var windowLong = Windows.GetWindowLong( sdl2Window.Handle, Windows.GWL_EXSTYLE );
+			Windows.MARGINS margins = new() { Left = -1, Right = -1, Top = -1, Bottom = -1 };
 
-			_ = Windows.SetWindowLong( sdl2Window.Handle, Windows.GWL_EXSTYLE, (IntPtr) windowLong | Windows.WS_EX_LAYERED | Windows.WS_EX_TRANSPARENT | Windows.WS_EX_TOPMOST );
+			_ = Windows.DwmExtendFrameIntoClientArea( sdl2Window.Handle, ref margins );
 
-			Windows.MARGINS marg = new() { Left = -1, Right = -1, Top = -1, Bottom = -1 };
+			_ = Windows.SetWindowLong( sdl2Window.Handle, Windows.GWL_EXSTYLE, Windows.WS_EX_LAYERED | Windows.WS_EX_TRANSPARENT | Windows.WS_EX_TOPMOST );
 
-			_ = Windows.DwmExtendFrameIntoClientArea( sdl2Window.Handle, ref marg );
+			Windows.SetWindowPos( sdl2Window.Handle, Windows.HWND_TOPMOST, 0, 0, 0, 0, Windows.SWP_NOSIZE | Windows.SWP_NOMOVE );
 
 			LogFile.Write( " OK!\r\n" );
 		}
@@ -354,8 +354,6 @@ namespace iRacingTV
 								bottomSplitLastPosition = IRSDK.normalizedSession.numCars;
 							}
 
-							overlayTextures[ (int) TextureEnum.PositionSplitter ]?.Draw( Settings.data.PositionSplitterImagePosition, null, Settings.data.PositionSplitterImageTint );
-
 							break;
 						}
 					}
@@ -422,6 +420,11 @@ namespace iRacingTV
 					leaderboardBackgroundDrawn = true;
 
 					overlayTextures[ (int) TextureEnum.Leaderboard ]?.Draw( Settings.data.LeaderboardImagePosition, null, Settings.data.LeaderboardImageTint );
+
+					if ( topSplitLastPosition + 1 != bottomSplitFirstPosition )
+					{
+						overlayTextures[ (int) TextureEnum.PositionSplitter ]?.Draw( Settings.data.PositionSplitterImagePosition, null, Settings.data.PositionSplitterImageTint );
+					}
 				}
 
 				// visible
@@ -713,8 +716,6 @@ namespace iRacingTV
 										var imagePosition = Settings.data.TrackImagePosition + new Vector2( bodyImageWidth * slot, Settings.data.TrackImageSize.Y - adjustedHeight );
 										var imageSize = new Vector2( bodyImageWidth, adjustedHeight );
 
-										normalizedCar.bodyOverlayTexture.Draw( imagePosition, imageSize, Vector4.One * alpha );
-
 										DrawText( fontA, imagePosition + Settings.data.IntroPositionTextOffset, Settings.data.IntroPositionTextColor * alpha, $"P{normalizedCar.qualifyingPosition}" );
 
 										if ( normalizedCar.qualifyingTime > 1 )
@@ -729,6 +730,8 @@ namespace iRacingTV
 										DrawText( fontB, imagePosition + Settings.data.IntroQualifyingTimeTextOffset, Settings.data.IntroQualifyingTimeTextColor * alpha, $"{textString}" );
 
 										DrawText( fontA, imagePosition + Settings.data.IntroDriverNameTextOffset, Settings.data.IntroDriverNameTextColor * alpha, normalizedCar.abbrevName );
+
+										normalizedCar.bodyOverlayTexture.Draw( imagePosition, imageSize, Vector4.One * alpha );
 									}
 								}
 							}

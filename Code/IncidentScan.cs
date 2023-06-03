@@ -229,7 +229,7 @@ namespace iRacingTV
 							{
 								settleLoopCount++;
 
-								if ( settleLoopCount == IRSDK.MinimumSendMessageWaitTicks )
+								if ( settleLoopCount == Settings.data.MinimumCommandRate )
 								{
 									currentIncidentScanState = nextIncidentScanState;
 								}
@@ -239,7 +239,7 @@ namespace iRacingTV
 						{
 							settleLoopCount++;
 
-							if ( settleLoopCount == IRSDK.MinimumSendMessageWaitTicks * 10 )
+							if ( settleLoopCount == 300 )
 							{
 								currentIncidentScanState = IncidentScanStateEnum.RewindToStartOfReplayAgain;
 							}

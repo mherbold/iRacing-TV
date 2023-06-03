@@ -29,6 +29,8 @@ namespace iRacingTV
 		public bool BetweenCars = false;
 		public int NumberOfCheckpoints = 100;
 
+		public int MinimumCommandRate = 30;
+
 		public string FontAFileName = "Assets\\RevolutionGothic_ExtraBold.otf";
 		public int FontASize = 33;
 

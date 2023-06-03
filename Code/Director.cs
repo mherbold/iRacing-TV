@@ -27,16 +27,22 @@ namespace iRacingTV
 
 			var cameraGroup = IRSDK.CameraGroupEnum.Far;
 
-			NormalizedCar? leadCar = null;
+			NormalizedCar? firstPlaceCar = null;
+			NormalizedCar? firstVisibleCar = null;
 			NormalizedCar? preferredCar = null;
 
 			foreach ( var normalizedCar in IRSDK.normalizedSession.leaderboardSortedNormalizedCars )
 			{
 				if ( normalizedCar.includeInLeaderboard )
 				{
-					if ( ( leadCar == null ) && !normalizedCar.isOnPitRoad && !normalizedCar.isOutOfCar )
+					if ( firstPlaceCar == null )
 					{
-						leadCar = normalizedCar;
+						firstPlaceCar = normalizedCar;
+					}
+
+					if ( ( firstVisibleCar == null ) && !normalizedCar.isOnPitRoad && !normalizedCar.isOutOfCar )
+					{
+						firstVisibleCar = normalizedCar;
 					}
 
 					if ( normalizedCar.carNumber == Settings.data.PreferredCarNumber )
@@ -46,7 +52,15 @@ namespace iRacingTV
 				}
 			}
 
-			if ( Settings.data.PreferredCarLockOnHeatEnabled && ( preferredCar != null ) && ( preferredCar.heat >= Settings.data.PreferredCarLockOnHeat ) && ( IRSDK.normalizedSession.sessionState == SessionState.StateRacing ) )
+			if ( ( IRSDK.normalizedSession.sessionState == SessionState.StateCoolDown ) && ( firstPlaceCar != null ) && !firstPlaceCar.isOutOfCar )
+			{
+				cameraGroup = IRSDK.CameraGroupEnum.Close;
+
+				IRSDK.targetCameraCarIdx = firstPlaceCar.carIdx;
+				IRSDK.targetCameraCarNumber = firstPlaceCar.carNumber;
+				IRSDK.targetCameraReason = $"Race is cooling down and this car is the winner";
+			}
+			else if ( Settings.data.PreferredCarLockOnHeatEnabled && ( preferredCar != null ) && ( preferredCar.heat >= Settings.data.PreferredCarLockOnHeat ) && ( IRSDK.normalizedSession.sessionState == SessionState.StateRacing ) )
 			{
 				cameraGroup = IRSDK.CameraGroupEnum.Medium;
 
@@ -95,18 +109,18 @@ namespace iRacingTV
 
 				driverWasTalking = false;
 			}
-			else if ( ( leadCar != null ) && ( ( IRSDK.normalizedSession.sessionState == SessionState.StateWarmup ) || ( IRSDK.normalizedSession.sessionState == SessionState.StateParadeLaps ) ) )
+			else if ( ( firstVisibleCar != null ) && ( ( IRSDK.normalizedSession.sessionState == SessionState.StateWarmup ) || ( IRSDK.normalizedSession.sessionState == SessionState.StateParadeLaps ) ) )
 			{
-				IRSDK.targetCameraCarIdx = leadCar.carIdx;
-				IRSDK.targetCameraCarNumber = leadCar.carNumber;
+				IRSDK.targetCameraCarIdx = firstVisibleCar.carIdx;
+				IRSDK.targetCameraCarNumber = firstVisibleCar.carNumber;
 				IRSDK.targetCameraReason = "The race is about to start and this is the lead car";
 
 				driverWasTalking = false;
 			}
-			else if ( ( leadCar != null ) && ( ( IRSDK.normalizedSession.sessionFlags & ( (uint) SessionFlags.GreenHeld | (uint) SessionFlags.StartReady | (uint) SessionFlags.StartSet | (uint) SessionFlags.StartGo ) ) != 0 ) )
+			else if ( ( firstVisibleCar != null ) && ( ( IRSDK.normalizedSession.sessionFlags & ( (uint) SessionFlags.GreenHeld | (uint) SessionFlags.StartReady | (uint) SessionFlags.StartSet | (uint) SessionFlags.StartGo ) ) != 0 ) )
 			{
-				IRSDK.targetCameraCarIdx = leadCar.carIdx;
-				IRSDK.targetCameraCarNumber = leadCar.carNumber;
+				IRSDK.targetCameraCarIdx = firstVisibleCar.carIdx;
+				IRSDK.targetCameraCarNumber = firstVisibleCar.carNumber;
 				IRSDK.targetCameraReason = "Green flag is about to be shown or is waving";
 
 				driverWasTalking = false;
@@ -158,12 +172,10 @@ namespace iRacingTV
 					}
 				}
 
-				if ( highestHeat == 0 )
+				if ( ( highestHeat == 0 ) && ( firstVisibleCar != null ) )
 				{
-					var normalizedCar = IRSDK.normalizedSession.leaderboardSortedNormalizedCars[ 0 ];
-
-					IRSDK.targetCameraCarIdx = normalizedCar.carIdx;
-					IRSDK.targetCameraCarNumber = normalizedCar.carNumber;
+					IRSDK.targetCameraCarIdx = firstVisibleCar.carIdx;
+					IRSDK.targetCameraCarNumber = firstVisibleCar.carNumber;
 					IRSDK.targetCameraReason = "There are no hot cars and this is the lead car";
 				}
 

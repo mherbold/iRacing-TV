@@ -277,30 +277,42 @@ namespace iRacingTV
 							{
 								if ( otherNormalizedCar.includeInLeaderboard && !otherNormalizedCar.isOnPitRoad && !otherNormalizedCar.isOutOfCar )
 								{
-									var distanceToOtherCar = otherNormalizedCar.lapDistPct - normalizedCar.lapDistPct;
+									var signedDistanceToOtherCar = otherNormalizedCar.lapDistPct - normalizedCar.lapDistPct;
 
-									if ( distanceToOtherCar > 0.5f )
+									if ( signedDistanceToOtherCar > 0.5f )
 									{
-										distanceToOtherCar -= 1.0f;
+										signedDistanceToOtherCar -= 1.0f;
 									}
-									else if ( distanceToOtherCar < -0.5f )
+									else if ( signedDistanceToOtherCar < -0.5f )
 									{
-										distanceToOtherCar += 1.0f;
+										signedDistanceToOtherCar += 1.0f;
 									}
 
-									var distanceToOtherCarInMeters = distanceToOtherCar * trackLengthInMeters;
+									var signedDistanceToOtherCarInMeters = signedDistanceToOtherCar * trackLengthInMeters;
 
-									var heat = Math.Max( 0.0f, 50.0f - Math.Abs( distanceToOtherCarInMeters ) ) / 50.0f;
+									var x = Math.Abs( signedDistanceToOtherCarInMeters / 100.0f );
 
-									normalizedCar.heat += (float) Math.Sqrt( heat );
+									x = Math.Min( x, 1 );
 
-									if ( distanceToOtherCarInMeters >= 0.0f )
+									x = x * -2 + 1;
+
+									x *= (float) Math.PI / 3.5f;
+
+									var y = (float) Math.Tan( x );
+
+									y /= 2.5079206753254076751418219566729f;
+
+									y += 0.5f;
+
+									normalizedCar.heat += y;
+
+									if ( signedDistanceToOtherCarInMeters >= 0.0f )
 									{
-										normalizedCar.distanceToCarInFrontInMeters = Math.Min( normalizedCar.distanceToCarInFrontInMeters, distanceToOtherCarInMeters );
+										normalizedCar.distanceToCarInFrontInMeters = Math.Min( normalizedCar.distanceToCarInFrontInMeters, signedDistanceToOtherCarInMeters );
 									}
 									else
 									{
-										normalizedCar.distanceToCarBehindInMeters = Math.Min( normalizedCar.distanceToCarBehindInMeters, -distanceToOtherCarInMeters );
+										normalizedCar.distanceToCarBehindInMeters = Math.Min( normalizedCar.distanceToCarBehindInMeters, -signedDistanceToOtherCarInMeters );
 									}
 								}
 							}
@@ -319,7 +331,7 @@ namespace iRacingTV
 
 				foreach ( var normalizedCar in leaderboardSortedNormalizedCars )
 				{
-					if ( !isInRaceSession || isUnderCaution || ( sessionState == SessionState.StateCheckered ) )
+					if ( !isInRaceSession || isUnderCaution || ( sessionState == SessionState.StateCheckered ) || ( sessionState == SessionState.StateCoolDown ) )
 					{
 						if ( normalizedCar.officialPosition >= 1 )
 						{

@@ -2,10 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
-
-using irsdkSharp.Serialization.Enums.Fastest;
 
 namespace iRacingTV
 {

@@ -113,6 +113,7 @@ namespace iRacingTV
 				UsernameTextBox.Text = Settings.data.Username;
 				PasswordTextBox.Password = Settings.data.Password;
 				CustomPaintsDirectoryTextBox.Text = Settings.data.CustomPaintsDirectory;
+				MinimumCommandRateTextBox.Text = Settings.data.MinimumCommandRate.ToString();
 			} );
 		}
 
@@ -709,6 +710,11 @@ namespace iRacingTV
 
 				CustomPaintsDirectoryTextBox.Text = Settings.data.CustomPaintsDirectory;
 			}
+		}
+
+		private void MinimumCommandRateTextBox_TextChanged( object sender, TextChangedEventArgs e )
+		{
+			Settings.data.MinimumCommandRate = int.Parse( MinimumCommandRateTextBox.Text );
 		}
 
 		// save and apply changes

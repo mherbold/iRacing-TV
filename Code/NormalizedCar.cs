@@ -184,16 +184,23 @@ namespace iRacingTV
 						{
 							var licColor = driver.LicColor[ 2.. ];
 							var carPath = driver.CarPath.Replace( " ", "%5C" );
-							var customTgaFileName = $"{Settings.data.CustomPaintsDirectory}\\{driver.CarPath}\\car_{driver.UserID}.tga";
+							var customCarTgaFileName = $"{Settings.data.CustomPaintsDirectory}\\{driver.CarPath}\\car_{driver.UserID}.tga".Replace( " ", "%5C" );
 
-							if ( !File.Exists( customTgaFileName ) )
+							if ( !File.Exists( customCarTgaFileName ) )
 							{
-								customTgaFileName = string.Empty;
+								customCarTgaFileName = string.Empty;
 							}
 
-							var carUrl = $"http://localhost:32034/pk_car.png?size=2&view=1&licCol={licColor}&club={driver.ClubID}&sponsors={driver.CarSponsor_1},{driver.CarSponsor_2}&numPat={numberDesignMatch.Groups[ 1 ].Value}&numCol={numberDesignMatch.Groups[ 3 ].Value},{numberDesignMatch.Groups[ 4 ].Value},{numberDesignMatch.Groups[ 5 ].Value}&numSlnt={numberDesignMatch.Groups[ 2 ].Value}&number={carNumber}&carPath={carPath}&carPat={carDesignMatch.Groups[ 1 ].Value}&carCol={carDesignMatch.Groups[ 2 ].Value},{carDesignMatch.Groups[ 3 ].Value},{carDesignMatch.Groups[ 4 ].Value}&carRimType=2&carRimCol={carDesignMatch.Groups[ 5 ].Value}&carCustPaint={customTgaFileName}";
+							var carUrl = $"http://localhost:32034/pk_car.png?size=2&view=1&licCol={licColor}&club={driver.ClubID}&sponsors={driver.CarSponsor_1},{driver.CarSponsor_2}&numPat={numberDesignMatch.Groups[ 1 ].Value}&numCol={numberDesignMatch.Groups[ 3 ].Value},{numberDesignMatch.Groups[ 4 ].Value},{numberDesignMatch.Groups[ 5 ].Value}&numSlnt={numberDesignMatch.Groups[ 2 ].Value}&number={carNumber}&carPath={carPath}&carPat={carDesignMatch.Groups[ 1 ].Value}&carCol={carDesignMatch.Groups[ 2 ].Value},{carDesignMatch.Groups[ 3 ].Value},{carDesignMatch.Groups[ 4 ].Value}&carRimType=2&carRimCol={carDesignMatch.Groups[ 5 ].Value}&carCustPaint={customCarTgaFileName}";
 
 							_ = Task.Run( async () => { carOverlayTexture = await OverlayTexture.CreateViaUrlAsync( carUrl ); } );
+						}
+
+						var customHelmetTgaFileName = $"{Settings.data.CustomPaintsDirectory}\\helmet_{driver.UserID}.tga".Replace( " ", "%5C" );
+
+						if ( !File.Exists( customHelmetTgaFileName ) )
+						{
+							customHelmetTgaFileName = string.Empty;
 						}
 
 						var helmetDesignMatch = HelmetDesignStringRegex().Match( driver.HelmetDesignStr );
@@ -202,14 +209,8 @@ namespace iRacingTV
 						{
 							var licColor = driver.LicColor[ 2.. ];
 							var helmetType = 0; // TODO add support for this in next season
-							var customTgaFileName = $"{Settings.data.CustomPaintsDirectory}\\helmet_{driver.UserID}.tga";
 
-							if ( !File.Exists( customTgaFileName ) )
-							{
-								customTgaFileName = string.Empty;
-							}
-
-							var helmetUrl = $"http://localhost:32034/pk_helmet.png?size=7&hlmtPat={helmetDesignMatch.Groups[ 1 ].Value}&licCol={licColor}&hlmtCol={helmetDesignMatch.Groups[ 2 ].Value},{helmetDesignMatch.Groups[ 3 ].Value},{helmetDesignMatch.Groups[ 4 ].Value}&view=1&hlmtType={helmetType}&hlmtCustPaint={customTgaFileName}";
+							var helmetUrl = $"http://localhost:32034/pk_helmet.png?size=7&hlmtPat={helmetDesignMatch.Groups[ 1 ].Value}&licCol={licColor}&hlmtCol={helmetDesignMatch.Groups[ 2 ].Value},{helmetDesignMatch.Groups[ 3 ].Value},{helmetDesignMatch.Groups[ 4 ].Value}&view=1&hlmtType={helmetType}&hlmtCustPaint={customHelmetTgaFileName}";
 
 							_ = Task.Run( async () => { helmetOverlayTexture = await OverlayTexture.CreateViaUrlAsync( helmetUrl ); } );
 						}
@@ -221,14 +222,14 @@ namespace iRacingTV
 							var suitType = 0; // TODO add support for this in next season
 							var helmetType = 0; // TODO add support for this in next season
 							var faceType = 0; // TODO add support for this in next season
-							var customTgaFileName = $"{Settings.data.CustomPaintsDirectory}\\suit_{driver.UserID}.tga";
+							var customSuitTgaFileName = $"{Settings.data.CustomPaintsDirectory}\\suit_{driver.UserID}.tga".Replace( " ", "%5C" );
 
-							if ( !File.Exists( customTgaFileName ) )
+							if ( !File.Exists( customSuitTgaFileName ) )
 							{
-								customTgaFileName = string.Empty;
+								customSuitTgaFileName = string.Empty;
 							}
 
-							var bodyUrl = $"http://localhost:32034/pk_body.png?size=1&view=2&suitType={suitType}&suitPat={suitDesignMatch.Groups[ 1 ].Value}&suitCol={suitDesignMatch.Groups[ 2 ].Value},{suitDesignMatch.Groups[ 3 ].Value},{suitDesignMatch.Groups[ 4 ].Value}&hlmtType={helmetType}&hlmtPat={helmetDesignMatch.Groups[ 1 ].Value}&hlmtCol={helmetDesignMatch.Groups[ 2 ].Value},{helmetDesignMatch.Groups[ 3 ].Value},{helmetDesignMatch.Groups[ 4 ].Value}&faceType={faceType}&suitCustPaint={customTgaFileName}";
+							var bodyUrl = $"http://localhost:32034/pk_body.png?size=1&view=2&suitType={suitType}&suitPat={suitDesignMatch.Groups[ 1 ].Value}&suitCol={suitDesignMatch.Groups[ 2 ].Value},{suitDesignMatch.Groups[ 3 ].Value},{suitDesignMatch.Groups[ 4 ].Value}&hlmtType={helmetType}&hlmtPat={helmetDesignMatch.Groups[ 1 ].Value}&hlmtCol={helmetDesignMatch.Groups[ 2 ].Value},{helmetDesignMatch.Groups[ 3 ].Value},{helmetDesignMatch.Groups[ 4 ].Value}&faceType={faceType}&suitCustPaint={customSuitTgaFileName}&hlmtCustPaint={customHelmetTgaFileName}";
 
 							_ = Task.Run( async () => { bodyOverlayTexture = await OverlayTexture.CreateViaUrlAsync( bodyUrl ); } );
 						}
@@ -281,7 +282,10 @@ namespace iRacingTV
 				}
 				else if ( ( lapDistPct >= 0.1f ) && ( lapDistPct <= 0.9f ) )
 				{
-					lapNumber = car.CarIdxLap;
+					if ( car.CarIdxLap >= 1 )
+					{
+						lapNumber = car.CarIdxLap;
+					}
 				}
 
 				lapPosition = lapNumber + lapDistPct - 1;
@@ -320,11 +324,11 @@ namespace iRacingTV
 			}
 			else if ( includeFirstNameInitial )
 			{
-				abbrevName = $"{userNameParts[ 0 ][ ..1 ]}. {userNameParts[ userNameParts.Length - 1 ]}";
+				abbrevName = $"{userNameParts[ 0 ][ ..1 ]}. {userNameParts[ ^1 ]}";
 			}
 			else
 			{
-				abbrevName = userNameParts[ userNameParts.Length - 1 ];
+				abbrevName = userNameParts[ ^1 ];
 			}
 		}
 

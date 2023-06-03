@@ -41,7 +41,6 @@ namespace iRacingTV
 
 		public static int[] cameraGroupNumbers = new int[ (int) CameraGroupEnum.NumCameraGroups ];
 
-		public const int MinimumSendMessageWaitTicks = 30; // half second
 		public const int MinimumCameraSwitchWaitTicks = 180; // three seconds
 		public const int PostChatCameraSwitchWaitTicks = 60; // one second
 
@@ -224,7 +223,7 @@ namespace iRacingTV
 
 					iRacingSdk.BroadcastMessage( message.msg, message.var1, message.var2, message.var3 );
 
-					sendMessageWaitTicksRemaining = MinimumSendMessageWaitTicks;
+					sendMessageWaitTicksRemaining = Settings.data.MinimumCommandRate;
 				}
 				else
 				{
@@ -240,7 +239,7 @@ namespace iRacingTV
 
 							// LogFile.Write( $"Sending message to iRacing: {BroadcastMessageTypes.CamSwitchNum}, {carNumberRaw}, {targetCameraGroupNumber}, 0\r\n" );
 
-							sendMessageWaitTicksRemaining = MinimumSendMessageWaitTicks;
+							sendMessageWaitTicksRemaining = Settings.data.MinimumCommandRate;
 							cameraSwitchWaitTicksRemaining = MinimumCameraSwitchWaitTicks;
 						}
 					}
