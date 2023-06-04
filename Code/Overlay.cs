@@ -632,7 +632,7 @@ namespace iRacingTV
 
 			// flags
 
-			if ( ( IRSDK.normalizedSession.sessionState == SessionState.StateCheckered ) )
+			if ( ( IRSDK.normalizedSession.sessionState == SessionState.StateCheckered ) || ( IRSDK.normalizedSession.sessionState == SessionState.StateCoolDown ) )
 			{
 				overlayTextures[ (int) TextureEnum.FlagCheckered ]?.Draw( Settings.data.FlagImagePosition );
 			}

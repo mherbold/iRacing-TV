@@ -290,17 +290,17 @@ namespace iRacingTV
 
 									var signedDistanceToOtherCarInMeters = signedDistanceToOtherCar * trackLengthInMeters;
 
-									var x = Math.Abs( signedDistanceToOtherCarInMeters / 100.0f );
+									var x = Math.Abs( signedDistanceToOtherCarInMeters / 60.0f );
 
 									x = Math.Min( x, 1 );
 
 									x = x * -2 + 1;
 
-									x *= (float) Math.PI / 3.5f;
+									x *= (float) Math.PI / 3.25f;
 
 									var y = (float) Math.Tan( x );
 
-									y /= 2.5079206753254076751418219566729f;
+									y /= 2.8975002255619444591626672202326f;
 
 									y += 0.5f;
 

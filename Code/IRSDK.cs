@@ -219,7 +219,7 @@ namespace iRacingTV
 
 					messageBuffer.RemoveAt( 0 );
 
-					// LogFile.Write( $"Sending message to iRacing: {message.msg}, {message.var1}, {message.var2}, {message.var3}\r\n" );
+					LogFile.Write( $"Sending message to iRacing: {message.msg}, {message.var1}, {message.var2}, {message.var3}\r\n" );
 
 					iRacingSdk.BroadcastMessage( message.msg, message.var1, message.var2, message.var3 );
 
@@ -237,7 +237,7 @@ namespace iRacingTV
 
 							iRacingSdk.BroadcastMessage( BroadcastMessageTypes.CamSwitchNum, carNumberRaw, targetCameraGroupNumber, 0 );
 
-							// LogFile.Write( $"Sending message to iRacing: {BroadcastMessageTypes.CamSwitchNum}, {carNumberRaw}, {targetCameraGroupNumber}, 0\r\n" );
+							LogFile.Write( $"Sending message to iRacing: {BroadcastMessageTypes.CamSwitchNum}, {carNumberRaw}, {targetCameraGroupNumber}, 0\r\n" );
 
 							sendMessageWaitTicksRemaining = Settings.data.MinimumCommandRate;
 							cameraSwitchWaitTicksRemaining = MinimumCameraSwitchWaitTicks;

@@ -30,15 +30,13 @@ namespace iRacingTV
 			NormalizedCar? firstPlaceCar = null;
 			NormalizedCar? firstVisibleCar = null;
 			NormalizedCar? preferredCar = null;
+			NormalizedCar? hottestCar = null;
 
 			foreach ( var normalizedCar in IRSDK.normalizedSession.leaderboardSortedNormalizedCars )
 			{
 				if ( normalizedCar.includeInLeaderboard )
 				{
-					if ( firstPlaceCar == null )
-					{
-						firstPlaceCar = normalizedCar;
-					}
+					firstPlaceCar ??= normalizedCar;
 
 					if ( ( firstVisibleCar == null ) && !normalizedCar.isOnPitRoad && !normalizedCar.isOutOfCar )
 					{
@@ -48,6 +46,11 @@ namespace iRacingTV
 					if ( normalizedCar.carNumber == Settings.data.PreferredCarNumber )
 					{
 						preferredCar = normalizedCar;
+					}
+
+					if ( ( normalizedCar.heat > 0 ) && ( ( hottestCar == null ) || ( normalizedCar.heat > hottestCar.heat ) ) )
+					{
+						hottestCar = normalizedCar;
 					}
 				}
 			}
@@ -62,11 +65,9 @@ namespace iRacingTV
 			}
 			else if ( Settings.data.PreferredCarLockOnHeatEnabled && ( preferredCar != null ) && ( preferredCar.heat >= Settings.data.PreferredCarLockOnHeat ) && ( IRSDK.normalizedSession.sessionState == SessionState.StateRacing ) )
 			{
-				cameraGroup = IRSDK.CameraGroupEnum.Medium;
-
-				IRSDK.targetCameraCarIdx = preferredCar.carIdx;
-				IRSDK.targetCameraCarNumber = preferredCar.carNumber;
 				IRSDK.targetCameraReason = $"Preferred car heat is >= {Settings.data.PreferredCarLockOnHeat}";
+
+				cameraGroup = ChooseCameraForCar( preferredCar );
 			}
 			else if ( IRSDK.normalizedSession.sessionState == SessionState.StateCheckered )
 			{
@@ -155,96 +156,30 @@ namespace iRacingTV
 			}
 			else
 			{
-				var highestHeat = 0.0f;
-
-				foreach ( var normalizedCar in IRSDK.normalizedSession.normalizedCars )
-				{
-					if ( normalizedCar.includeInLeaderboard )
-					{
-						if ( normalizedCar.heat > highestHeat )
-						{
-							highestHeat = normalizedCar.heat;
-
-							IRSDK.targetCameraCarIdx = normalizedCar.carIdx;
-							IRSDK.targetCameraCarNumber = normalizedCar.carNumber;
-							IRSDK.targetCameraReason = "This is the hottest car";
-						}
-					}
-				}
-
-				if ( ( highestHeat == 0 ) && ( firstVisibleCar != null ) )
-				{
-					IRSDK.targetCameraCarIdx = firstVisibleCar.carIdx;
-					IRSDK.targetCameraCarNumber = firstVisibleCar.carNumber;
-					IRSDK.targetCameraReason = "There are no hot cars and this is the lead car";
-				}
-
 				cameraGroup = IRSDK.CameraGroupEnum.Medium;
+
+				if ( hottestCar != null )
+				{
+					IRSDK.targetCameraReason = "This is the hottest car";
+
+					cameraGroup = ChooseCameraForCar( hottestCar );
+				}
+				else if ( firstVisibleCar != null )
+				{
+					IRSDK.targetCameraReason = "There are no hot cars and this is the lead car";
+
+					cameraGroup = ChooseCameraForCar( firstVisibleCar );
+				}
 
 				if ( ( IRSDK.normalizedSession.sessionFlags & ( (uint) SessionFlags.CautionWaving | (uint) SessionFlags.YellowWaving ) ) != 0 )
 				{
 					cameraGroup = IRSDK.CameraGroupEnum.Far;
-
-					IRSDK.targetCameraReason += " (caution waving)";
 				}
-				else
+				else if ( ( preferredCar != null ) && ( ( preferredCar.distanceToCarInFrontInMeters < 50 ) || ( preferredCar.distanceToCarBehindInMeters < 50 ) ) )
 				{
-					foreach ( var normalizedCar in IRSDK.normalizedSession.normalizedCars )
-					{
-						if ( normalizedCar.includeInLeaderboard )
-						{
-							if ( normalizedCar.carNumber == Settings.data.PreferredCarNumber )
-							{
-								var nearestCarDistance = Math.Min( normalizedCar.distanceToCarInFrontInMeters, normalizedCar.distanceToCarBehindInMeters );
+					IRSDK.targetCameraReason = "This is the preferred car";
 
-								if ( nearestCarDistance < 50 )
-								{
-									IRSDK.targetCameraCarIdx = normalizedCar.carIdx;
-									IRSDK.targetCameraCarNumber = normalizedCar.carNumber;
-									IRSDK.targetCameraReason = "This is the preferred car";
-
-									if ( IRSDK.normalizedSession.isUnderCaution )
-									{
-										cameraGroup = IRSDK.CameraGroupEnum.Far;
-
-										IRSDK.targetCameraReason += " (under caution)";
-									}
-									else if ( normalizedCar.distanceToCarInFrontInMeters < 10 )
-									{
-										cameraGroup = IRSDK.CameraGroupEnum.Inside;
-
-										IRSDK.targetCameraReason += " (car in front < 10m)";
-									}
-									else if ( nearestCarDistance < 10 )
-									{
-										cameraGroup = IRSDK.CameraGroupEnum.Close;
-
-										IRSDK.targetCameraReason += " (car within 10m)";
-									}
-									else if ( nearestCarDistance < 20 )
-									{
-										cameraGroup = IRSDK.CameraGroupEnum.Medium;
-
-										IRSDK.targetCameraReason += " (car within 20m)";
-									}
-									else if ( nearestCarDistance < 30 )
-									{
-										cameraGroup = IRSDK.CameraGroupEnum.Far;
-
-										IRSDK.targetCameraReason += " (car within 30m)";
-									}
-									else
-									{
-										cameraGroup = IRSDK.CameraGroupEnum.Blimp;
-
-										IRSDK.targetCameraReason += " (car within 50m)";
-									}
-								}
-
-								break;
-							}
-						}
-					}
+					cameraGroup = ChooseCameraForCar( preferredCar );
 				}
 			}
 
@@ -255,6 +190,58 @@ namespace iRacingTV
 			{
 				MainWindow.instance?.UpdateTarget();
 			}
+		}
+
+		private static IRSDK.CameraGroupEnum ChooseCameraForCar( NormalizedCar normalizedCar )
+		{
+			IRSDK.targetCameraCarIdx = normalizedCar.carIdx;
+			IRSDK.targetCameraCarNumber = normalizedCar.carNumber;
+
+			IRSDK.CameraGroupEnum cameraGroup;
+
+			if ( IRSDK.normalizedSession.isUnderCaution )
+			{
+				cameraGroup = IRSDK.CameraGroupEnum.Far;
+
+				IRSDK.targetCameraReason += " (under caution)";
+			}
+			else if ( ( normalizedCar.distanceToCarInFrontInMeters < 10 ) && ( IRSDK.currentCameraCarIdx == normalizedCar.carIdx ) )
+			{
+				cameraGroup = IRSDK.CameraGroupEnum.Inside;
+
+				IRSDK.targetCameraReason += " (car in front < 10m)";
+			}
+			else
+			{
+				var nearestCarDistance = Math.Min( normalizedCar.distanceToCarInFrontInMeters, normalizedCar.distanceToCarBehindInMeters );
+
+				if ( nearestCarDistance < 10 )
+				{
+					cameraGroup = IRSDK.CameraGroupEnum.Close;
+
+					IRSDK.targetCameraReason += " (car within 10m)";
+				}
+				else if ( nearestCarDistance < 20 )
+				{
+					cameraGroup = IRSDK.CameraGroupEnum.Medium;
+
+					IRSDK.targetCameraReason += " (car within 20m)";
+				}
+				else if ( nearestCarDistance < 30 )
+				{
+					cameraGroup = IRSDK.CameraGroupEnum.Far;
+
+					IRSDK.targetCameraReason += " (car within 30m)";
+				}
+				else
+				{
+					cameraGroup = IRSDK.CameraGroupEnum.Blimp;
+
+					IRSDK.targetCameraReason += " (car within 50m)";
+				}
+			}
+
+			return cameraGroup;
 		}
 	}
 }
