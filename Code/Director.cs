@@ -48,7 +48,7 @@ namespace iRacingTV
 						preferredCar = normalizedCar;
 					}
 
-					if ( ( normalizedCar.heat > 0 ) && ( ( hottestCar == null ) || ( normalizedCar.heat > hottestCar.heat ) ) )
+					if ( ( normalizedCar.attackingHeat > 0 ) && ( ( hottestCar == null ) || ( normalizedCar.attackingHeat > hottestCar.attackingHeat ) ) )
 					{
 						hottestCar = normalizedCar;
 					}
@@ -63,7 +63,7 @@ namespace iRacingTV
 				IRSDK.targetCameraCarNumber = firstPlaceCar.carNumber;
 				IRSDK.targetCameraReason = $"Race is cooling down and this car is the winner";
 			}
-			else if ( Settings.data.PreferredCarLockOnHeatEnabled && ( preferredCar != null ) && ( preferredCar.heat >= Settings.data.PreferredCarLockOnHeat ) && ( IRSDK.normalizedSession.sessionState == SessionState.StateRacing ) )
+			else if ( Settings.data.PreferredCarLockOnHeatEnabled && ( preferredCar != null ) && ( IRSDK.normalizedSession.sessionState == SessionState.StateRacing ) && ( ( preferredCar.attackingHeat >= Settings.data.PreferredCarLockOnHeat ) || ( preferredCar.defendingHeat >= Settings.data.PreferredCarLockOnHeat ) ) )
 			{
 				IRSDK.targetCameraReason = $"Preferred car heat is >= {Settings.data.PreferredCarLockOnHeat}";
 
@@ -205,7 +205,7 @@ namespace iRacingTV
 
 				IRSDK.targetCameraReason += " (under caution)";
 			}
-			else if ( ( normalizedCar.distanceToCarInFrontInMeters > 1 ) && ( normalizedCar.distanceToCarInFrontInMeters < 12 ) && ( IRSDK.currentCameraCarIdx == normalizedCar.carIdx ) )
+			else if ( ( normalizedCar.distanceToCarInFrontInMeters > 2 ) && ( normalizedCar.distanceToCarInFrontInMeters < 12 ) && ( IRSDK.currentCameraCarIdx == normalizedCar.carIdx ) )
 
 			{
 				cameraGroup = IRSDK.CameraGroupEnum.Inside;

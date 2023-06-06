@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:iRacingTV"
         mc:Ignorable="d"
-        Title="iRacing-TV 1.16" ResizeMode="CanMinimize" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen" Closed="Window_Closed">
+        Title="iRacing-TV 1.17" ResizeMode="CanMinimize" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen" Closed="Window_Closed">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -216,11 +216,11 @@
                         </StackPanel>
                     </Grid>
                     <StackPanel Orientation="Horizontal" Margin="0,6,0,3">
-                        <Label Content="Heat Radius (In Meters)" />
-                        <TextBox x:Name="HeatRadiusTextBox" TextChanged="HeatRadiusTextBoxTextBox_TextChanged" Width="55" Height="17.96" Margin="0,0,6,0" />
-                        <Label Content="Heat Multiplier" />
-                        <TextBox x:Name="HeatMultiplierTextBox" TextChanged="HeatMultiplierTextBoxTextBox_TextChanged" Width="55" Height="17.96" Margin="0,0,6,0" />
-                        <Label Content="Heat Bias (+1.00 = Favor Front, -1.00 = Favor Back)" />
+                        <Label Content="Car Length (In Meters)" />
+                        <TextBox x:Name="CarLengthTextBox" TextChanged="CarLengthTextBoxTextBox_TextChanged" Width="55" Height="17.96" Margin="0,0,6,0" />
+                        <Label Content="Heat Falloff (In Meters)" />
+                        <TextBox x:Name="HeatFalloffTextBox" TextChanged="HeatFalloffTextBoxTextBox_TextChanged" Width="55" Height="17.96" Margin="0,0,6,0" />
+                        <Label Content="Heat Bias (+#.## = Favor Front, -#.## = Favor Back)" />
                         <TextBox x:Name="HeatBiasTextBox" TextChanged="HeatBiasTextBoxTextBox_TextChanged" Width="55" Height="17.96" Margin="0,0,6,0" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,6">

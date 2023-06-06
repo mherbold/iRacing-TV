@@ -55,7 +55,7 @@ namespace iRacingTV
 
 		public NormalizedCar[] normalizedCars = new NormalizedCar[ MaxNumCars ];
 		public List<NormalizedCar> leaderboardSortedNormalizedCars = new( MaxNumCars );
-		public List<NormalizedCar> heatSortedNormalizedCars = new( MaxNumCars );
+		public List<NormalizedCar> attackingHeatSortedNormalizedCars = new( MaxNumCars );
 
 		public OverlayTexture? seriesOverlayTexture = null;
 		public OverlayTexture? largeTrackOverlayTexture = null;
@@ -70,7 +70,7 @@ namespace iRacingTV
 				normalizedCars[ i ] = new NormalizedCar();
 
 				leaderboardSortedNormalizedCars.Add( normalizedCars[ i ] );
-				heatSortedNormalizedCars.Add( normalizedCars[ i ] );
+				attackingHeatSortedNormalizedCars.Add( normalizedCars[ i ] );
 			}
 		}
 
@@ -265,7 +265,9 @@ namespace iRacingTV
 
 				foreach ( var normalizedCar in normalizedCars )
 				{
-					normalizedCar.heat = 0;
+					normalizedCar.attackingHeat = 0;
+					normalizedCar.defendingHeat = 0;
+
 					normalizedCar.distanceToCarInFrontInMeters = float.MaxValue;
 					normalizedCar.distanceToCarBehindInMeters = float.MaxValue;
 
@@ -281,20 +283,30 @@ namespace iRacingTV
 
 									if ( signedDistanceToOtherCar > 0.5f )
 									{
-										signedDistanceToOtherCar -= 1.0f;
+										signedDistanceToOtherCar -= 1;
 									}
 									else if ( signedDistanceToOtherCar < -0.5f )
 									{
-										signedDistanceToOtherCar += 1.0f;
+										signedDistanceToOtherCar += 1;
 									}
 
 									var signedDistanceToOtherCarInMeters = signedDistanceToOtherCar * trackLengthInMeters;
 
-									var heat = Settings.data.HeatMultiplier * Math.Max( 0, 1.0f - Math.Abs( signedDistanceToOtherCarInMeters ) / Settings.data.HeatRadius );
+									var heat = 1 - Math.Max( 0, Math.Abs( signedDistanceToOtherCarInMeters ) - Settings.data.CarLength ) / Math.Max( 1, Settings.data.HeatFalloff );
 
-									normalizedCar.heat += heat * heat;
+									if ( heat > 0 )
+									{
+										if ( signedDistanceToOtherCar >= 0 )
+										{
+											normalizedCar.attackingHeat += heat;
+										}
+										else
+										{
+											normalizedCar.defendingHeat += heat;
+										}
+									}
 
-									if ( signedDistanceToOtherCarInMeters >= 0.0f )
+									if ( signedDistanceToOtherCarInMeters >= 0 )
 									{
 										normalizedCar.distanceToCarInFrontInMeters = Math.Min( normalizedCar.distanceToCarInFrontInMeters, signedDistanceToOtherCarInMeters );
 									}
@@ -305,23 +317,10 @@ namespace iRacingTV
 								}
 							}
 						}
-
-						if ( normalizedCar.heat > 0 )
-						{
-							var positionAsSignedPct = ( ( numCars / 2.0f ) - normalizedCar.officialPosition ) / ( numCars / 2.0f );
-
-							var heatBias = Settings.data.HeatBias * positionAsSignedPct + Math.Abs( Settings.data.HeatBias );
-
-							normalizedCar.heat += heatBias;
-						}
 					}
 				}
 
 				leaderboardSortedNormalizedCars.Sort( NormalizedCar.LapPositionComparison );
-
-				heatSortedNormalizedCars.Sort( NormalizedCar.HeatComparison );
-
-				MainWindow.instance?.UpdateHottestCars();
 
 				var leaderboardPosition = 1;
 				var leaderLapPosition = leaderboardSortedNormalizedCars[ 0 ].lapPosition;
@@ -369,7 +368,20 @@ namespace iRacingTV
 				foreach ( var normalizedCar in leaderboardSortedNormalizedCars )
 				{
 					normalizedCar.leaderboardPosition = leaderboardPosition++;
+
+					if ( normalizedCar.includeInLeaderboard && ( normalizedCar.attackingHeat > 0 ) )
+					{
+						var positionAsSignedPct = ( ( numCars / 2.0f ) - normalizedCar.leaderboardPosition ) / ( numCars / 2.0f );
+
+						var heatBias = Settings.data.HeatBias * positionAsSignedPct + Math.Abs( Settings.data.HeatBias );
+
+						normalizedCar.attackingHeat += heatBias;
+					}
 				}
+
+				attackingHeatSortedNormalizedCars.Sort( NormalizedCar.AttackingHeatComparison );
+
+				MainWindow.instance?.UpdateHottestCars();
 			}
 		}
 

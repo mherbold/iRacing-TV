@@ -9,6 +9,7 @@ using System.Windows.Threading;
 using Microsoft.WindowsAPICodePack.Dialogs;
 
 using irsdkSharp.Serialization.Enums.Fastest;
+using System.Globalization;
 
 namespace iRacingTV
 {
@@ -90,8 +91,8 @@ namespace iRacingTV
 				BlimpCameraTextBox.Text = Settings.data.BlimpCameraGroupName.ToString();
 				ScenicCameraTextBox.Text = Settings.data.ScenicCameraGroupName.ToString();
 
-				HeatRadiusTextBox.Text = Settings.data.HeatRadius.ToString();
-				HeatMultiplierTextBox.Text = $"{Settings.data.HeatMultiplier:0.00}";
+				CarLengthTextBox.Text = $"{Settings.data.CarLength:0.00}";
+				HeatFalloffTextBox.Text = $"{Settings.data.HeatFalloff:0.00}";
 				HeatBiasTextBox.Text = $"{Settings.data.HeatBias:0.00}";
 
 				PreferredCarNumberTextBox.Text = Settings.data.PreferredCarNumber;
@@ -447,11 +448,11 @@ namespace iRacingTV
 				{
 					var text = string.Empty;
 
-					var normalizedCar = IRSDK.normalizedSession.heatSortedNormalizedCars[ i ];
+					var normalizedCar = IRSDK.normalizedSession.attackingHeatSortedNormalizedCars[ i ];
 
-					if ( ( normalizedCar.includeInLeaderboard ) && ( normalizedCar.heat > 0 ) )
+					if ( ( normalizedCar.includeInLeaderboard ) && ( normalizedCar.attackingHeat > 0 ) )
 					{
-						text = $"#{normalizedCar.carNumber}:{normalizedCar.heat:0.0}";
+						text = $"#{normalizedCar.carNumber}:{normalizedCar.attackingHeat:0.00}";
 					}
 
 					heatTextBoxes[ i ].Text = text;
@@ -499,7 +500,7 @@ namespace iRacingTV
 
 		// overlay
 
-		private void OverlayX_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
+		private void OverlayX_TextChanged( object sender, TextChangedEventArgs e )
 		{
 			if ( !int.TryParse( OverlayX.Text, out Settings.data.OverlayX ) )
 			{
@@ -507,7 +508,7 @@ namespace iRacingTV
 			}
 		}
 
-		private void OverlayY_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
+		private void OverlayY_TextChanged( object sender, TextChangedEventArgs e )
 		{
 			if ( !int.TryParse( OverlayY.Text, out Settings.data.OverlayY ) )
 			{
@@ -515,7 +516,7 @@ namespace iRacingTV
 			}
 		}
 
-		private void OverlayWidth_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
+		private void OverlayWidth_TextChanged( object sender, TextChangedEventArgs e )
 		{
 			if ( !int.TryParse( OverlayWidth.Text, out Settings.data.OverlayWidth ) )
 			{
@@ -523,7 +524,7 @@ namespace iRacingTV
 			}
 		}
 
-		private void OverlayHeight_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
+		private void OverlayHeight_TextChanged( object sender, TextChangedEventArgs e )
 		{
 			if ( !int.TryParse( OverlayHeight.Text, out Settings.data.OverlayHeight ) )
 			{
@@ -574,88 +575,88 @@ namespace iRacingTV
 			Settings.data.NumberOfCheckpoints = (int) NumberOfCheckpointsSlider.Value;
 		}
 
-		private void CarNumberImageColorOverrideA_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
+		private void CarNumberImageColorOverrideA_TextChanged( object sender, TextChangedEventArgs e )
 		{
 			Settings.data.CarNumberColorOverrideA = CarNumberImageColorOverrideATextBox.Text;
 		}
 
-		private void CarNumberImageColorOverrideB_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
+		private void CarNumberImageColorOverrideB_TextChanged( object sender, TextChangedEventArgs e )
 		{
 			Settings.data.CarNumberColorOverrideB = CarNumberImageColorOverrideBTextBox.Text;
 		}
 
-		private void CarNumberImageColorOverrideC_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
+		private void CarNumberImageColorOverrideC_TextChanged( object sender, TextChangedEventArgs e )
 		{
 			Settings.data.CarNumberColorOverrideC = CarNumberImageColorOverrideCTextBox.Text;
 		}
 
-		private void CarNumberImagePatternOverride_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
+		private void CarNumberImagePatternOverride_TextChanged( object sender, TextChangedEventArgs e )
 		{
 			Settings.data.CarNumberPatternOverride = CarNumberImagePatternOverrideTextBox.Text;
 		}
 
-		private void CarNumberImageSlantOverride_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
+		private void CarNumberImageSlantOverride_TextChanged( object sender, TextChangedEventArgs e )
 		{
 			Settings.data.CarNumberSlantOverride = CarNumberImageSlantOverrideTextBox.Text;
 		}
 
 		// director
 
-		private void InsideCameraTextBox_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
+		private void InsideCameraTextBox_TextChanged( object sender, TextChangedEventArgs e )
 		{
 			Settings.data.InsideCameraGroupName = InsideCameraTextBox.Text;
 		}
 
-		private void CloseCameraTextBox_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
+		private void CloseCameraTextBox_TextChanged( object sender, TextChangedEventArgs e )
 		{
 			Settings.data.CloseCameraGroupName = CloseCameraTextBox.Text;
 		}
 
-		private void MediumCameraTextBox_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
+		private void MediumCameraTextBox_TextChanged( object sender, TextChangedEventArgs e )
 		{
 			Settings.data.MediumCameraGroupName = MediumCameraTextBox.Text;
 		}
 
-		private void FarCameraTextBox_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
+		private void FarCameraTextBox_TextChanged( object sender, TextChangedEventArgs e )
 		{
 			Settings.data.FarCameraGroupName = FarCameraTextBox.Text;
 		}
 
-		private void BlimpCameraTextBox_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
+		private void BlimpCameraTextBox_TextChanged( object sender, TextChangedEventArgs e )
 		{
 			Settings.data.BlimpCameraGroupName = BlimpCameraTextBox.Text;
 		}
 
-		private void ScenicCameraTextBox_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
+		private void ScenicCameraTextBox_TextChanged( object sender, TextChangedEventArgs e )
 		{
 			Settings.data.ScenicCameraGroupName = ScenicCameraTextBox.Text;
 		}
 
-		private void HeatRadiusTextBoxTextBox_TextChanged( object sender, TextChangedEventArgs e )
+		private void CarLengthTextBoxTextBox_TextChanged( object sender, TextChangedEventArgs e )
 		{
-			if ( !float.TryParse( HeatRadiusTextBox.Text, out Settings.data.HeatRadius ) )
+			if ( !float.TryParse( CarLengthTextBox.Text, CultureInfo.InvariantCulture.NumberFormat, out Settings.data.CarLength ) )
 			{
-				Settings.data.HeatRadius = 60.0f;
+				Settings.data.CarLength = 4.91f;
 			}
 		}
 
-		private void HeatMultiplierTextBoxTextBox_TextChanged( object sender, TextChangedEventArgs e )
+		private void HeatFalloffTextBoxTextBox_TextChanged( object sender, TextChangedEventArgs e )
 		{
-			if ( !float.TryParse( HeatMultiplierTextBox.Text, out Settings.data.HeatMultiplier ) )
+			if ( !float.TryParse( HeatFalloffTextBox.Text, CultureInfo.InvariantCulture.NumberFormat, out Settings.data.HeatFalloff ) )
 			{
-				Settings.data.HeatMultiplier = 1.0f;
+				Settings.data.HeatFalloff = 10.0f;
 			}
 		}
 
 		private void HeatBiasTextBoxTextBox_TextChanged( object sender, TextChangedEventArgs e )
 		{
-			if ( !float.TryParse( HeatBiasTextBox.Text, out Settings.data.HeatBias ) )
+			if ( !float.TryParse( HeatBiasTextBox.Text, CultureInfo.InvariantCulture.NumberFormat, out Settings.data.HeatBias ) )
 			{
-				Settings.data.HeatBias = 0.1f;
+				Settings.data.HeatBias = 0.5f;
 			}
 		}
 
-		private void PreferredCarNumberTextBox_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
+		private void PreferredCarNumberTextBox_TextChanged( object sender, TextChangedEventArgs e )
 		{
 			Settings.data.PreferredCarNumber = PreferredCarNumberTextBox.Text;
 		}
@@ -667,7 +668,7 @@ namespace iRacingTV
 
 		private void PreferredCarLockOnHeatTextBox_TextChanged( object sender, TextChangedEventArgs e )
 		{
-			if ( !float.TryParse( PreferredCarLockOnHeatTextBox.Text, out Settings.data.PreferredCarLockOnHeat ) )
+			if ( !float.TryParse( PreferredCarLockOnHeatTextBox.Text, CultureInfo.InvariantCulture.NumberFormat, out Settings.data.PreferredCarLockOnHeat ) )
 			{
 				Settings.data.PreferredCarLockOnHeat = 0.85f;
 			}
@@ -711,17 +712,17 @@ namespace iRacingTV
 			Settings.data.EnableIntro = EnableIntroCheckBox.IsChecked ?? false;
 		}
 
-		private void IntroStartTimeTextBox_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
+		private void IntroStartTimeTextBox_TextChanged( object sender, TextChangedEventArgs e )
 		{
-			if ( !double.TryParse( IntroStartTimeTextBox.Text, out Settings.data.IntroStartTime ) )
+			if ( !double.TryParse( IntroStartTimeTextBox.Text, CultureInfo.InvariantCulture.NumberFormat, out Settings.data.IntroStartTime ) )
 			{
 				Settings.data.IntroStartTime = 35;
 			}
 		}
 
-		private void IntroDurationTextBox_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
+		private void IntroDurationTextBox_TextChanged( object sender, TextChangedEventArgs e )
 		{
-			if ( !double.TryParse( IntroDurationTextBox.Text, out Settings.data.IntroDuration ) )
+			if ( !double.TryParse( IntroDurationTextBox.Text, CultureInfo.InvariantCulture.NumberFormat, out Settings.data.IntroDuration ) )
 			{
 				Settings.data.IntroDuration = 80;
 			}
@@ -729,7 +730,7 @@ namespace iRacingTV
 
 		// iRacing
 
-		private void UsernameTextBox_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
+		private void UsernameTextBox_TextChanged( object sender, TextChangedEventArgs e )
 		{
 			Settings.data.Username = UsernameTextBox.Text;
 		}

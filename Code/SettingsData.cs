@@ -18,8 +18,8 @@ namespace iRacingTV
 		public string BlimpCameraGroupName = "Blimp";
 		public string ScenicCameraGroupName = "Scenic";
 
-		public float HeatRadius = 60.0f;
-		public float HeatMultiplier = 1.0f;
+		public float CarLength = 4.91f;
+		public float HeatFalloff = 20.0f;
 		public float HeatBias = 0.5f;
 
 		public string PreferredCarNumber = string.Empty;
