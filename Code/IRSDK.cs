@@ -41,7 +41,7 @@ namespace iRacingTV
 
 		public static int[] cameraGroupNumbers = new int[ (int) CameraGroupEnum.NumCameraGroups ];
 
-		public const int MinimumCameraSwitchWaitTicks = 180; // three seconds
+		public const int MinimumCameraSwitchWaitTicks = 150; // 2.5 seconds
 		public const int PostChatCameraSwitchWaitTicks = 60; // one second
 
 		public static int sendMessageWaitTicksRemaining = 0;

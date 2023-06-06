@@ -205,11 +205,12 @@ namespace iRacingTV
 
 				IRSDK.targetCameraReason += " (under caution)";
 			}
-			else if ( ( normalizedCar.distanceToCarInFrontInMeters < 10 ) && ( IRSDK.currentCameraCarIdx == normalizedCar.carIdx ) )
+			else if ( ( normalizedCar.distanceToCarInFrontInMeters > 1 ) && ( normalizedCar.distanceToCarInFrontInMeters < 12 ) && ( IRSDK.currentCameraCarIdx == normalizedCar.carIdx ) )
+
 			{
 				cameraGroup = IRSDK.CameraGroupEnum.Inside;
 
-				IRSDK.targetCameraReason += " (car in front < 10m)";
+				IRSDK.targetCameraReason += " (car in front within 12m)";
 			}
 			else
 			{

@@ -90,6 +90,10 @@ namespace iRacingTV
 				BlimpCameraTextBox.Text = Settings.data.BlimpCameraGroupName.ToString();
 				ScenicCameraTextBox.Text = Settings.data.ScenicCameraGroupName.ToString();
 
+				HeatRadiusTextBox.Text = Settings.data.HeatRadius.ToString();
+				HeatMultiplierTextBox.Text = $"{Settings.data.HeatMultiplier:0.00}";
+				HeatBiasTextBox.Text = $"{Settings.data.HeatBias:0.00}";
+
 				PreferredCarNumberTextBox.Text = Settings.data.PreferredCarNumber;
 				PreferredCarLockOnHeatEnabledCheckBox.IsChecked = Settings.data.PreferredCarLockOnHeatEnabled;
 				PreferredCarLockOnHeatTextBox.Text = Settings.data.PreferredCarLockOnHeat.ToString();
@@ -497,22 +501,34 @@ namespace iRacingTV
 
 		private void OverlayX_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
 		{
-			Settings.data.OverlayX = int.Parse( OverlayX.Text );
+			if ( !int.TryParse( OverlayX.Text, out Settings.data.OverlayX ) )
+			{
+				Settings.data.OverlayX = 0;
+			}
 		}
 
 		private void OverlayY_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
 		{
-			Settings.data.OverlayY = int.Parse( OverlayY.Text );
+			if ( !int.TryParse( OverlayY.Text, out Settings.data.OverlayY ) )
+			{
+				Settings.data.OverlayY = 0;
+			}
 		}
 
 		private void OverlayWidth_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
 		{
-			Settings.data.OverlayWidth = int.Parse( OverlayWidth.Text );
+			if ( !int.TryParse( OverlayWidth.Text, out Settings.data.OverlayWidth ) )
+			{
+				Settings.data.OverlayWidth = 1920;
+			}
 		}
 
 		private void OverlayHeight_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
 		{
-			Settings.data.OverlayHeight = int.Parse( OverlayHeight.Text );
+			if ( !int.TryParse( OverlayHeight.Text, out Settings.data.OverlayHeight ) )
+			{
+				Settings.data.OverlayHeight = 1080;
+			}
 		}
 
 		// leaderboard
@@ -615,6 +631,30 @@ namespace iRacingTV
 			Settings.data.ScenicCameraGroupName = ScenicCameraTextBox.Text;
 		}
 
+		private void HeatRadiusTextBoxTextBox_TextChanged( object sender, TextChangedEventArgs e )
+		{
+			if ( !float.TryParse( HeatRadiusTextBox.Text, out Settings.data.HeatRadius ) )
+			{
+				Settings.data.HeatRadius = 60.0f;
+			}
+		}
+
+		private void HeatMultiplierTextBoxTextBox_TextChanged( object sender, TextChangedEventArgs e )
+		{
+			if ( !float.TryParse( HeatMultiplierTextBox.Text, out Settings.data.HeatMultiplier ) )
+			{
+				Settings.data.HeatMultiplier = 1.0f;
+			}
+		}
+
+		private void HeatBiasTextBoxTextBox_TextChanged( object sender, TextChangedEventArgs e )
+		{
+			if ( !float.TryParse( HeatBiasTextBox.Text, out Settings.data.HeatBias ) )
+			{
+				Settings.data.HeatBias = 0.1f;
+			}
+		}
+
 		private void PreferredCarNumberTextBox_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
 		{
 			Settings.data.PreferredCarNumber = PreferredCarNumberTextBox.Text;
@@ -627,7 +667,10 @@ namespace iRacingTV
 
 		private void PreferredCarLockOnHeatTextBox_TextChanged( object sender, TextChangedEventArgs e )
 		{
-			Settings.data.PreferredCarLockOnHeat = float.Parse( PreferredCarLockOnHeatTextBox.Text );
+			if ( !float.TryParse( PreferredCarLockOnHeatTextBox.Text, out Settings.data.PreferredCarLockOnHeat ) )
+			{
+				Settings.data.PreferredCarLockOnHeat = 0.85f;
+			}
 		}
 
 		private void SwitchCameraToTalkingDriverCheckBox_Click( object sender, RoutedEventArgs e )
@@ -639,17 +682,26 @@ namespace iRacingTV
 
 		private void IncidentPrerollFramesTextBox_TextChanged( object sender, TextChangedEventArgs e )
 		{
-			Settings.data.IncidentPrerollFrames = int.Parse( IncidentPrerollFramesTextBox.Text );
+			if ( !int.TryParse( IncidentPrerollFramesTextBox.Text, out Settings.data.IncidentPrerollFrames ) )
+			{
+				Settings.data.IncidentPrerollFrames = 30;
+			}
 		}
 
 		private void IncidentFramesTextBox_TextChanged( object sender, TextChangedEventArgs e )
 		{
-			Settings.data.IncidentFrames = int.Parse( IncidentFramesTextBox.Text );
+			if ( !int.TryParse( IncidentFramesTextBox.Text, out Settings.data.IncidentFrames ) )
+			{
+				Settings.data.IncidentFrames = 240;
+			}
 		}
 
 		private void IncidentOffsetFramesTextBox_TextChanged( object sender, TextChangedEventArgs e )
 		{
-			Settings.data.IncidentOffsetFrames = int.Parse( IncidentOffsetFramesTextBox.Text );
+			if ( !int.TryParse( IncidentOffsetFramesTextBox.Text, out Settings.data.IncidentOffsetFrames ) )
+			{
+				Settings.data.IncidentOffsetFrames = 90;
+			}
 		}
 
 		// intro
@@ -661,12 +713,18 @@ namespace iRacingTV
 
 		private void IntroStartTimeTextBox_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
 		{
-			Settings.data.IntroStartTime = double.Parse( IntroStartTimeTextBox.Text );
+			if ( !double.TryParse( IntroStartTimeTextBox.Text, out Settings.data.IntroStartTime ) )
+			{
+				Settings.data.IntroStartTime = 35;
+			}
 		}
 
 		private void IntroDurationTextBox_TextChanged( object sender, System.Windows.Controls.TextChangedEventArgs e )
 		{
-			Settings.data.IntroDuration = double.Parse( IntroDurationTextBox.Text );
+			if ( !double.TryParse( IntroDurationTextBox.Text, out Settings.data.IntroDuration ) )
+			{
+				Settings.data.IntroDuration = 80;
+			}
 		}
 
 		// iRacing
@@ -714,7 +772,10 @@ namespace iRacingTV
 
 		private void MinimumCommandRateTextBox_TextChanged( object sender, TextChangedEventArgs e )
 		{
-			Settings.data.MinimumCommandRate = int.Parse( MinimumCommandRateTextBox.Text );
+			if ( !int.TryParse( MinimumCommandRateTextBox.Text, out Settings.data.MinimumCommandRate ) )
+			{
+				Settings.data.MinimumCommandRate = 30;
+			}
 		}
 
 		// save and apply changes

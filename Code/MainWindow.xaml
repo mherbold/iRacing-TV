@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:iRacingTV"
         mc:Ignorable="d"
-        Title="iRacing-TV 1.15" ResizeMode="CanMinimize" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen" Closed="Window_Closed">
+        Title="iRacing-TV 1.16" ResizeMode="CanMinimize" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen" Closed="Window_Closed">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -215,7 +215,15 @@
                             <TextBox x:Name="ScenicCameraTextBox" TextChanged="ScenicCameraTextBox_TextChanged" />
                         </StackPanel>
                     </Grid>
-                    <StackPanel Orientation="Horizontal" Margin="0,3,0,6">
+                    <StackPanel Orientation="Horizontal" Margin="0,6,0,3">
+                        <Label Content="Heat Radius (In Meters)" />
+                        <TextBox x:Name="HeatRadiusTextBox" TextChanged="HeatRadiusTextBoxTextBox_TextChanged" Width="55" Height="17.96" Margin="0,0,6,0" />
+                        <Label Content="Heat Multiplier" />
+                        <TextBox x:Name="HeatMultiplierTextBox" TextChanged="HeatMultiplierTextBoxTextBox_TextChanged" Width="55" Height="17.96" Margin="0,0,6,0" />
+                        <Label Content="Heat Bias (+1.00 = Favor Front, -1.00 = Favor Back)" />
+                        <TextBox x:Name="HeatBiasTextBox" TextChanged="HeatBiasTextBoxTextBox_TextChanged" Width="55" Height="17.96" Margin="0,0,6,0" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
                         <Label Content="Preferred Car Number" />
                         <TextBox x:Name="PreferredCarNumberTextBox" TextChanged="PreferredCarNumberTextBox_TextChanged" Width="55" Height="17.96" Margin="0,0,6,0" />
                         <CheckBox x:Name="PreferredCarLockOnHeatEnabledCheckBox" Content="Lock On When Heat Is Above" Click="PreferredCarLockOnHeatEnabledCheckBox_Click" VerticalAlignment="Center" Margin="0,1,6,0" />

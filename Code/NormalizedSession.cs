@@ -269,11 +269,11 @@ namespace iRacingTV
 					normalizedCar.distanceToCarInFrontInMeters = float.MaxValue;
 					normalizedCar.distanceToCarBehindInMeters = float.MaxValue;
 
-					foreach ( var otherNormalizedCar in normalizedCars )
+					if ( normalizedCar.includeInLeaderboard && !normalizedCar.isOnPitRoad && !normalizedCar.isOutOfCar )
 					{
-						if ( normalizedCar != otherNormalizedCar )
+						foreach ( var otherNormalizedCar in normalizedCars )
 						{
-							if ( normalizedCar.includeInLeaderboard && !normalizedCar.isOnPitRoad && !normalizedCar.isOutOfCar )
+							if ( normalizedCar != otherNormalizedCar )
 							{
 								if ( otherNormalizedCar.includeInLeaderboard && !otherNormalizedCar.isOnPitRoad && !otherNormalizedCar.isOutOfCar )
 								{
@@ -290,21 +290,9 @@ namespace iRacingTV
 
 									var signedDistanceToOtherCarInMeters = signedDistanceToOtherCar * trackLengthInMeters;
 
-									var x = Math.Abs( signedDistanceToOtherCarInMeters / 60.0f );
+									var heat = Settings.data.HeatMultiplier * Math.Max( 0, 1.0f - Math.Abs( signedDistanceToOtherCarInMeters ) / Settings.data.HeatRadius );
 
-									x = Math.Min( x, 1 );
-
-									x = x * -2 + 1;
-
-									x *= (float) Math.PI / 3.25f;
-
-									var y = (float) Math.Tan( x );
-
-									y /= 2.8975002255619444591626672202326f;
-
-									y += 0.5f;
-
-									normalizedCar.heat += y;
+									normalizedCar.heat += heat * heat;
 
 									if ( signedDistanceToOtherCarInMeters >= 0.0f )
 									{
@@ -316,6 +304,15 @@ namespace iRacingTV
 									}
 								}
 							}
+						}
+
+						if ( normalizedCar.heat > 0 )
+						{
+							var positionAsSignedPct = ( ( numCars / 2.0f ) - normalizedCar.officialPosition ) / ( numCars / 2.0f );
+
+							var heatBias = Settings.data.HeatBias * positionAsSignedPct + Math.Abs( Settings.data.HeatBias );
+
+							normalizedCar.heat += heatBias;
 						}
 					}
 				}
