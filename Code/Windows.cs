@@ -31,7 +31,7 @@ namespace iRacingTV
 		public const uint WS_EX_TRANSPARENT = 0x00000020;
 		public const uint WS_EX_LAYERED = 0x00080000;
 
-		public static readonly IntPtr HWND_TOPMOST = new IntPtr( -1 );
+		public static readonly IntPtr HWND_TOPMOST = new( -1 );
 
 		public const uint SWP_NOSIZE = 0x0001;
 		public const uint SWP_NOMOVE = 0x0002;
